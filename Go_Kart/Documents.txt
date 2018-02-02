@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+GIO PIN MUX : -------------------------------------------------------------------------
+	PORT A : 
+		(INPUT)		0 : MD_EN
+		(INPUT)		1 : MD_RUN
+		(OUTPUT)		2 :	MTR_EN	
+		(OUTPUT)	5 : S_1	(Pre_Charge)
+		(OUTPUT)	6 : S_2	(High_Voltage)
+		(OUTPUT)	7 :	S_3	(Ground)
+			
+	PORT B : 
+		(INPUT)		0 : PRESS 
+		(INPUT)		1 : BMS_OUTPUT
+		(INPUT)		2 :	
+		(INPUT)		3 : 
+
+
+ADC : ---------------------------------------------------------------------------------
+	ADC 1 :
+		Group 1 : 
+			PIN 0 : Throttle Voltage 1 (Main)	-	Cancel
+			PIN 7 : Battery Voltage Meter
+			PIN 18: Battery Ampere Meter LOW
+			PIN 19: Battery Ampere Meter HIGH
+			PIN 20: Throttle Voltage 2			-	Cancel
+		
+		
+CAN : ---------------------------------------------------------------------------------
+
+	DCAN1 : 			(NOTE : Address in a specific format, not in exact format)
+		(TX)Message_Box 1 :	0x80C0000		-	Update speed
+		(RX)Message_Box 2 : 0x4580000		-	Receive date from Motor
+		(RX)Message_Box 3 : 0x45C0000		-	Receive date from Motor
+		(RX)Message_Box 4 : 0x4640000		-	Receive date from Motor
+		(TX)Message_Box 5 : 0x4000000		-	Send info to "Peripheral Data Handler MicroController"
+		(TX)Message_Box 9 : 0x8880000		-	Reserved
+
+RTI : ---------------------------------------------------------------------------------
+	Compare 1 :
+		PID processing and send computed speed to Motor  
+	
+	Compare 2 : 
+		Updating DCAN, ADC data periodically
+
+	Compare 3 : 
+		Reserved (Currently used for sending data to PC, for debuging use)
+		
+	Compare 4 : 
+		Updating timer
+
+
+	NOTE : Each 
+
+
+
+
+
+
+
+
