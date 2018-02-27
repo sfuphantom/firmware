@@ -1,6 +1,8 @@
 # firmware
 TI TMS570LS1224 embedded C firmware
 
+To get started with the TMS570LS1224 launchpad, follow Project 0:
+http://processors.wiki.ti.com/index.php/LAUNCHXL2_TMS57012:_Project_0
 
 Getting started with git
 the main workflow is usually like this:
