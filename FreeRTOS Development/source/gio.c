@@ -71,7 +71,7 @@ void gioInit(void)
     /** @b initialize @b Port @b A */
 
     /** - Port A output values */
-    gioPORTA->DOUT = (uint32)((uint32)1U << 0U)  /* Bit 0 */
+    gioPORTA->DOUT = (uint32)((uint32)0U << 0U)  /* Bit 0 */
                    | (uint32)((uint32)0U << 1U)  /* Bit 1 */
                    | (uint32)((uint32)0U << 2U)  /* Bit 2 */
                    | (uint32)((uint32)0U << 3U)  /* Bit 3 */
@@ -81,7 +81,7 @@ void gioInit(void)
                    | (uint32)((uint32)0U << 7U); /* Bit 7 */
 
     /** - Port A direction */
-    gioPORTA->DIR  = (uint32)((uint32)1U << 0U)  /* Bit 0 */
+    gioPORTA->DIR  = (uint32)((uint32)0U << 0U)  /* Bit 0 */
                    | (uint32)((uint32)0U << 1U)  /* Bit 1 */
                    | (uint32)((uint32)0U << 2U)  /* Bit 2 */
                    | (uint32)((uint32)0U << 3U)  /* Bit 3 */

@@ -65,6 +65,7 @@
 #include "sys_core.h"
 #include "inputOutput.h"
 #include "utilities.h"
+#include "stateMachine.h"
 
 /* USER CODE END */
 
@@ -77,22 +78,18 @@
 */
 
 /* USER CODE BEGIN (2) */
-xQueueHandle analogInputsQueue;
+xQueueHandle VCUDataQueue;
 xTaskHandle xTask1Handle,xTask2Handle;
 xSemaphoreHandle binary_sem;
 static void v100msTask(void *);
-static void v500msTask(void *);
+static void vRDUTask(void *);
+
+void fxInitHardware();
 
 uint32 tx_done = 0;
 uint8 rx_data[8] = {0};
 uint8 *rx_ptr = &rx_data[0];
 uint32 cnt = 0;
-
-struct analogInputs {
-    float throttleInput_V;
-    float batteryVoltage_V;
-    float batteryCurrent_A;
-};
 
 
 
@@ -102,31 +99,12 @@ int main(void)
 {
 /* USER CODE BEGIN (3) */
 
-    sciInit();
-    sciSend(scilinREG,18,(unsigned char*)"SCI initialized.\r\n");
+    // Perform hardware Initialization
+    fxInitHardware();
 
-    hetInit();
-    sciSend(scilinREG,18,(unsigned char*)"HET initialized.\r\n");
-    pwmSetDuty(hetRAM1, 0,  0 );
+    // Do some sort of CRC Check?
 
-    adcInit();
-    initLinAnalogInputs();
-    sciSend(scilinREG,18,(unsigned char*)"ADC initialized.\r\n");
-
-
-
-    /* Set high end timer GIO port hetPort pin direction to all output */
-    gioSetDirection(hetPORT1, 0xFFFFFFFF);
-
-
-
-    /** - configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive */
-     canInit();
-     canEnableErrorNotification(canREG1);
-     sciSend(scilinREG,18,(unsigned char*)"CAN initialized.\r\n");
-
-
-
+    // Start the watchdog?
 
     // Queue used to pass messages between tasks
     /*
@@ -136,11 +114,11 @@ int main(void)
      * the application writer, which results in a greater number of parameters  but allows
      * the RAM to be statically allocated at compile time.
      */
-    analogInputsQueue = xQueueCreate(1, sizeof(struct analogInputs));
+     VCUDataQueue = xQueueCreate(1, sizeof(struct data));
 
-    vSemaphoreCreateBinary(binary_sem);
+     vSemaphoreCreateBinary(binary_sem);
 
-    if (analogInputsQueue != NULL){
+     if (VCUDataQueue != NULL){
         /* The 100ms task does the following actions:
          *  1) Turns on and off the LED every 100ms
          *  2) Reads ADC value
@@ -157,13 +135,13 @@ int main(void)
          *  1) Turns on and off the LED every 500ms
          *  2) Sends a CAN messages whenever it receives the semaphore from CAN receive ISR
          */
-        if (xTaskCreate(v500msTask, (const signed char*)"500msTask",  configMINIMAL_STACK_SIZE, NULL,  (1 ), &xTask2Handle) != pdTRUE){
+        if (xTaskCreate(vRDUTask, (const signed char*)"RDUTask",  configMINIMAL_STACK_SIZE, NULL,  (1 ), &xTask2Handle) != pdTRUE){
             sciSend(scilinREG,23,(unsigned char*)"Task2 Creation Failed.\r\n");
             while(1);
         }
 
         vTaskStartScheduler();
-    }
+     }
 
 
 
@@ -179,15 +157,23 @@ int main(void)
 
 /* USER CODE BEGIN (4) */
 static void v100msTask(void *pvParameters){
+    /* Task Related Initialization */
     TickType_t xLastWakeTime;
     const TickType_t xFrequency = 100;
     portBASE_TYPE xStatus;
 
     // Initialize the xLastWakeTime  variable with the current time
     xLastWakeTime = xTaskGetTickCount();
-
     uint8_t taskCounter = 0;
-    struct analogInputs analogInLin;
+    /******************************/
+
+    data VCUData, *VCUDataPtr;
+    VCUDataPtr = &VCUData;
+
+    // Initialize Linear Analog Inputs
+    fxInitLinAnalogInputs();
+    // Initialize data structure
+    fxInitInputs(VCUDataPtr);
 
     for( ;; )
          {
@@ -198,6 +184,7 @@ static void v100msTask(void *pvParameters){
 
 
 
+
              // Perform action here.
              pwmSetDuty(hetRAM1, 0,  100 );
 
@@ -205,14 +192,15 @@ static void v100msTask(void *pvParameters){
              vTaskDelay(100);
 
 
-             fxReadAnalogInputs();
-             analogInLin.throttleInput_V = inputThrottle.sensorOutput;
-             analogInLin.batteryVoltage_V = 0;
-             analogInLin.batteryCurrent_A = 0;
+             fxReadAnalogInputs(VCUDataPtr);
+             fxReadDigitalInputs(VCUDataPtr);
+
+             fxStateMachine(VCUDataPtr);
+
 
              if (++taskCounter % 5 == 0){
-                 xQueueReset(analogInputsQueue);
-                 xStatus = xQueueSendToBack(analogInputsQueue,&analogInLin,0);
+                 xQueueReset(VCUDataQueue);
+                 xStatus = xQueueSendToBack(VCUDataQueue,&VCUData,0);
                  sciSend(scilinREG,8,(unsigned char*)"Enque!\r\n");
                  /*
                  if (xStatus){
@@ -236,13 +224,13 @@ static void v100msTask(void *pvParameters){
 }
 
 /* USER CODE BEGIN (4) */
-static void v500msTask(void *pvParameters){
+static void vRDUTask(void *pvParameters){
     TickType_t xLastWakeTime;
     const TickType_t xFrequency = 500;
     const portTickType xTicksToWait = 100 / portTICK_RATE_MS;
     portBASE_TYPE xStatus;
 
-    struct analogInputs analogInLin;
+    data VCUData;
     uint8 tx_data[8] = {0};
     uint8 *tx_ptr = &tx_data[0];
 
@@ -265,9 +253,9 @@ static void v500msTask(void *pvParameters){
              vTaskDelay(100);
 
              if (xSemaphoreTake(binary_sem,portMAX_DELAY )){
-                 xStatus = xQueueReceive(analogInputsQueue, &analogInLin, xTicksToWait);
+                 xStatus = xQueueReceive(VCUDataQueue, &VCUData, xTicksToWait);
                  sciSend(scilinREG,8,(unsigned char*)"Deque!\r\n");
-                 tx_data[0] = descaledF32ToU8(analogInLin.throttleInput_V, -5.0, 0.1); // Offset = -5.0    Scaling = 0.1
+                 tx_data[0] = descaledF32ToU8(VCUData.VCU_AIN.throttleInput_V, -5.0, 0.1); // Offset = -5.0    Scaling = 0.1
                  canTransmit(canREG1, canMESSAGE_BOX1, tx_ptr);
                  sciSend(scilinREG,16,(unsigned char*)"Sending a MSG!\r\n");
                  while(tx_done == 0){
@@ -287,6 +275,32 @@ static void v500msTask(void *pvParameters){
 
 }
 
+void fxInitHardware(){
+
+   sciInit();
+   sciSend(scilinREG,18,(unsigned char*)"SCI initialized.\r\n");
+
+   hetInit();
+   sciSend(scilinREG,18,(unsigned char*)"HET initialized.\r\n");
+   pwmSetDuty(hetRAM1, 0,  0 );
+
+   adcInit();
+   sciSend(scilinREG,18,(unsigned char*)"ADC initialized.\r\n");
+
+
+
+   /* Set high end timer GIO port hetPort pin direction to all output */
+   gioSetDirection(hetPORT1, 0xFFFFFFFF);
+
+
+   /** - configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive */
+    canInit();
+    canEnableErrorNotification(canREG1);
+    sciSend(scilinREG,18,(unsigned char*)"CAN initialized.\r\n");
+
+}
+
+
 void canMessageNotification(canBASE_t *node, uint32 messageBox)
 {
      /* node 1 - transfer request */
@@ -302,5 +316,9 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
 
     /* Note: since only message box 1 is used on both nodes we dont check it here.*/
 }
+
+
+
+
 
 /* USER CODE END */

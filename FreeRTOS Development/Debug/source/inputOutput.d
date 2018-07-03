@@ -35,6 +35,7 @@ source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRT
 source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/reg_sci.h
 source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/sys_dma.h
 source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/reg_dma.h
+source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/gio.h
 source/inputOutput.obj: C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/inputOutput.h
 source/inputOutput.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include/stdio.h
 source/inputOutput.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include/stdarg.h
@@ -75,6 +76,7 @@ C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/sci.h:
 C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/reg_sci.h: 
 C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/sys_dma.h: 
 C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/reg_dma.h: 
+C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/gio.h: 
 C:/Users/sormoh/Desktop/Personal/Phantom/Software/FreeRTOS_1/include/inputOutput.h: 
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include/stdio.h: 
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS/include/stdarg.h: 
