@@ -46,13 +46,27 @@ typedef struct digitalOutputs {
 DOUT VCU_DOUT;
 
 typedef struct internalDigtal {
+    uint8 SEV1;
     uint8 SEV2;
-    uint8 SEV3;
+    uint8 HighBatteryVoltageSev1;
+    uint8 LowBatteryVoltageSev1;
+    uint8 HighBatteryCurrentSev1;
+    uint8 LowBatteryCurrentSev1;
+    uint8 HighBatteryVoltageSev2;
+    uint8 LowBatteryVoltageSev2;
+    uint8 HighBatteryCurrentSev2;
+    uint8 LowBatteryCurrentSev2;
 } DIGInternal;
 DIGInternal VCU_DIGInternal;
 
 typedef struct internalAnalog {
     uint8 state;
+    uint8 activeSev1_1;
+    uint8 activeSev1_2;
+    uint8 activeSev1_3;
+    uint8 activeSev2_1;
+    uint8 activeSev2_2;
+    uint8 activeSev2_3;
 } ANInternal;
 ANInternal VCU_ANInternal;
 

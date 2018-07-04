@@ -106,42 +106,34 @@ int main(void)
 
     // Start the watchdog?
 
-    // Queue used to pass messages between tasks
-    /*
-     * Each queue requires RAM that is used to hold the queue state, and to hold the queue
-     * state, and to hold the items that are contained in the queue (the queue storage area)
-     * xQueueCreate() automatically allocated from the FreeRTOS heap. The  RAM is provided by
-     * the application writer, which results in a greater number of parameters  but allows
-     * the RAM to be statically allocated at compile time.
-     */
-     VCUDataQueue = xQueueCreate(1, sizeof(struct data));
+    // Queue used to pass messages between 100msTask and the RDUTask
+    VCUDataQueue = xQueueCreate(1, sizeof(struct data));
 
-     vSemaphoreCreateBinary(binary_sem);
+    vSemaphoreCreateBinary(binary_sem);
 
-     if (VCUDataQueue != NULL){
-        /* The 100ms task does the following actions:
-         *  1) Turns on and off the LED every 100ms
-         *  2) Reads ADC value
-         *  3) Sets PWM output
-         */
+    if (VCUDataQueue != NULL){
+       /* The 100ms task does the following actions:
+        *  1) Reads Analog Inputs
+        *  2) Reads Digital Inputs
+        *  3) Evaluates State Machine
+        */
 
         if (xTaskCreate(v100msTask, (const signed char*)"100msTask",  configMINIMAL_STACK_SIZE, NULL,  (2 ), &xTask1Handle) != pdTRUE){
-            sciSend(scilinREG,23,(unsigned char*)"Task Creation Failed.\r\n");
+            sciSend(scilinREG,23,(unsigned char*)"Task1 Creation Failed.\r\n");
             while(1);
         }
 
         /*
-         * The 500 ms Task does the following actions:
-         *  1) Turns on and off the LED every 500ms
-         *  2) Sends a CAN messages whenever it receives the semaphore from CAN receive ISR
-         */
+        * The 500 ms Task does the following actions:
+        *  2) Sends a CAN messages whenever it receives the semaphore from CAN receive ISR
+        */
         if (xTaskCreate(vRDUTask, (const signed char*)"RDUTask",  configMINIMAL_STACK_SIZE, NULL,  (1 ), &xTask2Handle) != pdTRUE){
             sciSend(scilinREG,23,(unsigned char*)"Task2 Creation Failed.\r\n");
             while(1);
         }
 
         vTaskStartScheduler();
-     }
+    }
 
 
 
@@ -180,10 +172,6 @@ static void v100msTask(void *pvParameters){
              // Wait for the next cycle.
              vTaskDelayUntil( &xLastWakeTime, xFrequency );
 
-             // Task Counter
-
-
-
 
              // Perform action here.
              pwmSetDuty(hetRAM1, 0,  100 );
@@ -194,7 +182,6 @@ static void v100msTask(void *pvParameters){
 
              fxReadAnalogInputs(VCUDataPtr);
              fxReadDigitalInputs(VCUDataPtr);
-
              fxStateMachine(VCUDataPtr);
 
 

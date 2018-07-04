@@ -52,9 +52,16 @@ void fxInitInputs(data* VCUDataPtr){
     VCUDataPtr->VCU_DOUT.positiveLegContactor = 0;
 
     // Initialization of Digital Internals
+    VCUDataPtr->VCU_DIGInternal.SEV1 = 0;
     VCUDataPtr->VCU_DIGInternal.SEV2 = 0;
-    VCUDataPtr->VCU_DIGInternal.SEV3 = 0;
-
+    VCUDataPtr->VCU_DIGInternal.HighBatteryVoltageSev1 = 0;
+    VCUDataPtr->VCU_DIGInternal.LowBatteryVoltageSev1 = 0;
+    VCUDataPtr->VCU_DIGInternal.HighBatteryCurrentSev1 = 0;
+    VCUDataPtr->VCU_DIGInternal.LowBatteryCurrentSev1 = 0;
+    VCUDataPtr->VCU_DIGInternal.HighBatteryVoltageSev2 = 0;
+    VCUDataPtr->VCU_DIGInternal.LowBatteryVoltageSev2 = 0;
+    VCUDataPtr->VCU_DIGInternal.HighBatteryCurrentSev2 = 0;
+    VCUDataPtr->VCU_DIGInternal.LowBatteryCurrentSev2 = 0;
     // Initialization of Analog Internals
     VCUDataPtr->VCU_ANInternal.state = 0;
 }

@@ -19,5 +19,6 @@ extern State state;
 
 // Functions
 void fxStateMachine (data* VCUDataPtr);
+void fxCheckAlarms (data *VCUDataPtr);
 
 #endif /* INCLUDE_STATEMACHINE_H_ */
