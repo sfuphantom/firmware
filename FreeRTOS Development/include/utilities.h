@@ -18,7 +18,7 @@ typedef struct descaleOutF32ToU16 {
 
 float descale(float in_F32, float offset_F32, float scaling_F32);
 uint8_t descaledF32ToU8(float in_F32, float offset_F32, float scaling_F32);
-outF32ToU16 *descaledF32ToU16(float in_F32, float offset_F32, float scaling_F32);
+outF32ToU16 descaledF32ToU16(float in_F32, float offset_F32, float scaling_F32);
 
 
 #endif /* INCLUDE_UTILITIES_H_ */

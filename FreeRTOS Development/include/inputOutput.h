@@ -13,16 +13,29 @@
 #include "sys_common.h"
 
 
-#define ADC_DATA_CONVERT_NUM 1      //The total number of ADC pin used
+#define ADC_DATA_CONVERT_NUM 4      //The total number of ADC pin used
 
 
 // Declaration of global variables
 extern adcData_t adc_data[ADC_DATA_CONVERT_NUM];    //ADC converted result stores here
 
+typedef struct linAnalogInputInit
+{
+    float raw;
+    float rawLL;
+    float rawHL;
+    float euLL;
+    float euHL;
+    float sensorOutput;
+} AINLinInit;
+
+
+
 typedef struct analogInputs {
-    float throttleInput_V;
-    float batteryVoltage_V;
-    float batteryCurrent_A;
+    AINLinInit throttleInput_V;
+    AINLinInit batteryVoltage_V;
+    AINLinInit batteryCurrentLow_A;
+    AINLinInit batteryCurrentHigh_A;
 } AIN;
 AIN VCU_AIN;
 
@@ -61,12 +74,7 @@ DIGInternal VCU_DIGInternal;
 
 typedef struct internalAnalog {
     uint8 state;
-    uint8 activeSev1_1;
-    uint8 activeSev1_2;
-    uint8 activeSev1_3;
-    uint8 activeSev2_1;
-    uint8 activeSev2_2;
-    uint8 activeSev2_3;
+    float batteryDischargeCurrent_A;
 } ANInternal;
 ANInternal VCU_ANInternal;
 
@@ -82,21 +90,11 @@ typedef struct data {
 extern data VCUData;
 
 
-typedef struct linAnalogInputInit
-{
-    float raw;
-    float rawLL;
-    float rawHL;
-    float euLL;
-    float euHL;
-    float sensorOutput;
-} AINLinInit;
 
-AINLinInit inputThrottle;
 
 //Functions
 void fxInitInputs(data* VCUDataPtr);
-void fxInitLinAnalogInputs(void);
+void fxInitLinAnalogInputs(data* VCUDataPtr);
 void fxSetScaling(AINLinInit* sensorPtr, float rawLL, float rawHL, float euLL, float euHL);
 void fxComputeAnalogInput(AINLinInit* sensorPtr);
 void fxReadAnalogInputs(data* VCUDataPtr);

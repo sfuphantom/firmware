@@ -162,10 +162,10 @@ static void v100msTask(void *pvParameters){
     data VCUData, *VCUDataPtr;
     VCUDataPtr = &VCUData;
 
-    // Initialize Linear Analog Inputs
-    fxInitLinAnalogInputs();
     // Initialize data structure
     fxInitInputs(VCUDataPtr);
+    // Initialize Linear Analog Inputs
+    fxInitLinAnalogInputs(VCUDataPtr);
 
     for( ;; )
          {
@@ -220,6 +220,7 @@ static void vRDUTask(void *pvParameters){
     data VCUData;
     uint8 tx_data[8] = {0};
     uint8 *tx_ptr = &tx_data[0];
+    outF32ToU16 F32ToU16Out;
 
     // Initialize the xLastWakeTime  variable with the current time
     xLastWakeTime = xTaskGetTickCount();
@@ -242,7 +243,29 @@ static void vRDUTask(void *pvParameters){
              if (xSemaphoreTake(binary_sem,portMAX_DELAY )){
                  xStatus = xQueueReceive(VCUDataQueue, &VCUData, xTicksToWait);
                  sciSend(scilinREG,8,(unsigned char*)"Deque!\r\n");
-                 tx_data[0] = descaledF32ToU8(VCUData.VCU_AIN.throttleInput_V, -5.0, 0.1); // Offset = -5.0    Scaling = 0.1
+                 // Throttle Input
+                 tx_data[0] = descaledF32ToU8(VCUData.VCU_AIN.throttleInput_V.sensorOutput, -5.0, 0.1); // Offset = -5.0    Scaling = 0.1
+
+                 // Battery Voltage  (scale: 0..1500 : -500V..+100V)
+                 F32ToU16Out = descaledF32ToU16(VCUData.VCU_AIN.batteryVoltage_V.sensorOutput, -500.0, 1); // Offset = -500    Scaling = 1
+                 tx_data[1] = F32ToU16Out.outLSB_U8;
+                 tx_data[2] = F32ToU16Out.outMSB_U8;
+
+                 // Battery Discharge Current  (scale: 0..15000 : -500A..+500A)
+                 F32ToU16Out = descaledF32ToU16(VCUData.VCU_ANInternal.batteryDischargeCurrent_A, -500.0, 1); // Offset = -500    Scaling = 0.1
+                 tx_data[3] = F32ToU16Out.outLSB_U8;
+                 tx_data[4] = F32ToU16Out.outMSB_U8;
+
+                 // State
+                 tx_data[5] = VCUData.VCU_ANInternal.state;
+
+                 // Enable Signal
+                 tx_data[6] = VCUData.VCU_DIN.enableSignal;
+
+                 // RUn Signal
+                 tx_data[7] = VCUData.VCU_DIN.runSignal;
+
+
                  canTransmit(canREG1, canMESSAGE_BOX1, tx_ptr);
                  sciSend(scilinREG,16,(unsigned char*)"Sending a MSG!\r\n");
                  while(tx_done == 0){

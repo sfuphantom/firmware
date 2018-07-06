@@ -72,7 +72,7 @@ void fxStateMachine (data* VCUDataPtr){
     } else if (state == SHUTDOWN) {
         VCUDataPtr->VCU_ANInternal.state = (uint8)state;
         fxCheckAlarms(VCUDataPtr);
-        if ( (VCUDataPtr->VCU_DIN.enableSignal && VCUDataPtr->VCU_DIN.runSignal && !(VCUDataPtr->VCU_DIGInternal.SEV2)) || ( VCUDataPtr->VCU_AIN.batteryCurrent_A <= 3 ) ){
+        if ( (VCUDataPtr->VCU_DIN.enableSignal && VCUDataPtr->VCU_DIN.runSignal && !(VCUDataPtr->VCU_DIGInternal.SEV2)) || ( VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A <= 3 ) ){
             state = STANDBY;
 
         }
@@ -89,10 +89,10 @@ void fxStateMachine (data* VCUDataPtr){
 
 void fxCheckAlarms (data *VCUDataPtr){
 
-    uint8 BatteryVoltageException = (VCUDataPtr->VCU_AIN.batteryVoltage_V > 65.0) ? 2 : (VCUDataPtr->VCU_AIN.batteryVoltage_V < 40.0) ? 1 : 0;
-    uint8 BatteryVoltageWarning =  (VCUDataPtr->VCU_AIN.batteryVoltage_V >= 50.0) ? 2 :  (VCUDataPtr->VCU_AIN.batteryVoltage_V <= 44.0) ? 1 : 0;
-    uint8 BatteryCurrentException = (VCUDataPtr->VCU_AIN.batteryCurrent_A > 40.0) ? 2 : (VCUDataPtr->VCU_AIN.batteryCurrent_A < -3.0) ? 1 : 0;
-    uint8 BatteryCurrentWarning =  (VCUDataPtr->VCU_AIN.batteryCurrent_A >= 30.0) ? 2 : 0;
+    uint8 BatteryVoltageException = (VCUDataPtr->VCU_AIN.batteryVoltage_V.sensorOutput > 65.0) ? 2 : (VCUDataPtr->VCU_AIN.batteryVoltage_V.sensorOutput < 40.0) ? 1 : 0;
+    uint8 BatteryVoltageWarning =  (VCUDataPtr->VCU_AIN.batteryVoltage_V.sensorOutput >= 50.0) ? 2 :  (VCUDataPtr->VCU_AIN.batteryVoltage_V.sensorOutput <= 44.0) ? 1 : 0;
+    uint8 BatteryCurrentException = (VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A > 40.0) ? 2 : (VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A < -3.0) ? 1 : 0;
+    uint8 BatteryCurrentWarning =  (VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A >= 30.0) ? 2 : 0;
 
     if ( (BatteryVoltageException == 0) && (BatteryCurrentException == 0 ) ){
         VCUDataPtr->VCU_DIGInternal.SEV2 = 0;

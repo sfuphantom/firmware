@@ -12,7 +12,7 @@
 
 
 
-outF32ToU16 F32ToU16;
+
 
 float descale(float in_F32, float offset_F32, float scaling_F32){
 
@@ -40,9 +40,9 @@ uint8_t descaledF32ToU8(float in_F32, float offset_F32, float scaling_F32){
     return out_U8;
 }
 
-outF32ToU16 *descaledF32ToU16(float in_F32, float offset_F32, float scaling_F32){
+outF32ToU16 descaledF32ToU16(float in_F32, float offset_F32, float scaling_F32){
+    outF32ToU16 F32ToU16;
 
-    outF32ToU16 *F32ToU16Ptr = &F32ToU16;
 
     uint16_t out_U16;
     if (scaling_F32 != 0){
@@ -51,10 +51,10 @@ outF32ToU16 *descaledF32ToU16(float in_F32, float offset_F32, float scaling_F32)
         out_U16 = 0;
     }
 
-    F32ToU16.outLSB_U8 = out_U16 & 0x0F;
-    F32ToU16.outMSB_U8 = out_U16 & 0xF0;
+    F32ToU16.outLSB_U8 = (uint8_t)out_U16 & 0x00FF;
+    F32ToU16.outMSB_U8 = (uint8_t)(out_U16 >> 8);
 
-    return F32ToU16Ptr;
+    return F32ToU16;
 }
 
 

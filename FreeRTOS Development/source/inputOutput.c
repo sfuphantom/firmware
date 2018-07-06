@@ -16,7 +16,7 @@
 #include "inputOutput.h"
 #include <stdio.h>
 
-#define ADC_DATA_CONVERT_NUM 1
+#define ADC_DATA_CONVERT_NUM 4
 #define ADC_MAX_DELAY_ITERATIONS    60
 
 
@@ -30,13 +30,17 @@ DIN VCU_DIN;
 DOUT VCU_DOUT;
 //data VCUData;
 
-AINLinInit inputThrottleInit;
 
 void fxInitInputs(data* VCUDataPtr){
     // Initialization of Analog Inputs
-    VCUDataPtr->VCU_AIN.batteryCurrent_A = 0.0;
-    VCUDataPtr->VCU_AIN.batteryVoltage_V = 0.0;
-    VCUDataPtr->VCU_AIN.throttleInput_V = 0.0;
+    VCUDataPtr->VCU_AIN.batteryCurrentLow_A.raw = 0.0;
+    VCUDataPtr->VCU_AIN.batteryCurrentHigh_A.raw = 0.0;
+    VCUDataPtr->VCU_AIN.batteryVoltage_V.raw = 0.0;
+    VCUDataPtr->VCU_AIN.throttleInput_V.raw = 0.0;
+    VCUDataPtr->VCU_AIN.batteryCurrentLow_A.sensorOutput = 0.0;
+    VCUDataPtr->VCU_AIN.batteryCurrentHigh_A.sensorOutput = 0.0;
+    VCUDataPtr->VCU_AIN.batteryVoltage_V.sensorOutput = 0.0;
+    VCUDataPtr->VCU_AIN.throttleInput_V.sensorOutput = 0.0;
 
     // Initialization of Analog Outputs
     VCUDataPtr->VCU_AOUT.throttleOutput_V = 0.0;
@@ -64,20 +68,22 @@ void fxInitInputs(data* VCUDataPtr){
     VCUDataPtr->VCU_DIGInternal.LowBatteryCurrentSev2 = 0;
     // Initialization of Analog Internals
     VCUDataPtr->VCU_ANInternal.state = 0;
+    VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A = 0;
 }
 
-void fxInitLinAnalogInputs(){
-
-    AINLinInit *ptrAnalogInput;
+void fxInitLinAnalogInputs(data* VCUDataPtr){
 
     //Throttle Input Init
-    ptrAnalogInput = &inputThrottleInit;
-    fxSetScaling(ptrAnalogInput, 0, 5, 0, 5);
+    fxSetScaling( &(VCUDataPtr->VCU_AIN.throttleInput_V), 0, 5, 0, 5);
 
     // Voltage Transducer Init
+    fxSetScaling( &(VCUDataPtr->VCU_AIN.batteryVoltage_V), 0, 5, 0, 1000);
 
-    // Current Transucer Init
+    // Current Transucer Low Init
+    fxSetScaling( &(VCUDataPtr->VCU_AIN.batteryCurrentLow_A), 0, 5, 0, 5);
 
+    // Current Transucer High Init
+    fxSetScaling( &(VCUDataPtr->VCU_AIN.batteryCurrentHigh_A), 0, 5, 0, 5);
 }
 
 
@@ -123,18 +129,64 @@ void fxReadAnalogInputs(data* VCUDataPtr){
         return;
     }
 
-    // Input throttle voltage 0 - 2.1V
-    ptrAnalogInput = &inputThrottleInit;
-    ptrAnalogInput->raw = ((5.0*adc_data[0].value) / 4096.0);
+    // Input throttle voltage
+    ptrAnalogInput = &(VCUDataPtr->VCU_AIN.throttleInput_V);
+    VCUDataPtr->VCU_AIN.throttleInput_V.raw = ((5.0*adc_data[0].value) / 4096.0);
     fxComputeAnalogInput(ptrAnalogInput);
-    VCU_AIN.throttleInput_V =  ptrAnalogInput->sensorOutput;
+
+    // Battery voltage 0 - 5V <-> 0 - 1000V
+    ptrAnalogInput = &(VCUDataPtr->VCU_AIN.batteryVoltage_V);
+    ptrAnalogInput->raw = ((5.0*adc_data[1].value) / 4096.0);
+    fxComputeAnalogInput(ptrAnalogInput);
 
 
+    // Battery voltage 0 - 5V <-> 0 - 5V
+    ptrAnalogInput = &(VCUDataPtr->VCU_AIN.batteryCurrentLow_A);
+    ptrAnalogInput->raw = ((5.0*adc_data[2].value) / 4096.0);
+    fxComputeAnalogInput(ptrAnalogInput);
 
-    VCUDataPtr->VCU_AIN = VCU_AIN;
+
+    // Battery voltage 0 - 5V <-> 0 - 5V
+    ptrAnalogInput = &(VCUDataPtr->VCU_AIN.batteryCurrentHigh_A);
+    ptrAnalogInput->raw = ((5.0*adc_data[3].value) / 4096.0);
+    fxComputeAnalogInput(ptrAnalogInput);
+
+
+    /*
+       Calculate current:
+                                   current high limit   supply voltage nominal
+               current = offsetV * ------------------ * ----------------------*(1/G)
+                                   offset voltage HL       supply voltage
+
+    */
+
+
+       float offsetVoltageLow = VCUDataPtr->VCU_AIN.batteryCurrentLow_A.sensorOutput - 2.5;
+       float offsetVoltageHigh = VCUDataPtr->VCU_AIN.batteryCurrentHigh_A.sensorOutput - 2.5;
+
+       float batteryDischargeCurrentLow_A =  offsetVoltageLow*(1/0.0667);
+       float batteryDischargeCurrentHigh_A =  offsetVoltageHigh*(1/0.0057);
+
+
+       // Calculate high range weighting factor
+       float highRangeWeightingFactor = (0-1)/(30-40)*(batteryDischargeCurrentHigh_A-30)+ 0;
+
+       if (highRangeWeightingFactor < 0)
+           highRangeWeightingFactor = 0;
+       else if (highRangeWeightingFactor > 1)
+           highRangeWeightingFactor = 1;
+
+       // Calculate raw stack voltage using a combination of the high and low range inputs
+       VCUDataPtr->VCU_ANInternal.batteryDischargeCurrent_A = (highRangeWeightingFactor * (batteryDischargeCurrentHigh_A - batteryDischargeCurrentLow_A)) + batteryDischargeCurrentLow_A;
+
+
 
 }
 
+// *************************************************************************
+// Function:    fxReadDigitalInputs
+// Purpose:     Reads analog inputs every 100 ms
+// *************************************************************************
 
 void fxReadDigitalInputs(data* VCUDataPtr){
 
