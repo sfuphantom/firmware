@@ -38,27 +38,8 @@ VCU/source/notification.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/in
 VCU/source/notification.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/linkage.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/htu.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_htu.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/gio.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/lin.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_lin.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/sci.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_sci.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/spi.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_spi.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/rti.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_rti.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/dcc.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_dcc.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/i2c.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_i2c.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/crc.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_crc.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/etpwm.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_etpwm.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/eqep.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_eqep.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/ecap.h
-VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_ecap.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/sys_dma.h
 VCU/source/notification.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_dma.h
 
@@ -100,26 +81,7 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/_ti_config.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/linkage.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/htu.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/reg_htu.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/gio.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/lin.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_lin.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/sci.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/reg_sci.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/spi.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_spi.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/rti.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_rti.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/dcc.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_dcc.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/i2c.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_i2c.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/crc.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_crc.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/etpwm.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_etpwm.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/eqep.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_eqep.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/ecap.h: 
-D:/Team_Phantom/Firmware/firmware/VCU/include/reg_ecap.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/sys_dma.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/reg_dma.h: 

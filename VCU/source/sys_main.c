@@ -43,6 +43,9 @@
 
 
 /* USER CODE BEGIN (0) */
+
+#include "sci.h"
+
 /* USER CODE END */
 
 /* Include Files */
@@ -50,6 +53,9 @@
 #include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
+
+static unsigned char command;
+
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -66,6 +72,17 @@
 int main(void)
 {
 /* USER CODE BEGIN (3) */
+
+    _enable_IRQ();
+
+    sciInit();
+
+    sciSend(scilinREG, 21, (unsigned char *)"Please press a key");
+
+    sciReceive(scilinREG, 1, (unsigned char *)&command);
+
+    while(1);
+
 /* USER CODE END */
 
     return 0;
@@ -73,4 +90,22 @@ int main(void)
 
 
 /* USER CODE BEGIN (4) */
+
+void sciNotification(sciBASE_t *sci, unsigned flags)
+{
+    sciSend(sci, 1, (unsigned char*)&command);
+
+    sciReceive(sci, 1, (unsigned char *)&command);
+}
+
+void esmGroup1Notification(int bit)
+{
+    return;
+}
+
+void esmGroup2Notification(int bit)
+{
+    return;
+}
+
 /* USER CODE END */

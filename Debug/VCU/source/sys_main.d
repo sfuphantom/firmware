@@ -1,6 +1,8 @@
 # FIXED
 
 VCU/source/sys_main.obj: ../VCU/source/sys_main.c
+VCU/source/sys_main.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/sci.h
+VCU/source/sys_main.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_sci.h
 VCU/source/sys_main.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/sys_common.h
 VCU/source/sys_main.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/hal_stdtypes.h
 VCU/source/sys_main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/stdint.h
@@ -11,8 +13,11 @@ VCU/source/sys_main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/includ
 VCU/source/sys_main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/machine/_stdint.h
 VCU/source/sys_main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/sys/_stdint.h
 VCU/source/sys_main.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/stdbool.h
+VCU/source/sys_main.obj: D:/Team_Phantom/Firmware/firmware/VCU/include/reg_gio.h
 
 ../VCU/source/sys_main.c: 
+D:/Team_Phantom/Firmware/firmware/VCU/include/sci.h: 
+D:/Team_Phantom/Firmware/firmware/VCU/include/reg_sci.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/sys_common.h: 
 D:/Team_Phantom/Firmware/firmware/VCU/include/hal_stdtypes.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/stdint.h: 
@@ -23,3 +28,4 @@ C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/machine/_types.h:
 C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/machine/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/sys/_stdint.h: 
 C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.3.LTS/include/stdbool.h: 
+D:/Team_Phantom/Firmware/firmware/VCU/include/reg_gio.h: 
