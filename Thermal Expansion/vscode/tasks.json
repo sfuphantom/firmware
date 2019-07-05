@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "command": "/Applications/ti/ccs901/ccs/utils/bin/gmake -k -j 7 all -O",
+    "type": "shell",
+    "options": {
+        "cwd": "${workspaceRoot}"
+    },
+    "presentation": {
+        "echo": true,
+        "reveal":"always",
+        "focus": false,
+        "panel": "shared"
+    },
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build",
+            "command": "/Applications/ti/ccs901/ccs/utils/bin/gmake -k -j 7 all -O ",
+            "args": [
+                "-k",
+                "-j4",
+                "all",
+                "-O"
+            ],
+            "problemMatcher": "$gcc",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}
