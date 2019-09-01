@@ -88,7 +88,7 @@ uint32 i ;
                       | (uint32)((uint32)0U << 0U);  /* C2EDELAY */
 
     /** - Data Format 0 */
-    mibspiREG3->FMT0 = (uint32)((uint32)1U << 24U)  /* wdelay */
+    mibspiREG3->FMT0 = (uint32)((uint32)0U << 24U)  /* wdelay */
                      | (uint32)((uint32)0U << 23U)  /* parity Polarity */
                      | (uint32)((uint32)0U << 22U)  /* parity enable */
                      | (uint32)((uint32)0U << 21U)  /* wait on enable */
@@ -99,7 +99,7 @@ uint32 i ;
                      | (uint32)((uint32)16U << 0U); /* data word length */
 
     /** - Data Format 1 */
-    mibspiREG3->FMT1 = (uint32)((uint32)1U << 24U)  /* wdelay */
+    mibspiREG3->FMT1 = (uint32)((uint32)0U << 24U)  /* wdelay */
                      | (uint32)((uint32)0U << 23U)  /* parity Polarity */
                      | (uint32)((uint32)0U << 22U)  /* parity enable */
                      | (uint32)((uint32)0U << 21U)  /* wait on enable */
@@ -214,7 +214,7 @@ uint32 i ;
                                           | (uint16)((uint16)0U << 11U)  /* lock transmission */
                                           | (uint16)((uint16)0U << 8U)  /* data format */
 										  /*SAFETYMCUSW 334 S MR:10.5 <APPROVED> "LDRA Tool issue" */
-                                          | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_0)) & (uint16)0x00FFU);  /* chip select */
+                                          | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_1)) & (uint16)0x00FFU);  /* chip select */
                 i++;
             }
 #endif
@@ -223,7 +223,7 @@ uint32 i ;
                                       | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                       | (uint16)((uint16)0U << 8U)  /* data format */
 										  /*SAFETYMCUSW 334 S MR:10.5 <APPROVED> "LDRA Tool issue" */
-                                      | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_0)) & (uint16)0x00FFU);  /* chip select */
+                                      | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_1)) & (uint16)0x00FFU);  /* chip select */
 
 
             i++;
@@ -243,7 +243,7 @@ uint32 i ;
                                           | (uint16)((uint16)0U << 11U)  /* lock transmission */
                                           | (uint16)((uint16)1U << 8U)  /* data format */
 										  /*SAFETYMCUSW 334 S MR:10.5 <APPROVED> "LDRA Tool issue" */
-                                          | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_0)) & (uint16)0x00FFU);  /* chip select */
+                                          | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_1)) & (uint16)0x00FFU);  /* chip select */
 
                 i++;
             }
@@ -253,7 +253,7 @@ uint32 i ;
                                       | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                       | (uint16)((uint16)1U << 8U)  /* data format */
 										  /*SAFETYMCUSW 334 S MR:10.5 <APPROVED> "LDRA Tool issue" */
-                                      | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_0)) & (uint16)0x00FFU);  /* chip select */
+                                      | ((uint16)(~((uint16)0xFFU ^ (uint16)CS_1)) & (uint16)0x00FFU);  /* chip select */
 
             i++;
         }
@@ -523,8 +523,8 @@ uint32 i ;
 
 
     /* MIBSPI3 set all pins to functional */
-    mibspiREG3->PC0 = (uint32)((uint32)1U << 0U)  /* SCS[0] */
-                    | (uint32)((uint32)0U << 1U)  /* SCS[1] */
+    mibspiREG3->PC0 = (uint32)((uint32)0U << 0U)  /* SCS[0] */
+                    | (uint32)((uint32)1U << 1U)  /* SCS[1] */
                     | (uint32)((uint32)0U << 2U)  /* SCS[2] */
                     | (uint32)((uint32)0U << 3U)  /* SCS[3] */
                     | (uint32)((uint32)0U << 4U)  /* SCS[4] */
@@ -918,6 +918,38 @@ void mibspi3GetConfigValue(mibspi_config_reg_t *config_reg, config_value_type_t 
 
 
 
+/* USER CODE BEGIN (28) */
+/* USER CODE END */
+
+/** @fn void mibspi3HighInterruptLevel(void)
+*   @brief Level 0 Interrupt for MIBSPI3
+*/
+#pragma CODE_STATE(mibspi3HighInterruptLevel, 32)
+#pragma INTERRUPT(mibspi3HighInterruptLevel, IRQ)
+
+/* SourceId : MIBSPI_SourceId_017 */
+/* DesignId : MIBSPI_DesignId_013 */
+/* Requirements : HL_SR163, HL_SR164, HL_SR165 */
+void mibspi3HighInterruptLevel(void)
+{
+    uint32 mibspiFlags = (mibspiREG3->FLG & 0x0000FFFFU) & (~mibspiREG3->LVL & 0x035FU);
+    uint32 vec = mibspiREG3->INTVECT0;
+
+/* USER CODE BEGIN (29) */
+/* USER CODE END */
+
+    if (vec > 0x21U)
+    {
+        mibspiREG3->FLG = (mibspiREG3->FLG & 0xFFFF0000U) | mibspiFlags;
+        mibspiNotification(mibspiREG3, mibspiFlags & 0xFFU);
+    }
+    else
+    {
+        mibspiGroupNotification(mibspiREG3, ((vec & 0x3FU) >> 1U) - 1U);
+    }
+/* USER CODE BEGIN (30) */
+/* USER CODE END */
+}
 
 
 

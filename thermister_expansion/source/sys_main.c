@@ -43,22 +43,15 @@
 
 
 /* USER CODE BEGIN (0) */
-#include "mibspi.h"
-#include "spi.h"
-#include "system.h"
 /* USER CODE END */
 
 /* Include Files */
-
 #include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
-//#pragma DATA_SECTION(RX_Data_Slave,"NonCacheSect")
-//#pragma DATA_SECTION(TX_Data_Slave,"NonCacheSect")
-
-//uint16_t RX_Data_Slave[128]  = {0};
-//uint16_t TX_Data_Slave[26]  = {1};
-
+#include "mibspi.h"
+#include <temperature_buff.h>
+#include <temperature.h>
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -71,14 +64,33 @@
 
 /* USER CODE BEGIN (2) */
 
-//uint16_t adc_mode_register[12] ={0x2800,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000}; // ADC runnning in Auto-1 mode
+/*uint16_t adc_mode_register[12] ={0x2800,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000};  ADC runnning in Auto-1 mode*/
 
-uint16_t adc_received_Data[12]; // For storing the ADC conversion result.
+#define TransferGroup0           0
+#define TransferGroup1           1
+#define Channels                 12
 
-uint16_t threshold_temp = 0x003C; // 16-bit = 0x003C = 60
+static volatile int
+isTxComplete;
 
-uint16 temperature_adc [12]; // Temperature Result
-uint16_t count=0; // For now just counting errors
+static uint16_t
+TG0_dummydata[2];
+
+static uint16_t
+rxData_Buffer[12];
+
+const uint16_t
+adc_mode[12]={0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800};
+
+temperature_t th;
+
+static temperature_buff_t htemperature_buffer;
+static uint16_t
+htemperature_buff_data[Channels];
+
+
+static volatile int
+currentIndex;
 
 /* USER CODE END */
 
@@ -86,49 +98,41 @@ int main(void)
 {
 /* USER CODE BEGIN (3) */
 
-        systemInit();
         _enable_IRQ();  //Enables global interrupts
-        mibspiInit();   // Initialize the mibspi3 module; mibspi3 = mibspiREG3
+        mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
 
+        uint16 rxADCdata;
+        /*
+         * Configuring ADS7952.
+         */
+        uint16 adc_configuration[2] = {0x1000, 0x3FF};  //ADC Program Register configuration - to run in Auto-1 Mode
+        mibspiSetData(mibspiREG3, TransferGroup0, adc_configuration);
+        mibspiEnableGroupNotification(mibspiREG3, TransferGroup0, 0);
+        isTxComplete = 0;
+        mibspiTransfer(mibspiREG3, TransferGroup0);
+        while(!isTxComplete){}
 
-        uint16_t adc_configuration [2]= {0x1000, 0x3FFF}; // ADC Program Register configuration - to run in Auto-1 Mode
-        mibspiSetData(mibspiREG3, 0, adc_configuration);
-        uint16_t adc_mode_register[12] = {0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800,0x2800}; // ADC runnning in Auto-1 mode
-        mibspiSetData(mibspiREG3, 1, adc_mode_register);
+        temperature_init(&th, Channels);
+        currentIndex = 0;
+        buff_init(&htemperature_buffer, htemperature_buff_data, Channels);
 
+        mibspiSetData(mibspiREG3, TransferGroup1, (uint16*) adc_mode);
+        mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+        isTxComplete = 0;
+        mibspiTransfer(mibspiREG3,TransferGroup1);
+        while(!isTxComplete){}
 
-        // Configure Program Register of External ADC - Only needed once
-        mibspiTransfer(mibspiREG3, 0);
-        while(!(mibspiIsTransferComplete(mibspiREG3,0))){}; // Wait till you have the configured the ADC to run in Auto-1 mode
-
-
-        //Now, we can talk to the ADC - in the while loop
-        while(1)
+        while(isTxComplete)
         {
-            mibspiTransfer(mibspiREG3,1); // Initiated Transfer Group 1 transmission to the ADC
-            while(!(mibspiIsTransferComplete(mibspiREG3,1))){}; // Wait till you have the conversion results of all 12 ADC channels
 
-            // Now, we read the conversion results from each of the 12 RXRAM buffer's RXDATA from the mibSPI3 multi-buffer RAM
-            mibspiGetData(mibspiREG3,1,adc_received_Data); // Get all the received data from the mibspiRAM's RXRAM block to the adc_recieved_Data
-
-            uint32 i;
-            for (i=0; i<12; i++)
-            {
-                
-                adc_received_Data[i]&=~0xF000; // Clear the first 4 bits - the channel address
-
-                uint32 resistance = 10000 * ((4095/adc_received_Data[i])-1);
-                //temperature_adc[i]=0;
-                temperature_adc[i] = resistance;  // For now we can compare to the datasheet graph // can convert to temp easily
-                if (temperature_adc[i] >threshold_temp)
-                    count++;
-                else
-                    continue;
+            if (buff_get_full(&htemperature_buffer)) {    /* Check if anything in buffer now */
+                while (buff_read(&htemperature_buffer, &rxADCdata, 1)) {
+                    calculate_temperature(&th, &rxADCdata, currentIndex); /* Process channel-by-channel */
+                }
             }
 
-            mibspiSetData(mibspiREG3,1, adc_mode_register);
-
         }
+
 
 /* USER CODE END */
 
@@ -137,4 +141,39 @@ int main(void)
 
 
 /* USER CODE BEGIN (4) */
+
+void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
+{
+    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+    mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
+
+    if (mibspi == mibspiREG3 && group == TransferGroup0) {
+        if(mibspiIsTransferComplete(mibspi, group)){
+                mibspiGetData(mibspi, group, (uint16*)TG0_dummydata);
+                isTxComplete = 1;
+        }
+    }
+    if (mibspi == mibspiREG3 && group == TransferGroup1 && isTxComplete==0) {
+
+        if(mibspiIsTransferComplete(mibspi, group) && (buff_get_free(&htemperature_buffer)==12)){
+
+            mibspiGetData(mibspi, group, rxData_Buffer);
+            buff_write(&htemperature_buffer, rxData_Buffer, 12);
+            isTxComplete = 1;
+            mibspiSetData(mibspi, TransferGroup1, (uint16*)adc_mode);
+            mibspiEnableGroupNotification(mibspi, group, 0);
+            mibspiTransfer(mibspi, TransferGroup1);
+        }
+    }
+    if (mibspi == mibspiREG3 && group == TransferGroup1 && isTxComplete==1) {
+
+        if(mibspiIsTransferComplete(mibspi, group) && (buff_get_free(&htemperature_buffer)==12)){
+              mibspiGetData(mibspi, group, (uint16*)rxData_Buffer);
+              buff_write(&htemperature_buffer, (uint16*)rxData_Buffer, 12);
+              mibspiSetData(mibspi, TransferGroup1, (uint16*)adc_mode);
+              mibspiEnableGroupNotification(mibspi, group, 0);
+              mibspiTransfer(mibspi, TransferGroup1);
+        }
+    }
+}
 /* USER CODE END */
