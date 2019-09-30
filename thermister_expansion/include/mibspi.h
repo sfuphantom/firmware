@@ -208,16 +208,16 @@ typedef struct mibspi_config_reg
 #define MIBSPI3_FMT3_CONFIGVALUE     ((uint32)((uint32)0U << 24U) | (uint32)((uint32)0U << 23U) | (uint32)((uint32)0U << 22U) | (uint32)((uint32)0U << 21U) | (uint32)((uint32)0U << 20U) | (uint32)((uint32)0U << 17U) | (uint32)((uint32)0U << 16U) | (uint32)((uint32)79U << 8U) | (uint32)((uint32)16U << 0U))
 
 #define MIBSPI3_MIBSPIE_CONFIGVALUE  1U
-#define MIBSPI3_LTGPEND_CONFIGVALUE  ((uint32)((uint32)((2U+12U+0U+0U+0U+0U+0U+0U)-1U) << 8U))
+#define MIBSPI3_LTGPEND_CONFIGVALUE  ((uint32)((uint32)((15U+12U+0U+0U+0U+0U+0U+0U)-1U) << 8U))
 
 #define MIBSPI3_TGCTRL0_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)0U << 8U)))
-#define MIBSPI3_TGCTRL1_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)2U << 8U)))
-#define MIBSPI3_TGCTRL2_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U) << 8U)))
-#define MIBSPI3_TGCTRL3_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U+0U) << 8U)))
-#define MIBSPI3_TGCTRL4_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U+0U+0U) << 8U)))
-#define MIBSPI3_TGCTRL5_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U+0U+0U+0U) << 8U)))
-#define MIBSPI3_TGCTRL6_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U+0U+0U+0U+0U) << 8U)))
-#define MIBSPI3_TGCTRL7_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(2U+12U+0U+0U+0U+0U+0U) << 8U)))
+#define MIBSPI3_TGCTRL1_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)15U << 8U)))
+#define MIBSPI3_TGCTRL2_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U) << 8U)))
+#define MIBSPI3_TGCTRL3_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U+0U) << 8U)))
+#define MIBSPI3_TGCTRL4_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U+0U+0U) << 8U)))
+#define MIBSPI3_TGCTRL5_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U+0U+0U+0U) << 8U)))
+#define MIBSPI3_TGCTRL6_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U+0U+0U+0U+0U) << 8U)))
+#define MIBSPI3_TGCTRL7_CONFIGVALUE  (0xFFFF7FFFU & ((uint32)((uint32)1U << 30U) | (uint32)((uint32)0U << 29U) | (uint32)((uint32)TRG_ALWAYS << 20U) | (uint32)((uint32)TRG_DISABLED << 16U) | (uint32)((uint32)(15U+12U+0U+0U+0U+0U+0U) << 8U)))
 
 #define MIBSPI3_UERRCTRL_CONFIGVALUE (0x00000005U)
 

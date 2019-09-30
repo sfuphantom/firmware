@@ -84,7 +84,7 @@ static volatile int
 Processed;
 
 static uint16
-TG0_dummydata[2];
+TG0_dummydata[15];
 
 static uint16
 rxData_Buffer[12];
@@ -101,8 +101,12 @@ rxData_Buffer[12];
  *  Receive = Invalid Data; But ADC acquires CH0 input in this frame, but samples in the next frame.
  *  CS=1
  */
+
 static uint16
-adc_configuration[2] = {0x3C00, 0x92C0};
+adc_configuration[15] = {0x000, 0x3C00,0x3000, 0x3000, 0x3000, 0x3000, 0x9300, 0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
+
+
+
 
 
 /*
@@ -120,8 +124,11 @@ adc_configuration[2] = {0x3C00, 0x92C0};
  *   Continue this till CH11 is sampled. At CH11 sampling, ADC selects CH0 and repeats the process.
  *
  */
+
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
+
+
 
 temperature_t th;
 
@@ -146,45 +153,20 @@ int main(void)
          * Configuring ADS7952.
          */
 
-
         mibspiSetData(mibspiREG3, TransferGroup0, adc_configuration);
         mibspiEnableGroupNotification(mibspiREG3, TransferGroup0, 0);
         mibspiTransfer(mibspiREG3, TransferGroup0);
         adcConfigured = 0;
-        mibspiIsTransferComplete(mibspiREG3, TransferGroup0);
         while(!adcConfigured){}
 
-
-       temperature_init(&th, Channels);
-        currentIndex = 0;
-        buff_init(&htemperature_buffer, &htemperature_buff_data, Channels);
-        ReceivedData = 0;
-        Processed = 0;
-
-
-        while(adcConfigured)
-        {
-
-            if((ReceivedData==1) && (Processed==1))
-            {
-                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
-                mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
-                mibspiTransfer(mibspiREG3, TransferGroup1);
-                ReceivedData = 0;
-            }
-            while(!Processed)
-            {
-                    if (buff_get_full(&htemperature_buffer)) {    /* Check if anything in buffer now */
-                        while (buff_read(&htemperature_buffer, &rxADCdata, 1)) {
-                            calculate_temperature(&th, &rxADCdata, currentIndex++); /* Process channel-by-channel*/
-                            if (currentIndex==12)
-                               Processed=1;
-                        }
-                   }
-            }
-
-
+        while(adcConfigured){
+               mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
+               mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+               ReceivedData = 0;
+               mibspiTransfer(mibspiREG3, TransferGroup1);
+               while(!ReceivedData){}
         }
+
 
 /* USER CODE END */
 
@@ -202,19 +184,24 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
                 mibspiGetData(mibspi, group, TG0_dummydata);
                 mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
                 adcConfigured = 1;
-                Processed = 1;
-                ReceivedData = 1;
+
     }
 
     if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
 
-       if((buff_get_free(&htemperature_buffer)==12)){
+       /*if((buff_get_free(&htemperature_buffer)==12)){*/
               mibspiGetData(mibspi, group, rxData_Buffer);
-              buff_write(&htemperature_buffer, &rxData_Buffer, 12);
+              /*int i = 0;
+              for (;i<12;i++){
+                  (rxData_Buffer[i])&=~0xF000; /* Clear the upper 4 bits - Channel Address
+                   uint16 resistance = 10000 * ((4095/(rxData_Buffer[i])-1));
+                   rxData_Buffer[i] = resistance;
+              }*/
+              //buff_write(&htemperature_buffer, &rxData_Buffer, 12);
               ReceivedData = 1;
-              Processed = 0;
+              //Processed = 1;
 
-        }
+        //}
 
     }
 }
