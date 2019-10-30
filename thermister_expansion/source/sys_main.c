@@ -82,14 +82,14 @@ static volatile int
 Processed;
 
 static uint16
-TG0_dummydata[15];
+TG0_dummydata[11];
 
 static uint16
 rxData_Buffer[12];
 
 /*
  *  CS = 0
- *  Send = 0x3C00 - Request to enter Auto-2 Mode
+ *  Send = 0x3C40 - Request to enter Auto-2 Mode with Vref = 2* Vref as I/P range
  *  Receive = Invalid Data
  *  CS=1
  *
@@ -101,9 +101,7 @@ rxData_Buffer[12];
  */
 
 static uint16
-adc_configuration[15] = {0x000, 0x3C00,0x3000, 0x3000, 0x3000, 0x3000, 0x92C0, 0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
-
-
+adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
 /*
  *   CS = 0
  *   Send = 0x3000 - Continue to operate in Auto-2 Mode
@@ -123,14 +121,10 @@ adc_configuration[15] = {0x000, 0x3C00,0x3000, 0x3000, 0x3000, 0x3000, 0x92C0, 0
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
-
-
-temperature_t th;
-
-static temperature_buff_t htemperature_buffer;
-static uint16
-htemperature_buff_data[Channels];
-
+/*
+ * static uint16
+adc_mode[12]={ 0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000 ,0x0000};
+*/
 
 static volatile int
 currentIndex;
@@ -143,7 +137,7 @@ int main(void)
 
         _enable_IRQ();  //Enables global interrupts
         mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
-        uint16_t rxADCdata;
+        //uint16_t rxADCdata;
         /*
          * Configuring ADS7952.
          */
