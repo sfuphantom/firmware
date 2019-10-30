@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="com.ti.ccstudio.project.ui.internal.wizards.project.ProjectSettingsPage">
+		<item value="C:\ti\ccs910\ccs\ccs_base\common\targetdb\connections\TIXDS110_Connection.xml" key="CCS.CONNECTION"/>
+		<item value="devices/tms570ls1227.xml" key="CCS.TARGET"/>
+		<section name="1">
+			<item value="" key="CCS.TOOL_CHAIN"/>
+			<item value="null" key="CCS.RUNTIME_SUPPORT_LIB"/>
+			<item value="" key="CCS.TOOL_VERSION"/>
+			<item value="null" key="CCS.LINKER_COMMAND_FILE"/>
+			<item value="" key="CCS.DEVICE_ENDIANNESS"/>
+			<item value="" key="CCS.OUTPUT_FORMAT"/>
+			<item value="executable" key="CCS.OUTPUT_TYPE"/>
+		</section>
+	</section>
+	<section name="com.ti.ccstudio.project.ui.internal.properties.DynamicPropertiesPageManager">
+	</section>
+	<section name="com.ti.ccstudio.project.ui.internal.wizards.importexport.ProjectImportPage">
+		<item value="C:\Users\PTL\Desktop\Phantom\firmware" key="CCS.BROWSE_DIRS_FILTER"/>
+		<item value="false" key="CCS.IMPORT_FROM_ARCHIVE"/>
+		<item value="false" key="CCS.COPY_INTO_WORKSPACE"/>
+		<item value="false" key="CCS.IMPORT_REFERENCED_PROJECTS"/>
+	</section>
+	<section name="com.ti.ccstudio.project.ui.internal.preferences.DynamicPreferencePageManager">
+	</section>
+</section>

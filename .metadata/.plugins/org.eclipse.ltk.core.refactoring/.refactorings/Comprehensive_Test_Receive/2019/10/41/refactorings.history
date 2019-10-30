@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;Comprehensive_Test_Receive/include/DAC_SPI/MSP48FV_DAC_SPI&apos; to &apos;MSP48FV_DAC_SPI.c&apos;" description="Rename resource &apos;MSP48FV_DAC_SPI&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="include/DAC_SPI/MSP48FV_DAC_SPI" name="MSP48FV_DAC_SPI.c" stamp="1570908212758" updateReferences="true"/>
+</session>

@@ -1,0 +1,18 @@
+
+**** Build of configuration Debug for project Comprehensive_Test_Receive ****
+
+"C:\\ti\\ccs910\\ccs\\utils\\bin\\gmake" -k -j 4 all -O 
+ 
+Building file: "../source/sys_main.c"
+Invoking: ARM Compiler
+"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 --include_path="C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart" --include_path="C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart/source" --include_path="C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart/include/DAC_SPI" --include_path="C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart/include" --include_path="C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include" -g --c99 --printf_support=full --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi --preproc_with_compile --preproc_dependency="source/sys_main.d_raw" --obj_directory="source"  "../source/sys_main.c"
+Finished building: "../source/sys_main.c"
+ 
+Building target: "Comprehensive_Test_Receive.out"
+Invoking: ARM Linker
+"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 -g --c99 --printf_support=full --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi -z -m"Comprehensive_Test_Receive.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/lib" -i"C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart/source" -i"C:/Users/PTL/Desktop/Phantom/firmware/Go_Kart/include/DAC_SPI" -i"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="Comprehensive_Test_Receive_linkInfo.xml" --rom_model --be32 -o "Comprehensive_Test_Receive.out" "./include/DAC_SPI/MSP48FV_DAC_SPI.obj" "./source/A_LCD.obj" "./source/A_PID.obj" "./source/A_control_methods.obj" "./source/A_exception_handler.obj" "./source/adc.obj" "./source/alarmLogic.obj" "./source/can.obj" "./source/dabort.obj" "./source/esm.obj" "./source/gio.obj" "./source/het.obj" "./source/i2c.obj" "./source/inputOutput.obj" "./source/mainStateMachine.obj" "./source/mibspi.obj" "./source/notification.obj" "./source/pinmux.obj" "./source/rti.obj" "./source/sci.obj" "./source/sys_core.obj" "./source/sys_dma.obj" "./source/sys_intvecs.obj" "./source/sys_main.obj" "./source/sys_mpu.obj" "./source/sys_pcr.obj" "./source/sys_phantom.obj" "./source/sys_pmm.obj" "./source/sys_pmu.obj" "./source/sys_selftest.obj" "./source/sys_startup.obj" "./source/sys_vim.obj" "./source/system.obj" "./source/utilities.obj" "../source/sys_link.cmd"  -lrtsv7R4_T_be_v3D16_eabi.lib 
+<Linking>
+Finished building target: "Comprehensive_Test_Receive.out"
+ 
+
+**** Build Finished ****
