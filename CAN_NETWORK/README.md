@@ -1,2 +1,2 @@
 # CAN_NETWORK
-Implementation of CAN communication between two Hercules Safety MCUs - TMS570LS1224 and TMS570LS1227
+Implementation of CAN communication between VCU(TMS570LS1227) & BMS(TMS570LS1224)
