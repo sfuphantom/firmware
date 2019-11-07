@@ -61,10 +61,8 @@ uint8 tx_data[D_COUNT] = {'N','O','D','E','-','2'};
 uint8 rx_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
 uint8 *rx_ptr = &rx_data[0];
-uint8 *dptr=0;
 
 
-void dumpSomeData();
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -84,10 +82,6 @@ int main(void)
 
     /* enable irq interrupt in Cortex R4 */
     _enable_interrupt_();
-
-
-    /** - writing a random data in RAM - to transmit */
-    //dumpSomeData();
 
 
     /** - configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive */
@@ -130,33 +124,26 @@ int main(void)
 
 /* USER CODE BEGIN (4) */
 
-void dumpSomeData()
-{
-     uint32 tmp = 0x11;
-
-
-     cnt = (D_COUNT*8)-1;
-     dptr = &tx_data[0];
-     *dptr = tmp;
-
-
-     while(cnt--)
-     {
-        tmp = *dptr++;
-        *dptr = tmp + 0x11;
-     }
-}
+/*
+ * Directed here from canHigh1InterruptHandler defined in can.c
+ */
 
 void canMessageNotification(canBASE_t *node, uint32 messageBox)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (15) */
 
+    /*
+    * The following is executed when transmission is successful
+    */
 
     if((node==canREG1) && (messageBox==canMESSAGE_BOX1)){
         tx_done=1;
     }
 
+    /*
+    * The following is executed when reception is successful
+    */
     if((node==canREG1) && (messageBox==canMESSAGE_BOX2)){
         while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX2));
              canGetData(canREG1, canMESSAGE_BOX2, rx_ptr); /* copy to RAM */
