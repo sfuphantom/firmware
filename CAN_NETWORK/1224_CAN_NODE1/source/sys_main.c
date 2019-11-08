@@ -149,6 +149,11 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
              canGetData(canREG1, canMESSAGE_BOX2, rx_ptr); /* copy to RAM */
              rx_ptr +=8;
     }
+    if((node==canREG1) && (messageBox==canMESSAGE_BOX3)){
+            while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX3));
+                 canGetData(canREG1, canMESSAGE_BOX3, rx_ptr); /* copy to RAM */
+                 rx_ptr +=8;
+     }
 }
 
 

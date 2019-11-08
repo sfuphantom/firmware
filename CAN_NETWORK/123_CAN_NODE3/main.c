@@ -161,6 +161,7 @@ int main(void)
      */
     IntEnable(INT_CAN0);
 
+    IntMasterEnable();
     /*
      * Initialize  canMsgObject1 with the MessageID and Transmit message
      * canMsgObject1 MsgID = 3

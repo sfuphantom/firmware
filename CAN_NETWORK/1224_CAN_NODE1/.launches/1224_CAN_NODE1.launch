@@ -4,7 +4,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="${build_artifact:1224_CAN_NODE1}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="1224_CAN_NODE1"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:1224_CAN_NODE1}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="C:/Users\Junaid\Desktop\Phantom\firmware\1224_CAN_NODE1\Debug\1224_CAN_NODE1.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="C:/Users\Junaid\Desktop\Phantom\firmware\CAN_NETWORK\1224_CAN_NODE1\Debug\1224_CAN_NODE1.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/1224_CAN_NODE1"/>
 </listAttribute>
