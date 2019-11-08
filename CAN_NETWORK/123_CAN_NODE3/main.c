@@ -40,12 +40,131 @@ uint32_t cnt=0, tx_done =0;
 volatile bool errFlag =0; // Initially, no errors
 
 
+void CAN_Init(void);
+void CANIntHandler(void);
+
+
+int main(void)
+{
+
+    // Set the system clock to be generated directly from the external oscillator
+    SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
+
+    CAN_Init();
+
+    // Enable Global Interrupts
+    IntMasterEnable();
+
+    /*
+    * Load MsgObject2 & MsgObject3 into CAN0 message object 2 & 3.
+    * Once loaded, CAN0 will receive any messages with MsgID = 2 & MsgID=1 into
+    *  message objects 2 & 3, and request for servicing through RX-interrupt.
+    */
+
+    CANMessageSet(CAN0_BASE, 2, &canMsgObject2, MSG_OBJ_TYPE_RX);
+
+
+    CANMessageSet(CAN0_BASE, 3, &canMsgObject3, MSG_OBJ_TYPE_RX);
+
+
+    CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+    while(!tx_done); // wait until transmit completed;
+
+
+    while(1);
+
+}
+
+void CAN_Init(void){
+
+    // Enable clock access to Port B to configure its pins for CAN module
+       SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+       while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
+
+    // Enable clock access to CAN0
+       SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN0);
+       while(!SysCtlPeripheralReady(SYSCTL_PERIPH_CAN0));
+
+    /* Configure GPIO pins for CAN mode  */
+
+      // Configure PB4 as CAN0RX
+      GPIOPinConfigure(GPIO_PB4_CAN0RX);
+      // Configure PB5 as CAN0TX
+      GPIOPinConfigure(GPIO_PB5_CAN0TX);
+
+      GPIOPinTypeCAN(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+
+      CANInit(CAN0_BASE);
+
+      CANDisable(CAN0_BASE);
+
+      /*
+      * Set CAN0's bit rate for CAN bus - setting up the CAN bus timing.
+      * Setting CAN0 bit rate @ 500KHz
+      * SysCtlClockGet() used to determine clock rate used for clocking CAN module
+      */
+      CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
+
+      /*
+       * Initialize  canMsgObject1 with the MessageID and Transmit message
+       * canMsgObject1 MsgID = 3
+       * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+       */
+      canMsgObject1.ui32MsgID = 0x3;
+      canMsgObject1.ui32MsgIDMask = 0x000007FF;
+      canMsgObject1.ui32Flags = MSG_OBJ_TX_INT_ENABLE;
+      canMsgObject1.ui32MsgLen = sizeof(tx_Data);
+      canMsgObject1.pui8MsgData = &tx_Data[0];
+
+
+      /*
+      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
+      * canMsgObject1 MsgID = 1
+      * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+      */
+      canMsgObject2.ui32MsgID = 0x1;
+      canMsgObject2.ui32MsgIDMask = 0x000007FF;
+      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER);
+      canMsgObject2.ui32MsgLen = sizeof(rx_DataNode1);
+      canMsgObject2.pui8MsgData = &rx_DataNode1[0];
+
+
+      /*
+      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
+      * canMsgObject1 MsgID = 1
+      * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+      */
+      canMsgObject3.ui32MsgID = 0x2;
+      canMsgObject3.ui32MsgIDMask = 0x000007FF;
+      canMsgObject3.ui32Flags = MSG_OBJ_RX_INT_ENABLE;
+      canMsgObject3.ui32MsgLen = sizeof(rx_DataNode2);
+      canMsgObject3.pui8MsgData = &rx_DataNode2[0];
+
+
+      CANEnable(CAN0_BASE);
+
+      // Enable the NVIC interrupt
+      IntEnable(INT_CAN0);
+      CANIntClear(CAN0_BASE, CANIntStatus(CAN0_BASE, CAN_INT_STS_CAUSE));
+
+      /*
+       * Enable Interrupts sources for CAN0
+       * CAN_INT_MASTER = Enables CAN0 to generate interrupts
+       * CAN_INT_ERROR = Enables CAN0 to generate Error interrupts
+       * CAN_INT_STATUS = Enable CAN0 to generate interrupts on successful Transmission and/or Reception of messages
+       *
+       */
+       CANIntEnable(CAN0_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
+
+}
 void CANIntHandler(void){
 
     /*
      * Read CAN interrupt status to find the cause of interrupt
      */
     uint32_t intStatus = CANIntStatus(CAN0_BASE, CAN_INT_STS_CAUSE);
+
+    CANIntClear(CAN0_BASE, intStatus);
 
    if(intStatus == CAN_INT_INTID_STATUS){
        // Execute this block if the interrupt caused by CAN controller status
@@ -58,7 +177,7 @@ void CANIntHandler(void){
 
        //Set a flag to indicate some error may have occurred.
        errFlag = 1;
-   }else if (intStatus==1){
+   }else if (intStatus==(uint32_t)1){
        /*
         * if Interrupt was caused by CAN message object 1 - execute this block
         * Message object 1 is configured to Transmit a message on the CAN bus
@@ -73,7 +192,7 @@ void CANIntHandler(void){
 
        // Clear the flag
        CANIntClear(CAN0_BASE, 1);
-   }else if(intStatus==2){
+   }else if(intStatus==(uint32_t)2){
            /*
            * If Interrupt was caused by CAN message object 2 - execute this block
            * Message object 1 is configured to receive a message on the CAN bus
@@ -83,7 +202,7 @@ void CANIntHandler(void){
            CANMessageGet(CAN0_BASE, 2, &canMsgObject2, 1);
            CANIntClear(CAN0_BASE, 2);
 
-   }else if(intStatus==3){
+   }else if(intStatus==(uint32_t)3){
                   /*
                   * If Interrupt was caused by CAN message object 2 - execute this block
                   * Message object 1 is configured to receive a message on the CAN bus
@@ -95,136 +214,4 @@ void CANIntHandler(void){
    }else{
         // Fake/fault interrupt can be handled here.
    }
-
-
-}
-
-int main(void)
-{
-
-    // Set the system clock to be generated directly from the external oscillator
-    SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
-
-    /*
-     * Configure CAN0;
-     * CAN0RX = PB4
-     * CAN0TX = PB5
-     *
-     */
-
-    // Enable clock access to Port B to configure its pins for CAN module
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-
-    /*
-     * Configure port B pins for alternate functionality
-     */
-    // Configure PB4 as CAN0RX
-    GPIOPinConfigure(GPIO_PB4_CAN0RX);
-    // Configure PB5 as CAN0TX
-    GPIOPinConfigure(GPIO_PB5_CAN0TX);
-
-    /*
-     * Enable alternate functionality of the configured PORTB pins
-     */
-    GPIOPinTypeCAN(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5);
-
-    /*
-     * After setting up the CAN0 Rx & Tx pins, enable clock access to CAN0 module
-     *
-     */
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN0);
-
-    /*
-     * Initialize CAN0 module.
-     */
-
-    CANInit(CAN0_BASE);
-
-    /*
-     * Set CAN0's bit rate for CAN bus - setting up the CAN bus timing.
-     * Setting CAN0 bit rate @ 500KHz
-     * SysCtlClockGet() used to determine clock rate used for clocking CAN module
-     */
-    CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
-
-    /*
-     * Enable Interrupts sources for CAN0
-     * CAN_INT_MASTER = Enables CAN0 to generate interrupts
-     * CAN_INT_ERROR = Enables CAN0 to generate Error interrupts
-     * CAN_INT_STATUS = Enable CAN0 to generate interrupts on successful Transmission and/or Reception of messages
-     *
-     */
-    CANIntEnable(CAN0_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
-
-    /*
-     *  Enable CAN0 to interrupt the process and request service
-     */
-    IntEnable(INT_CAN0);
-
-    IntMasterEnable();
-    /*
-     * Initialize  canMsgObject1 with the MessageID and Transmit message
-     * canMsgObject1 MsgID = 3
-     * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
-     *
-     *
-     */
-    canMsgObject1.ui32MsgID = 0x00000003;
-    canMsgObject1.ui32MsgIDMask = 0x000007FF;
-    canMsgObject1.ui32Flags = MSG_OBJ_TX_INT_ENABLE;
-    canMsgObject1.ui32MsgLen = sizeof(tx_Data);
-    canMsgObject1.pui8MsgData = &tx_Data[0];
-
-
-    /*********************************************/
-
-    /*
-        *  Note: For now we're receiving messages with different IDs using different
-        *  message Objects. We can use the same message object with different MsgIDs and assign
-        *  them to different CAN0 message objects (1-32 available).
-        */
-
-    /*
-    * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
-    * canMsgObject1 MsgID = 1
-    * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
-    */
-   canMsgObject2.ui32MsgID = 0x00000001;
-   canMsgObject2.ui32MsgIDMask = 0x000007FF;
-   canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER);
-   canMsgObject2.ui32MsgLen = sizeof(rx_DataNode1);
-   canMsgObject2.pui8MsgData = &rx_DataNode1[0];
-
-   /*
-    * Load MsgObject2 into CAN0 message object 2.
-    * Once loaded, CAN0 will receive any messages with CAN ID = 1 into
-    * this message object and request for servicing through RX-interrupt.
-    */
-
-   CANMessageSet(CAN0_BASE, 2, &canMsgObject2, MSG_OBJ_TYPE_RX);
-
-       /*
-      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
-      * canMsgObject1 MsgID = 1
-      * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
-      */
-    canMsgObject3.ui32MsgID = 0x00000002;
-    canMsgObject3.ui32MsgIDMask = 0x000007FF;
-    canMsgObject3.ui32Flags = MSG_OBJ_RX_INT_ENABLE;
-    canMsgObject3.ui32MsgLen = sizeof(rx_DataNode2);
-    canMsgObject3.pui8MsgData = &rx_DataNode2[0];
-
-    /*
-     * Load MsgObject3 into CAN0 message object 3.
-     * Once loaded, CAN0 will receive any messages with CAN ID = 2 into
-     * this message object and request for servicing through RX-interrupt.
-     */
-    CANMessageSet(CAN0_BASE, 3, &canMsgObject3, MSG_OBJ_TYPE_RX);
-
-    CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
-    while(!tx_done); // wait until transmit completed;
-
-
-    while(1);
-
 }
