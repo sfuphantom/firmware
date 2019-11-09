@@ -2,18 +2,23 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="24" key="selection"/>
+		<item value="MCP" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="MSP"/>
+			<item value="nit"/>
+			<item value="mibspiDenit"/>
 			<item value="24"/>
 			<item value="mibspinotification"/>
 			<item value="groupNotification"/>
 			<item value="mibspiInit"/>
 		</list>
 		<list key="replacehistory">
+			<item value="MCP"/>
+			<item value=""/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

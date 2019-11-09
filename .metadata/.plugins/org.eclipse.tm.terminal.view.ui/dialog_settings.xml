@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="LaunchTerminalSettingsDialog">
+		<item value="Serial Terminal" key="terminalLabel"/>
+		<section name="SettingsPanelControl">
+			<section name="Git Bash">
+			</section>
+			<section name="Serial Terminal">
+				<list key="hosts">
+				</list>
+			</section>
+		</section>
+	</section>
+</section>

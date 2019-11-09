@@ -1,0 +1,2 @@
+eclipse.preferences.version=1
+state_.org.eclipse.debug.ui.ExpressionView=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<View>\r\n<PERSISTABLE IMemento.internal.id\="VarPersitable">\r\n<VarMeta Format\="HEX.Format" IMemento.internal.id\="txbuffer"/>\r\n<VarMeta Format\="HEX.Format" IMemento.internal.id\="(txbuffer)[0]"/>\r\n<VarMeta Format\="HEX.Format" IMemento.internal.id\="dacRegister"/>\r\n</PERSISTABLE>\r\n<PERSISTABLE IMemento.internal.id\="ExpandReveal">\r\n<Model>\r\n<Element Flags\="1048576" Id\="txbuffer"/>\r\n</Model>\r\n</PERSISTABLE>\r\n</View>

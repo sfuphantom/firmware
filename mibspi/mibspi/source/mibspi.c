@@ -78,11 +78,11 @@ uint32 i ;
                   | 1U);  /* MASTER */
 
     /** MIBSPI1 enable pin configuration */
-    mibspiREG1->INT0 = (mibspiREG1->INT0 & 0xFEFFFFFFU) | (uint32)((uint32)0U << 24U);  /* ENABLE HIGHZ */
+    mibspiREG1->INT0 = (mibspiREG1->INT0 & 0xFEFFFFFFU) | (uint32)((uint32)1U << 24U);  /* ENABLE HIGHZ */
 
     /** - Delays */
-    mibspiREG1->DELAY = (uint32)((uint32)50U << 24U)  /* C2TDELAY */
-                      | (uint32)((uint32)50U << 16U)  /* T2CDELAY */
+    mibspiREG1->DELAY = (uint32)((uint32)1U << 24U)  /* C2TDELAY */
+                      | (uint32)((uint32)1U << 16U)  /* T2CDELAY */
                       | (uint32)((uint32)0U << 8U)   /* T2EDELAY */
                       | (uint32)((uint32)0U << 0U);  /* C2EDELAY */
 
@@ -94,7 +94,7 @@ uint32 i ;
                      | (uint32)((uint32)0U << 20U)  /* shift direction */
                      | (uint32)((uint32)0U << 17U)  /* clock polarity */
                      | (uint32)((uint32)0U << 16U)  /* clock phase */
-                     | (uint32)((uint32)159U << 8U)  /* baudrate prescale */
+                     | (uint32)((uint32)255U << 8U)  /* baudrate prescale */
                      | (uint32)((uint32)8U << 0U); /* data word length */
 
     /** - Data Format 1 */

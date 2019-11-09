@@ -39,6 +39,8 @@ mibspi/source/notification.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12
 mibspi/source/notification.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/linkage.h
 mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/htu.h
 mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_htu.h
+mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/sci.h
+mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_sci.h
 mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/sys_dma.h
 mibspi/source/notification.obj: C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_dma.h
 
@@ -81,5 +83,7 @@ C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/_ti_config.h:
 C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/linkage.h: 
 C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/htu.h: 
 C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_htu.h: 
+C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/sci.h: 
+C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_sci.h: 
 C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/sys_dma.h: 
 C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include/reg_dma.h: 

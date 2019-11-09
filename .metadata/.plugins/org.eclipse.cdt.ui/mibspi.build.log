@@ -3,28 +3,6 @@
 
 "C:\\ti\\ccs910\\ccs\\utils\\bin\\gmake" -k -j 4 all -O 
  
-Building file: "../mibspi/source/sys_main.c"
-Invoking: ARM Compiler
-"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 --include_path="C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include" --include_path="C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/DAC_SPI" --include_path="C:/Users/PTL/Desktop/Phantom/mibspi" --include_path="C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include" -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi --preproc_with_compile --preproc_dependency="mibspi/source/sys_main.d_raw" --obj_directory="mibspi/source"  "../mibspi/source/sys_main.c"
-warning: "../mibspi/source/sys_main.c", line 100: Assembly statement "NOP" creates a label, which may not be what was intended. Use a colon after a label or a space before a non-label to silence the warning.
-warning: "../mibspi/source/sys_main.c", line 100: Assembly statement "NOP" creates a label, which may not be what was intended. Use a colon after a label or a space before a non-label to silence the warning.
-Finished building: "../mibspi/source/sys_main.c"
- 
-Building file: "../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c"
-Invoking: ARM Compiler
-"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 --include_path="C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/include" --include_path="C:/Users/PTL/Desktop/Phantom/mibspi/mibspi/DAC_SPI" --include_path="C:/Users/PTL/Desktop/Phantom/mibspi" --include_path="C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include" -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi --preproc_with_compile --preproc_dependency="mibspi/DAC_SPI/MCP48FV_DAC_SPI.d_raw" --obj_directory="mibspi/DAC_SPI"  "../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c"
-"../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c", line 31: warning #225-D: function "cmdCreator" declared implicitly
-"../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c", line 41: warning #161-D: declaration is incompatible with previous "cmdCreator" (declared at line 31)
-"../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c", line 68: warning #225-D: function "MSP48FV_Read" declared implicitly
-"../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c", line 68: warning #181-D: right operand of "%" is zero
-"../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c", line 72: warning #161-D: declaration is incompatible with previous "MSP48FV_Read" (declared at line 68)
-Finished building: "../mibspi/DAC_SPI/MCP48FV_DAC_SPI.c"
- 
-Building target: "mibspi.out"
-Invoking: ARM Linker
-"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi -z -m"mibspi.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/lib" -i"C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="mibspi_linkInfo.xml" --rom_model --be32 -o "mibspi.out" "./mibspi/DAC_SPI/MCP48FV_DAC_SPI.obj" "./mibspi/source/dabort.obj" "./mibspi/source/errata_SSWF021_45.obj" "./mibspi/source/esm.obj" "./mibspi/source/mibspi.obj" "./mibspi/source/notification.obj" "./mibspi/source/pinmux.obj" "./mibspi/source/sys_core.obj" "./mibspi/source/sys_dma.obj" "./mibspi/source/sys_intvecs.obj" "./mibspi/source/sys_main.obj" "./mibspi/source/sys_mpu.obj" "./mibspi/source/sys_pcr.obj" "./mibspi/source/sys_phantom.obj" "./mibspi/source/sys_pmm.obj" "./mibspi/source/sys_pmu.obj" "./mibspi/source/sys_selftest.obj" "./mibspi/source/sys_startup.obj" "./mibspi/source/sys_vim.obj" "./mibspi/source/system.obj" "../mibspi/source/sys_link.cmd"  -lrtsv7R4_T_be_v3D16_eabi.lib 
-<Linking>
-Finished building target: "mibspi.out"
- 
+gmake[1]: 'mibspi.out' is up to date.
 
 **** Build Finished ****

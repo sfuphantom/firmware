@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="SerialSettingsPage">
+		<item value="8" key="cdtserial.byteSize"/>
+		<item value="9600" key="cdtserial.baudRate"/>
+		<item value="COM12" key="cdtserial.portName"/>
+		<item value="None" key="cdtserial.parity"/>
+		<item value="2" key="cdtserial.stopBits"/>
+	</section>
+</section>

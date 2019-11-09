@@ -13,38 +13,35 @@
 #define DAC_READ_CMD 03 //0b11
 #define DAC_WRITE_CMD 00
 
-
-bool MSP48FV_Init(){
+//init function, responsible for initializing MiBspi
+bool MCP48FV_Init(){
     mibspiInit();
 
     return true;
 }
+
 /*Main DAC controller, configure to set the output voltage from 0-5VDC
-
-
+ * use: targetVoltage= 500 = 5.00V, 251 = 2.51V
 */
-bool MSP48FV_Set_Value(uint16_t targetVoltage){
-   if(targetVoltage>500)return false;
-    uint32_t enableBitPrecent= (targetVoltage*1000)/(DAC_HIGHEST_VOLTAGE*100);
-    uint32_t dacRegister= (enableBitPrecent*0xFFF)/1000;
+bool MCP48FV_Set_Value(uint16_t targetVoltage){
 
-   MSP48FV_Write(cmdCreator(DAC0_REGISTER_ADDRESS, DAC_WRITE_CMD,0,dacRegister));
+   if(targetVoltage>500)return false;
+    uint32_t enableBitPrecent= ((targetVoltage+5)*1000)/(DAC_HIGHEST_VOLTAGE*100);
+    uint32_t dacRegister= (enableBitPrecent*0xFF)/1000;
+
+   MCP48FV_Write(cmdCreator(DAC0_REGISTER_ADDRESS, DAC_WRITE_CMD,0,dacRegister));
 
     return true;
 }
 
 
-
-
-//SPI write, writes the SPI Command to MCP48FV
-
+//creates the commands from register inputs
 uint32_t cmdCreator(uint8_t address, uint8_t cmdReadWrite, uint8_t cmderr, uint16_t dataBit){
-
     return ((address<<19) + (cmdReadWrite<<17) + (cmderr<<16) + (0<<12)+ dataBit);
 }
 
-
-bool MSP48FV_Write(uint32_t cmdString){
+//responsible for transmitting SPI command
+bool MCP48FV_Write(uint32_t cmdString){
 
 //    uint8_t cmdSPI1= cmdString; // debug
 //    uint8_t cmdSPI2= (cmdString>>8);
@@ -52,8 +49,6 @@ bool MSP48FV_Write(uint32_t cmdString){
 
 //
     uint16_t txbuffer[]={(uint8_t) (cmdString>>16),(uint8_t) (cmdString>>8),(uint8_t) (cmdString>>0)};
-
-  //  mibspiInit();
     mibspiSetData(mibspiREG1,0,txbuffer);
     mibspiTransfer(mibspiREG1,0);
     while(!(mibspiIsTransferComplete(mibspiREG1,0)));
@@ -62,14 +57,15 @@ bool MSP48FV_Write(uint32_t cmdString){
 
 }
 
+//return register data from specific register
 uint16_t readRegister (uint8_t registerAddress){
 
-    MSP48FV_Write(cmdCreator(registerAddress,DAC_READ_CMD,0,0));
-    return  MSP48FV_Read()%(1>>12);
-
+    MCP48FV_Write(cmdCreator(registerAddress,DAC_READ_CMD,0,0));
+    return  MCP48FV_Read()%(1>>12);
 }
 
-uint16_t MSP48FV_Read(){
+//receive data from MCP48FV
+uint16_t MCP48FV_Read(){
 
     uint16_t rxBuffer[10]={0};
     mibspiGetData(mibspiREG1,0,rxBuffer);
