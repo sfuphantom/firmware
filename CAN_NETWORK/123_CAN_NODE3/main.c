@@ -23,9 +23,10 @@
 
 
 #define D_SIZE 6
-#define MSG_ID1 0x0001
-#define MSG_ID2 0x0002
-#define MSG_ID3 0x0003
+#define MSG_ID1 0x00000001
+#define MSG_ID2 0x00000002
+#define MSG_ID3 0x00000003
+
 uint8_t tx_Data[D_SIZE]={'N','O','D','E','-','3'};
 uint8_t rx_DataNode1[D_SIZE] ={0};
 uint8_t rx_DataNode2[D_SIZE] ={0};
@@ -33,7 +34,7 @@ uint8_t *tx_ptr  = &tx_Data[0];
 uint8_t *rx_ptr1 = &rx_DataNode1[0];
 uint8_t *rx_ptr2 = &rx_DataNode2[0];
 
-uint32_t cnt=0, tx_done =0;
+
 
 /*
  * Transmission/Receive Error Flag
@@ -47,12 +48,14 @@ volatile bool RXFlag3 =0;
 volatile uint32_t messageBox1Count =0;
 volatile uint32_t messageBox2Count =0;
 volatile uint32_t messageBox3Count =0;
+volatile int bitCounter=0;
 
 
 
 void CAN_Init(void);
 void CANIntHandler(void);
 
+tCANBitClkParms controllerBitTiming;
 tCANMsgObject canMsgObject1;
 tCANMsgObject canMsgObject2;
 tCANMsgObject canMsgObject3;
@@ -60,7 +63,8 @@ tCANMsgObject canMsgObject3;
 int main(void)
 {
     // Set the system clock to be generated directly from the external oscillator
-    SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN | SYSCTL_XTAL_16MHZ);
+    SysCtlClockSet(SYSCTL_SYSDIV_2 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN |SYSCTL_XTAL_16MHZ);
+
 
     CAN_Init();
 
@@ -78,11 +82,10 @@ int main(void)
 
 
     while(1){
-        if(messageSent){
+        if(messageSent && (bitCounter<=sizeof(tx_Data))){
             tx_ptr += 8;
-            CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+            CANMessageSet(CAN0_BASE,1, &canMsgObject1, MSG_OBJ_TYPE_TX);
             messageSent =0;
-
         }
         if(RXFlag2){
             canMsgObject2.pui8MsgData = rx_ptr1;
@@ -132,6 +135,8 @@ void CAN_Init(void){
        */
       CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
 
+
+
       // Enable interrupts on the CAN peripheral.
        /*
         * Enable Interrupts sources for CAN0
@@ -154,8 +159,8 @@ void CAN_Init(void){
        * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
        */
       canMsgObject1.ui32MsgID = MSG_ID3;
-      canMsgObject1.ui32MsgIDMask = 0xE00007FF;
-      canMsgObject1.ui32Flags = MSG_OBJ_TX_INT_ENABLE;
+      canMsgObject1.ui32MsgIDMask = 0x000007FF;
+      canMsgObject1.ui32Flags = (MSG_OBJ_TX_INT_ENABLE);
       canMsgObject1.ui32MsgLen = sizeof(tx_Data);
       canMsgObject1.pui8MsgData = tx_ptr;
 
@@ -165,9 +170,8 @@ void CAN_Init(void){
       * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
       */
       canMsgObject2.ui32MsgID = MSG_ID1;
-      canMsgObject2.ui32MsgIDMask = 0xE00007FF;
-      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER |
-              MSG_OBJ_EXTENDED_ID);
+      canMsgObject2.ui32MsgIDMask = 0x000007FF;
+      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | MSG_OBJ_EXTENDED_ID );
       canMsgObject2.ui32MsgLen = 6;
 
 
@@ -177,9 +181,8 @@ void CAN_Init(void){
       * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
       */
       canMsgObject3.ui32MsgID = MSG_ID2;
-      canMsgObject3.ui32MsgIDMask = 0xE00007FF;
-      canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER |
-              MSG_OBJ_EXTENDED_ID);
+      canMsgObject3.ui32MsgIDMask = 0x000007FF;
+      canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | MSG_OBJ_EXTENDED_ID);
       canMsgObject3.ui32MsgLen = 6;
 
 }
@@ -210,35 +213,54 @@ void CANIntHandler(void){
                 * And Successful.
                 *
                 */
-
                CANIntClear(CAN0_BASE, 1);
                messageBox1Count++;
                messageSent=1;
-               // Clear any error flags has the message was successfully sent
-               errFlag = 0;
 
-               // Clear the flag
+               if(bitCounter<sizeof(tx_Data)){ // Only transmitting 6 characters right now; Will fix it
+                   bitCounter++;
+                   // Clear any error flags has the message was successfully sent
+                     errFlag = 0;
+               }else if(bitCounter==sizeof(tx_Data)){
+                   bitCounter=0;
+                   tx_ptr = &tx_Data[0];
+                   CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+                   messageSent=0;
+                   // Clear any error flags has the message was successfully sent
+                  errFlag = 0;
+               }else{
+                   errFlag=1;
+               }
+
    }else if(intCause==2){
                /*
                * If Interrupt was caused by CAN message object 2 - execute this block
-               * Message object 1 is configured to receive a message on the CAN bus
-               * Therefore, an interrupt set by message Object 2 means a message has been received
+               * Message object 2 is configured to receive a message on the CAN bus
+               * Therefore, an interrupt set by message Object 3 means a message has been received
                *
                */
                CANIntClear(CAN0_BASE, 2);
-               messageBox2Count++;
-               RXFlag2 =1;
-               errFlag = 0;
+               intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
+               if(intCause==2){
+
+                   messageBox2Count++;
+                   RXFlag2 = 1;
+                   errFlag = 0;
+               }
    }else if(intCause==3){
                   /*
-                  * If Interrupt was caused by CAN message object 2 - execute this block
-                  * Message object 1 is configured to receive a message on the CAN bus
-                  * Therefore, an interrupt set by message Object 2 means a message has been received
+                  * If Interrupt was caused by CAN message object 3 - execute this block
+                  * Message object 3 is configured to receive a message on the CAN bus
+                  * Therefore, an interrupt set by message Object 3 means a message has been received
                   *
                   */
            CANIntClear(CAN0_BASE, 3);
-           messageBox3Count++;
-           RXFlag3 =1;
-           errFlag =0;
+           intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
+           if(intCause==3){
+               messageBox3Count++;
+               RXFlag3 =1;
+               errFlag =0;
+           }
+
    }
 }
