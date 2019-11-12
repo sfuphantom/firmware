@@ -54,12 +54,14 @@
 #include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
+
 #define D_COUNT 6
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','1'};
 uint8 rx_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
 uint8 *rx_ptr = &rx_data[0];
+volatile uint32_t messageBox1Count =0;
 
 
 
@@ -101,21 +103,9 @@ int main(void)
      }
 
 
-    /** - check the received data with the one that was transmitted */
-    tx_ptr = &tx_data[0];
-    rx_ptr = &rx_data[0];
+    while(1){
 
-
-    for(cnt=0;cnt<63;cnt++)
-     {
-          if(*tx_ptr++ != *rx_ptr++)
-          {
-               error++; /* data error */
-          }
-     }
-
-
-    while(1){}; /* wait forever after tx-rx complete. */
+    }; /* wait forever after tx-rx complete. */
 
 /* USER CODE END */
 
@@ -139,6 +129,7 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
      */
     if((node==canREG1) && (messageBox==canMESSAGE_BOX1)){
         tx_done=1;
+        messageBox1Count++;
     }
 
    /*
