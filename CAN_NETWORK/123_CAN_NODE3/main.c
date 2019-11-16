@@ -72,8 +72,8 @@ int main(void)
     IntMasterEnable();
 
     /*
-    * Load MsgObject2 & MsgObject3 into CAN0 message object 2 & 3.
-    * Once loaded, CAN0 will receive any messages with MsgID = 2 & MsgID=1 into
+    * Load MsgObject2 & MsgObject3 into CAN0 MessageBoxes 2 & 3.
+    * Once loaded, CAN0 will receive any messages with MsgID = 1 & MsgID=2 into
     *  message objects 2 & 3, and request for servicing through RX-interrupt.
     */
     CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
@@ -106,7 +106,6 @@ int main(void)
 
 
 }
-
 void CAN_Init(void){
 
 
@@ -197,7 +196,7 @@ void CANIntHandler(void){
        // Execute this block if the interrupt caused by CAN controller status
        // Get the status of the controller using CANStatusGet
        // Return from it is a field of status error bits - read API documentation for details about the
-       // error status bits.
+       // error status bits.ik
        // Reading the status clears the interrupt.
 
        intCause = CANStatusGet(CAN0_BASE, CAN_STS_CONTROL);

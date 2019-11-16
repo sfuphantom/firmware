@@ -54,7 +54,7 @@
 
 /* USER CODE BEGIN (1) */
 
-#define TRANSMIT 0
+
 #define D_COUNT 6
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','2'};
@@ -84,14 +84,17 @@ int main(void)
     _enable_interrupt_();
 
 
-    /** - configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive */
+    /*
+     * configuring CAN1 MB1 with Msg ID-2 to transmit
+     * and CAN1 MB2 to receive Msg with an ID of 1
+     * */
     canInit();
 
 
     /** - enabling error interrupts */
     canEnableErrorNotification(canREG1);
 
-#if TRANSMIT
+
     /* - starting transmission */
      for(cnt=0;cnt<D_COUNT;cnt++)
      {
@@ -101,19 +104,7 @@ int main(void)
       tx_ptr +=8;    /* next chunk ...*/
       }
     /** - check the received data with the one that was transmitted */
-    tx_ptr = &tx_data[0];
-    rx_ptr = &rx_data[0];
 
-
-    for(cnt=0;cnt<63;cnt++)
-     {
-          if(*tx_ptr++ != *rx_ptr++)
-          {
-               error++; /* data error */
-          }
-     }
-
-#endif
     while(1){}; /* wait forever after tx-rx complete. */
 
 /* USER CODE END */

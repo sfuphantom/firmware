@@ -86,7 +86,13 @@ int main(void)
     _enable_interrupt_();
 
 
-    /** - configuring CAN1 MB1,Msg ID-1 to transmit and CAN2 MB1 to receive */
+    /*
+     * MB = MessageBox
+     * configuring CAN1 MB1 with Msg ID-1 to transmit and
+     * CAN1 MB2 to receive messages
+     * with Msg-ID of 2.
+     *
+     * */
     canInit();
 
 
