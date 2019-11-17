@@ -85,7 +85,7 @@ int main(void)
     /* enable irq interrupt in Cortex R4 */
     _enable_interrupt_();
 
-    sciSend(sciREG, 18, "Initialized SCI. \r\n");
+
 
      /*
      * MB = MessageBox
@@ -96,7 +96,7 @@ int main(void)
      * */
     canInit();
 
-    sciSend(sciREG, 19, "CAN Initialized. \r\n");
+
 
 
 

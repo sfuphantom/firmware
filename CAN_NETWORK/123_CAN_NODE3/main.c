@@ -63,7 +63,7 @@ tCANMsgObject canMsgObject3;
 int main(void)
 {
     // Set the system clock to be generated directly from the external oscillator
-    SysCtlClockSet(SYSCTL_SYSDIV_2 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN |SYSCTL_XTAL_16MHZ);
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN |SYSCTL_XTAL_16MHZ);
 
 
     CAN_Init();
