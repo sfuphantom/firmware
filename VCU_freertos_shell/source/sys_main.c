@@ -79,6 +79,22 @@ static void vSensorReadTask(void *);    // This task will read all the sensors i
 static void vThrottleTask(void *);      // This task reads the APPS, performs signal plausibility, and controls the inverter through a DAC
 static void vDataLoggingTask(void *);   // This task will send any important data over CAN to the dashboard for logging onto the SD card
 
+// task handle creation??? shouldn't they need to be passed into the xTaskCreate function?
+
+/*********************************************************************************
+ *                              TASK PRIORITIES
+ *********************************************************************************/
+#define THROTTLE_TASK_PRIORITY         2
+#define SENSOR_READ_TASK_PRIORITY      1
+#define STATE_MACHINE_TASK_PRIORITY    1
+#define DATA_LOGGING_TASK_PRIORITY     0 // same as idle task
+
+// there may also be interrupt/ISR priorities for:
+// CAN messages
+// GPIOs (ready to drive, shutdown circuit GPIOs..)
+
+// would be nice to separate these into a separate priorities file
+
 /*********************************************************************************
  *                          GLOBAL VARIABLE DECLARATIONS
  *********************************************************************************/
@@ -127,7 +143,7 @@ int main(void)
     xq = xQueueCreate(5, sizeof(long));
 
     // freeRTOS API to create a task, takes in a task name, stack size, something, priority, something else
-    if (xTaskCreate(vStateMachineTask, (const char*)"StateMachineTask",  240, NULL,  (3), NULL) != pdTRUE)
+    if (xTaskCreate(vStateMachineTask, (const char*)"StateMachineTask",  240, NULL,  (STATE_MACHINE_TASK_PRIORITY), NULL) != pdTRUE)
     {
         // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
         // probably need a better error handler
@@ -136,7 +152,7 @@ int main(void)
     }
 
 
-    if (xTaskCreate(vThrottleTask, (const char*)"ThrottleTask",  240, NULL,  (1), NULL) != pdTRUE)
+    if (xTaskCreate(vThrottleTask, (const char*)"ThrottleTask",  240, NULL,  (THROTTLE_TASK_PRIORITY), NULL) != pdTRUE)
     {
         // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
         // probably need a better error handler
@@ -145,14 +161,14 @@ int main(void)
     }
 
 
-    if (xTaskCreate(vSensorReadTask, (const char*)"SensorReadTask",  240, NULL,  (2), NULL) != pdTRUE)
+    if (xTaskCreate(vSensorReadTask, (const char*)"SensorReadTask",  240, NULL,  (SENSOR_READ_TASK_PRIORITY), NULL) != pdTRUE)
     {
         // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
         // probably need a better error handler
         sciSend(scilinREG,23,(unsigned char*)"SensorReadTask Creation Failed.\r\n");
         while(1);
     }
-    if (xTaskCreate(vDataLoggingTask, (const char*)"DataLoggingTask",  240, NULL,  (2), NULL) != pdTRUE)
+    if (xTaskCreate(vDataLoggingTask, (const char*)"DataLoggingTask",  240, NULL,  (DATA_LOGGING_TASK_PRIORITY), NULL) != pdTRUE)
     {
         // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
         // probably need a better error handler
@@ -161,7 +177,10 @@ int main(void)
     }
 
     // all tasks have been created successfully
-    UARTSend(scilinREG, "Tasks created\r\n");
+    UARTSend(scilinREG, "Tasks created\r\n"); // We want to replace scilinREG with something like "PC_UART". and the BMS one to be "BMS_UART"
+    // will need our own hardware defines file to do this for all the ports and pins we use..
+    // will need to be different based on the launchpad or VCU being used. This can be changed via build configurations
+    // so one build has all the right files/linker included, right debugger, right MCU
 
     // start freeRTOS task scheduler
     vTaskStartScheduler();
@@ -196,14 +215,19 @@ static void vStateMachineTask(void *pvParameters){
     char stbuf[64];
     int nchars;
 
-    do{
-    xStatus = xQueueReceive(xq, &lrval, 30);
-    nchars = ltoa(lrval, stbuf);
-    UARTSend(scilinREG, (char *)stbuf);
-    UARTSend(scilinREG, "\r\n");
+    while(true)
+    {
+        xStatus = xQueueReceive(xq, &lrval, 30);
+        nchars = ltoa(lrval, stbuf);
+        UARTSend(scilinREG, (char *)stbuf);
+        UARTSend(scilinREG, "\r\n");
 
-    vTaskDelay(10);
-    }while(1);
+        vTaskDelay(10);
+
+
+        // need to evaluate the state machine here:
+        // basically check what state we're in, based on that state, then check if any signals warrant a change of state
+    }
 }
 
 /***********************************************************
@@ -217,10 +241,34 @@ static void vStateMachineTask(void *pvParameters){
  * @Note                    - None
  ***********************************************************/
 static void vSensorReadTask(void *pvParameters){
-    do{
+
+    // any initialization
+
+    while(true)
+    {
         gioToggleBit(gioPORTB, 1);
         vTaskDelay(200);
-    }while(1);
+
+        // read high voltage
+
+        // read HV current
+
+        // IMD data (maybe this needs to be a separate interrupt?)
+
+        // Shutdown GPIOs (will probably start with these non-interrupt and see if we need to later..)
+
+        // TSAL state
+
+        // CAN status from BMS (this may need an interrupt for when data arrives, and maybe stored in a buffer? maybe not.. we should try both)
+
+        // read LV voltage, current
+
+        // make sure state machine signal flags are updated
+
+        // check for all errors here and update VCU data structure or state machine flags accordingly
+
+        // will also need a lookup table or data structure that has error messages and LED codes for whatever fault flags are on
+    }
 }
 
 
@@ -235,7 +283,10 @@ static void vSensorReadTask(void *pvParameters){
  * @Note                    - None
  ***********************************************************/
 static void vThrottleTask(void *pvParameters){
-    do{
+    while(true)
+    {
+
+        // read APPS signals
 
         // how was this i from 0 to 10 selected?
         for(i=0; i<10; i++)
@@ -247,6 +298,7 @@ static void vThrottleTask(void *pvParameters){
             FP_sensor_2_sum += (unsigned int)FP_data[1].value;
         }
 
+        // moving average signal conditioning.. worth it to graph this out and find a good filter time constant
         FP_sensor_1_avg = FP_sensor_1_sum/20;
         FP_sensor_2_avg = FP_sensor_2_sum/20;
 
@@ -270,12 +322,19 @@ static void vThrottleTask(void *pvParameters){
         xStatus = xQueueSendToBack(xq, &FP_sensor_2_avg, 0);
 
 
+        // 10% APPS redundancy check
         if(FP_sensor_diff > 0.10)
         {
             UARTSend(scilinREG, "SENSOR DIFFERENCE FAULT\r\n");
         }
+
+
+        // need to do APPS plausibility check with BSE
+
+
+        // based on state, send out DAC to inverter
         vTaskDelay(10);
-    }while(1);
+    }
 }
 
 /***********************************************************
@@ -290,10 +349,18 @@ static void vThrottleTask(void *pvParameters){
  ***********************************************************/
 
 static void vDataLoggingTask(void *pvParameters){
-    do{
+
+    // any initialization
+
+    while(true)
+    {
             gioToggleBit(gioPORTB, 2);
-            vTaskDelay(200);
-    }while(1);
+            vTaskDelay(200); // will need to adjust this value
+
+            // log HV voltage, current TSAL state, shutdown circuit states to CAN
+            // send to dashboard
+            // this may or may not depend on state
+    }
 
 }
 /* USER CODE END */
