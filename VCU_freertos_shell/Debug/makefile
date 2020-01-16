@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS
+CG_TOOL_ROOT := C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -151,34 +151,34 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-bms_freertos_shell.out \
+VCU_freertos_shell.out \
 
 EXE_OUTPUTS__QUOTED += \
-"bms_freertos_shell.out" \
+"VCU_freertos_shell.out" \
 
 BIN_OUTPUTS += \
-bms_freertos_shell.hex \
+VCU_freertos_shell.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"bms_freertos_shell.hex" \
+"VCU_freertos_shell.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "bms_freertos_shell.out"
+	@$(MAKE) --no-print-directory -Onone "VCU_freertos_shell.out"
 
 # Tool invocations
-bms_freertos_shell.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+VCU_freertos_shell.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi -z -m"bms_freertos_shell.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/lib" -i"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="bms_freertos_shell_linkInfo.xml" --rom_model --be32 -o "bms_freertos_shell.out" $(ORDERED_OBJS)
+	"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/bin/armcl" -mv7R4 --code_state=32 --float_support=VFPv3D16 -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi -z -m"VCU_freertos_shell.map" --heap_size=0x800 --stack_size=0x800 -i"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/lib" -i"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="VCU_freertos_shell_linkInfo.xml" --rom_model --be32 -o "VCU_freertos_shell.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-bms_freertos_shell.hex: $(EXE_OUTPUTS)
+VCU_freertos_shell.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/bin/armhex"  -o "bms_freertos_shell.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccs920/ccs/tools/compiler/ti-cgt-arm_18.12.3.LTS/bin/armhex"  -o "VCU_freertos_shell.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 

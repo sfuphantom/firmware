@@ -4,7 +4,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="${build_artifact:1227_CAN_NODE2}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="1227_CAN_NODE2"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:1227_CAN_NODE2}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="C:/Users\Junaid\Desktop\Phantom\firmware\1227_CAN_NODE2\Debug\1227_CAN_NODE2.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="C:/Users\gabriel\Documents\Phantom\firmware\CAN_NETWORK\1227_CAN_NODE2\Debug\1227_CAN_NODE2.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/1227_CAN_NODE2"/>
 </listAttribute>

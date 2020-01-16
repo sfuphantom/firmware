@@ -1,14 +1,14 @@
 /** @file sys_main.c 
 *   @brief Application main file
-*   @date 11-Dec-2018
-*   @version 04.07.01
+*   @date 07-July-2017
+*   @version 04.07.00
 *
 *   This file contains an empty main function,
 *   which can be used for the application.
 */
 
 /* 
-* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2016 Texas Instruments Incorporated - www.ti.com 
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -101,7 +101,8 @@ rxData_Buffer[12];
  */
 
 static uint16
-adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
+adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9000/*0x9300*/}; // 0x_ 3 _ _  says go from channel 0 to 3,
+// i want to go just to channel 0
 /*
  *   CS = 0
  *   Send = 0x3000 - Continue to operate in Auto-2 Mode
@@ -122,8 +123,8 @@ static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
 /*
- * static uint16
-adc_mode[12]={ 0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000 ,0x0000};
+static uint16
+adc_mode[12]={ 0x1100,0x1100, 0x1100,0x1100,0x1100,0x1100,0x1100,0x1100,0x1100,0x1100,0x1100,0x1100};
 */
 
 static volatile int
@@ -147,6 +148,7 @@ int main(void)
         mibspiTransfer(mibspiREG3, TransferGroup0);
         adcConfigured = 0;
         while(!adcConfigured){}
+
 
         while(adcConfigured){
                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
@@ -173,7 +175,6 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
                 mibspiGetData(mibspi, group, TG0_dummydata);
                 mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
                 adcConfigured = 1;
-
     }
 
     if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
