@@ -1,184 +1,275 @@
 /*
- * main.c
+ * main2.c  - From Phantom REPO
  *
- *  Created on: Dec 10, 2019
+ *  Created on: Jan 18, 2020
  *      Author: Junaid
  */
-#include <stdint.h>
+
 #include <stdbool.h>
-#include <stdlib.h>
-#include "driverlib/can.h"
-#include "inc/hw_memmap.h"
+#include <stdint.h>
 #include "driverlib/sysctl.h"
 #include "driverlib/pin_map.h"
+#include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
-#include "driverlib/interrupt.h"
+#include "driverlib/can.h"
 #include "inc/hw_ints.h"
 #include "inc/hw_can.h"
-
-
-
-#define RCV_ID1  1
-#define RCV_ID2  2
-#define XMT_ID   3
-
-uint8_t static RCVData1[6]; // Received Data from Node 1 - for interrupt handler
-uint8_t static RCVData2[6]; // Received Data from Node 2 - for interrupt handler
-
-uint8_t static Processed_Node1 [6];
-uint8_t static Processed_Node2 [6];
-
-int static MailFlag1; // Set when new data arrives from Node 1
-int static MailFlag2; // Set when new data arrives from Node 2
-
-int volatile RCV1Count = 0;
-int volatile RCV2Count = 0;
+#include "driverlib/interrupt.h"
 
 
 /*
- * Configures one of the 32 message objects.
- * The configured message object with ObjectID will
- * receive message frames with identifier of MessageID
+ * Define two CAN message objects;
+ * MessageObject1  = Tx
+ * MessageObject2  = RX Message from Node 1
+ * MessageObject3  = RX Message from Node 2
+ *
  */
-void static CAN0_Setup_Message_Object(uint32_t MesssageID, uint32_t MessageFlags,
-                                      uint32_t MessageLength, uint8_t *MessageData,
-                                      uint32_t ObjectID, tMsgObjType eMsgType){
-    tCANMsgObject xTempObject;
-    xTempObject.ui32MsgID = MesssageID; // 11 or 29 bit ID
-    xTempObject.ui32MsgLen = MessageLength;
-    xTempObject.pui8MsgData = MessageData;
-    xTempObject.ui32Flags = MessageFlags;
-    CANMessageSet(CAN0_BASE, ObjectID, &xTempObject, eMsgType);
+
+
+#define D_SIZE 6
+#define MSG_ID1 0x00000001
+#define MSG_ID2 0x00000002
+#define MSG_ID3 0x00000003
+
+uint8_t tx_Data[D_SIZE]={'N','O','D','E','-','3'};
+uint8_t rx_DataNode1[D_SIZE] ={0};
+uint8_t rx_DataNode2[D_SIZE] ={0};
+uint8_t *tx_ptr  = &tx_Data[0];
+uint8_t *rx_ptr1 = &rx_DataNode1[0];
+uint8_t *rx_ptr2 = &rx_DataNode2[0];
+
+
+
+/*
+ * Transmission/Receive Error Flag
+ * Message object 2 recieved messsage flag
+ * Message object 3 received message flag
+ */
+volatile bool errFlag =0; // Initially, no errors
+volatile bool messageSent =0;
+volatile bool RXFlag2 =0;
+volatile bool RXFlag3 =0;
+volatile uint32_t messageBox1Count =0;
+volatile uint32_t messageBox2Count =0;
+volatile uint32_t messageBox3Count =0;
+volatile int bitCounter=0;
+
+
+
+void CAN_Init(void);
+void CANIntHandler(void);
+
+tCANBitClkParms controllerBitTiming;
+tCANMsgObject canMsgObject1;
+tCANMsgObject canMsgObject2;
+tCANMsgObject canMsgObject3;
+
+int main(void)
+{
+    // Set the system clock to be generated directly from the external oscillator
+    SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |SYSCTL_XTAL_16MHZ); // This will run the Tm4c at 80 MHz
+
+    CAN_Init();
+
+    // Enable Global Interrupts
+    IntMasterEnable();
+
+    /*
+    * Load MsgObject2 & MsgObject3 into CAN0 message object 2 & 3.
+    * Once loaded, CAN0 will receive any messages with MsgID = 2 & MsgID=1 into
+    *  message objects 2 & 3, and request for servicing through RX-interrupt.
+    */
+    CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+    CANMessageSet(CAN0_BASE, 2, &canMsgObject2, MSG_OBJ_TYPE_RX);
+    CANMessageSet(CAN0_BASE, 3, &canMsgObject3, MSG_OBJ_TYPE_RX);
+
+
+    while(1){
+        if(messageSent && (bitCounter<=sizeof(tx_Data))){
+            tx_ptr += 8;
+            CANMessageSet(CAN0_BASE,1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+            messageSent =0;
+        }
+        if(RXFlag2){
+            canMsgObject2.pui8MsgData = rx_ptr1;
+            CANMessageGet(CAN0_BASE, 2, &canMsgObject2, 1);
+            RXFlag2 = 0;
+            rx_ptr1 += 8;
+
+        }
+        if(RXFlag3){
+            canMsgObject3.pui8MsgData = rx_ptr2;
+            CANMessageGet(CAN0_BASE, 3, &canMsgObject3, 1);
+            RXFlag3 = 0;
+            rx_ptr2 += 8;
+        }
+
+    }
+
+
+
 }
 
 void CAN_Init(void){
 
-    MailFlag1 = false;
-    MailFlag2 = false;
 
-     // Enable clock access to CAN0
-     SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN0);
-     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_CAN0));
+    // Enable clock access to Port B to configure its pins for CAN module
+       SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+       while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
 
-      // Enable clock access to CAN0
-      SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-      while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOE));
+    // Enable clock access to CAN0
+       SysCtlPeripheralEnable(SYSCTL_PERIPH_CAN0);
+       while(!SysCtlPeripheralReady(SYSCTL_PERIPH_CAN0));
+
+    /* Configure GPIO pins for CAN mode  */
 
       // Configure PB4 as CAN0RX
-      GPIOPinConfigure(GPIO_PE4_CAN0RX);
+      GPIOPinConfigure(GPIO_PB4_CAN0RX);
       // Configure PB5 as CAN0TX
-      GPIOPinConfigure(GPIO_PE5_CAN0TX);
+      GPIOPinConfigure(GPIO_PB5_CAN0TX);
 
-      GPIOPinTypeCAN(GPIO_PORTE_BASE, GPIO_PIN_4 | GPIO_PIN_5);
+      GPIOPinTypeCAN(GPIO_PORTB_BASE, GPIO_PIN_4 | GPIO_PIN_5);
 
       CANInit(CAN0_BASE);
-      CANBitRateSet(CAN0_BASE, 800000000, 500000);
-      CANEnable(CAN0_BASE);
-      CANIntEnable(CAN0_BASE, CAN_INT_MASTER|CAN_INT_ERROR |CAN_INT_STATUS);
+      /*
+       * Set CAN0's bit rate for CAN bus - setting up the CAN bus timing.
+       * Setting CAN0 bit rate @ 500KHz
+       * SysCtlClockGet() used to determine clock rate used for clocking CAN module
+       */
+      CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
 
-      // Configure Receive Box.
-      CAN0_Setup_Message_Object(RCV_ID2,MSG_OBJ_RX_INT_ENABLE, 6, NULL, RCV_ID2, MSG_OBJ_TYPE_RX);
-      CAN0_Setup_Message_Object(RCV_ID1,MSG_OBJ_RX_INT_ENABLE, 6, NULL, RCV_ID1, MSG_OBJ_TYPE_RX);
+
+
+      // Enable interrupts on the CAN peripheral.
+       /*
+        * Enable Interrupts sources for CAN0
+        * CAN_INT_MASTER = Enables CAN0 to generate interrupts
+        * CAN_INT_ERROR = Enables CAN0 to generate Error interrupts
+        * CAN_INT_STATUS = Enable CAN0 to generate interrupts on successful Transmission and/or Reception of messages
+        */
+      CANIntEnable(CAN0_BASE, (CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS));
+
+      // Enable the NVIC interrupt; Enable the CAN interrupt on the processor (NVIC).
       IntEnable(INT_CAN0);
-}
 
-/*
- * Interrupt is generated when a frame of the appropriate ID is received.
- * The interrupt handler will search the 32 possible message objects for the one that caused the interrupt.
- */
+      CANEnable(CAN0_BASE);
+
+      /* CAN Hardware Configured Completed here. */
+
+      /*
+       * Initialize  canMsgObject1 with the MessageID and Transmit message
+       * canMsgObject1 MsgID = 3
+       * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+       */
+      canMsgObject1.ui32MsgID = MSG_ID3;
+      canMsgObject1.ui32MsgIDMask = 0x000007FF;
+      canMsgObject1.ui32Flags = (MSG_OBJ_TX_INT_ENABLE | MSG_OBJ_EXTENDED_ID);
+      canMsgObject1.ui32MsgLen = sizeof(tx_Data);
+      canMsgObject1.pui8MsgData = tx_ptr;
+
+      /*
+      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
+      * canMsgObject1 MsgID = 1
+      * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+      */
+
+
+      canMsgObject2.ui32MsgID = MSG_ID1;
+      canMsgObject2.ui32MsgIDMask = 0x000007FF;
+      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_EXTENDED_ID);  // Without the MSG_OBJ_EXTENDED_ID flag message not received. Why??
+      canMsgObject2.ui32MsgLen = 6;
+
+
+      /*
+      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
+      * canMsgObject1 MsgID = 1
+      * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
+      */
+      canMsgObject3.ui32MsgID = MSG_ID2;
+      canMsgObject3.ui32MsgIDMask = 0x000007FF;
+      canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE |  MSG_OBJ_EXTENDED_ID);
+      //canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | MSG_OBJ_EXTENDED_ID);
+      canMsgObject3.ui32MsgLen = 6;
+
+}
 void CANIntHandler(void){
 
-    uint8_t data[6];
-    int i;
-    uint32_t uiIntStatus, uiIDStatus;
-    tCANMsgObject xTempMsgObject;
-    xTempMsgObject.pui8MsgData = data;
-    uiIntStatus = CANIntStatus(CAN0_BASE, CAN_INT_STS_CAUSE); // Cause of interrupt?
+    /*
+     * Read CAN interrupt status to find the cause of interrupt
+     */
+    uint32_t intCause = CANIntStatus(CAN0_BASE, CAN_INT_STS_CAUSE); // Cause of Interrupt; Either Controller Status or Message Object caused interrupt
 
-    if(uiIntStatus & CAN_INT_INTID_STATUS){ // Received new data?
-        uiIDStatus = CANIntStatus(CAN0_BASE, CAN_STS_NEWDAT);
-        for(i=0; i<32; i++){ // test every bit of the mask
-            if( (0x1 << i) & uiIDStatus ){ // if active, get data
-                CANMessageGet(CAN0_BASE, (i+1), &xTempMsgObject, true);
-                if(xTempMsgObject.ui32MsgID == RCV_ID1){
-                    RCVData1[0] = data[0];
-                    RCVData1[1] = data[1];
-                    RCVData1[2] = data[2];
-                    RCVData1[3] = data[3];
-                    RCVData1[4] = data[4];
-                    RCVData1[5] = data[5];
-                    MailFlag1 = true;
-                }
-                if(xTempMsgObject.ui32MsgID == RCV_ID2){
-                    RCVData2[0] = data[0];
-                    RCVData2[1] = data[1];
-                    RCVData2[2] = data[2];
-                    RCVData2[3] = data[3];
-                    RCVData2[4] = data[4];
-                    RCVData2[5] = data[5];
-                    MailFlag2 = true;
-                }
-            }
-        }
-    }
-    CANIntClear(CAN0_BASE, uiIntStatus); // Acknowledge the interrupt.
+   if(intCause == CAN_INT_INTID_STATUS){
+       // Execute this block if the interrupt caused by CAN controller status
+       // Get the status of the controller using CANStatusGet
+       // Return from it is a field of status error bits - read API documentation for details about the
+       // error status bits.
+       // Reading the status clears the interrupt.
+
+       intCause = CANStatusGet(CAN0_BASE, CAN_STS_CONTROL);
+
+
+       //Set a flag to indicate some error may have occurred.
+       errFlag = 1;
+   }else if(intCause==1){
+               /*
+                * if Interrupt was caused by CAN message object 1 - execute this block
+                * Message object 1 is configured to Transmit a message on the CAN bus
+                * Therefore, an interrupt set by message Object 1 means transmission complete
+                * And Successful.
+                *
+                */
+               CANIntClear(CAN0_BASE, 1);
+               messageBox1Count++;
+               messageSent=1;
+
+               if(bitCounter<sizeof(tx_Data)){ // Only transmitting 6 characters right now; Will fix it
+                   bitCounter++;
+                   // Clear any error flags has the message was successfully sent
+                     errFlag = 0;
+               }else if(bitCounter==sizeof(tx_Data)){
+                   bitCounter=0;
+                   tx_ptr = &tx_Data[0];
+                   CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+                   messageSent=0;
+                   // Clear any error flags has the message was successfully sent
+                  errFlag = 0;
+               }else{
+                   errFlag=1;
+               }
+
+   }else if(intCause==2){
+               /*
+               * If Interrupt was caused by CAN message object 2 - execute this block
+               * Message object 2 is configured to receive a message on the CAN bus
+               * Therefore, an interrupt set by message Object 3 means a message has been received
+               *
+               */
+               CANIntClear(CAN0_BASE, 2);
+               intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
+               if(intCause==2){
+
+                   messageBox2Count++;
+                   RXFlag2 = 1;
+                   errFlag = 0;
+               }
+   }else if(intCause==3){
+                  /*
+                  * If Interrupt was caused by CAN message object 3 - execute this block
+                  * Message object 3 is configured to receive a message on the CAN bus
+                  * Therefore, an interrupt set by message Object 3 means a message has been received
+                  *
+                  */
+           CANIntClear(CAN0_BASE, 3);
+           intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
+           if(intCause==3){
+               messageBox3Count++;
+               RXFlag3 =1;
+               errFlag =0;
+           }
+
+   }
 }
 
-/*
- * Use the Mailbox receiver to receive a message
- */
-int CAN0_GetMailNonBlock(uint8_t data[6]){
-    if(MailFlag1){
-        data[0] = RCVData1[0];
-        data[1] = RCVData1[1];
-        data[2] = RCVData1[2];
-        data[3] = RCVData1[3];
-        data[4] = RCVData1[4];
-        data[5] = RCVData1[5];
-        MailFlag1 = false;
-        return true;
-    }
-    if(MailFlag2){
-        data[0] = RCVData2[0];
-        data[1] = RCVData2[1];
-        data[2] = RCVData2[2];
-        data[3] = RCVData2[3];
-        data[4] = RCVData2[4];
-        data[5] = RCVData2[5];
-        MailFlag2 = false;
-        return true;
-    }
-    return false;
-}
 
-/*int CAN0_CheckMail(void){
-    return MailFlag;
-}
-*/
-void CAN0_SendData(uint8_t data[6]){
-    CAN0_Setup_Message_Object(XMT_ID, NULL, 6, data, XMT_ID, MSG_OBJ_TYPE_TX);
-}
 
-int main(void){
-
-    // Set the system clock to be generated directly from the external oscillator
-      SysCtlClockSet(SYSCTL_SYSDIV_2_5 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN |SYSCTL_XTAL_16MHZ); // This will run the Tm4c at 80 MHz
-
-    // Initialize CAN Controller
-      CAN_Init();
-
-   // Enable Interrupts Globally
-
-      IntMasterEnable();
-
-      while(1){
-
-          if(CAN0_GetMailNonBlock(Processed_Node1)){
-              RCV1Count++;
-          }
-          if(CAN0_GetMailNonBlock(Processed_Node2)){
-              RCV2Count++;
-          }
-      }
-
-}

@@ -58,9 +58,16 @@
 #define D_COUNT 6
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','2'};
-uint8 rx_data[D_COUNT] = {0};
+uint8 rx1_data[D_COUNT] = {0};
+uint8 rx2_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
-uint8 *rx_ptr = &rx_data[0];
+uint8 *rx1_ptr = &rx1_data[0];
+uint8 *rx2_ptr = &rx2_data[0];
+
+static volatile uint32_t messageBox1Count = 0;
+static volatile uint32_t messageBox2Count = 0;
+static volatile uint32_t messageBox3Count = 0;
+
 
 
 /* USER CODE END */
@@ -98,18 +105,20 @@ int main(void)
     /* - starting transmission */
      for(cnt=0;cnt<D_COUNT;cnt++)
      {
+
       canTransmit(canREG1, canMESSAGE_BOX1, tx_ptr); /* transmitting 8 different chunks 1 by 1 */
-       while(tx_done == 0){};                 /* ... wait until transmit request is through        */
+       while(tx_done == 0){};                 /* ... wait until transmit request is through */
       tx_done=0;
-      tx_ptr +=8;    /* next chunk ...*/
+      tx_ptr +=8;    /* next chunk ... */
       }
+
     /** - check the received data with the one that was transmitted */
 
     while(1){}; /* wait forever after tx-rx complete. */
 
 /* USER CODE END */
 
-    return 0;
+
 }
 
 
@@ -130,6 +139,7 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
 
     if((node==canREG1) && (messageBox==canMESSAGE_BOX1)){
         tx_done=1;
+        messageBox1Count++;
     }
 
     /*
@@ -137,9 +147,20 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
     */
     if((node==canREG1) && (messageBox==canMESSAGE_BOX2)){
         while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX2));
-             canGetData(canREG1, canMESSAGE_BOX2, rx_ptr); /* copy to RAM */
-             rx_ptr +=8;
+             canGetData(canREG1, canMESSAGE_BOX2, rx1_ptr); /* copy to RAM */
+             messageBox2Count++;
+             rx1_ptr +=8;
+
     }
+
+    if((node==canREG1) && (messageBox==canMESSAGE_BOX3)){
+        while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX3));
+             canGetData(canREG1, canMESSAGE_BOX3, rx2_ptr); /* copy to RAM */
+             rx2_ptr +=8;
+             messageBox3Count++;
+    }
+
+
 }
 
 /* USER CODE END */

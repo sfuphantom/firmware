@@ -59,10 +59,15 @@
 #define D_COUNT 6
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','1'};
-uint8 rx_data[D_COUNT] = {0};
+uint8 rx1_data[D_COUNT] = {0};
+uint8 rx2_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
-uint8 *rx_ptr = &rx_data[0];
-volatile uint32_t messageBox1Count =0;
+uint8 *rx1_ptr = &rx1_data[0];
+uint8 *rx2_ptr = &rx2_data[0];
+
+static volatile uint32_t messageBox1Count =0;
+static volatile uint32_t messageBox2Count =0;
+static volatile uint32_t messageBox3Count =0;
 
 
 /* USER CODE END */
@@ -85,8 +90,6 @@ int main(void)
     /* enable irq interrupt in Cortex R4 */
     _enable_interrupt_();
 
-
-
      /*
      * MB = MessageBox
      * configuring CAN1 MB1 with Msg ID-1 to transmit and
@@ -96,20 +99,17 @@ int main(void)
      * */
     canInit();
 
-
-
-
-
     /** - enabling error interrupts */
     canEnableErrorNotification(canREG1);
 
     /* - starting transmission */
+
      for(cnt=0;cnt<D_COUNT;cnt++)
       {
          canTransmit(canREG1, canMESSAGE_BOX1, tx_ptr); /* transmitting 8 different chunks 1 by 1 */
-         while(tx_done == 0){};                 /* ... wait until transmit request is through        */
+         while(tx_done == 0){};                 /* ... wait until transmit request is through */
          tx_done=0;
-         tx_ptr +=8;    /* next chunk ...*/
+         tx_ptr +=8;    /* next chunk ... */
      }
 
 
@@ -119,7 +119,7 @@ int main(void)
 
 /* USER CODE END */
 
-    return 0;
+
 }
 
 
@@ -147,13 +147,15 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
     */
     if((node==canREG1) && (messageBox==canMESSAGE_BOX2)){
         while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX2));
-             canGetData(canREG1, canMESSAGE_BOX2, rx_ptr); /* copy to RAM */
-             rx_ptr +=8;
+             canGetData(canREG1, canMESSAGE_BOX2, rx1_ptr); /* copy to RAM */
+             rx1_ptr +=8;
+             messageBox2Count++;
     }
     if((node==canREG1) && (messageBox==canMESSAGE_BOX3)){
             while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX3));
-                 canGetData(canREG1, canMESSAGE_BOX3, rx_ptr); /* copy to RAM */
-                 rx_ptr +=8;
+                 canGetData(canREG1, canMESSAGE_BOX3, rx2_ptr); /* copy to RAM */
+                 rx2_ptr +=8;
+                 messageBox3Count++;
      }
 }
 
