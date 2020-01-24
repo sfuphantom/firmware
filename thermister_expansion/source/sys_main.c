@@ -164,35 +164,36 @@ int main(void)
 
 
 /* USER CODE BEGIN (4) */
-void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
-{
-    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-    mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
 
-    if (mibspi == mibspiREG3 && group == TransferGroup0) {
-                mibspiGetData(mibspi, group, TG0_dummydata);
-                mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-                adcConfigured = 1;
-
-    }
-
-    if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
-
-       /*if((buff_get_free(&htemperature_buffer)==12)){*/
-              mibspiGetData(mibspi, group, rxData_Buffer);
-              /*int i = 0;
-              for (;i<12;i++){
-                  (rxData_Buffer[i])&=~0xF000; /* Clear the upper 4 bits - Channel Address
-                   uint16 resistance = 10000 * ((4095/(rxData_Buffer[i])-1));
-                   rxData_Buffer[i] = resistance;
-              }*/
-              //buff_write(&htemperature_buffer, &rxData_Buffer, 12);
-              ReceivedData = 1;
-              //Processed = 1;
-
-        //}
-
-    }
-}
+//void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
+//{
+//    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+//    mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
+//
+//    if (mibspi == mibspiREG3 && group == TransferGroup0) {
+//                mibspiGetData(mibspi, group, TG0_dummydata);
+//                mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+//                adcConfigured = 1;
+//
+//    }
+//
+//    if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
+//
+//       /*if((buff_get_free(&htemperature_buffer)==12)){*/
+//              mibspiGetData(mibspi, group, rxData_Buffer);
+//              /*int i = 0;
+//              for (;i<12;i++){
+//                  (rxData_Buffer[i])&=~0xF000; /* Clear the upper 4 bits - Channel Address
+//                   uint16 resistance = 10000 * ((4095/(rxData_Buffer[i])-1));
+//                   rxData_Buffer[i] = resistance;
+//              }*/
+//              //buff_write(&htemperature_buffer, &rxData_Buffer, 12);
+//              ReceivedData = 1;
+//              //Processed = 1;
+//
+//        //}
+//
+//    }
+//}
 
 /* USER CODE END */

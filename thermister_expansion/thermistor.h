@@ -16,6 +16,7 @@
 
 
 #include "sys_common.h"
+#include "mibspi.h"
 
 
 /*TERMISTOR INTERFACE FUNCTIONS************************************************************************************************************************************/
@@ -48,6 +49,9 @@ uint16_t    read_fault_thermistor();    //verifies if the operating temperatures
 void        print_fault_details_thermistor();     //Identifies and prints details of usage status (0/1), mux and channel corresponding to the occurred fault
 uint16_t    send_fault_signal_thermistor();       //flags a fault occurrence to the VCU and/or Dashboard or .....over SCI or something
 uint16_t    send_fault_details_thermistor();      //sends fault details to the VCU and/or Dashboard or...... over SCI or something
+
+/*mibspi Interrupts*/
+void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group);
 
 
 #endif /* THERMISTOR_H_ */
