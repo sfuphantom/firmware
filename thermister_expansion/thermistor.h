@@ -8,22 +8,26 @@
 #ifndef THERMISTOR_H_
 #define THERMISTOR_H_
 
+
+/*
 #define MAX_TEMP_CHARGING 45
 #define MAX_TEMP_RUNNING  60
+*/
+
 
 #include "sys_common.h"
 
 
-/*TERMISTOR INTERFACE FUNCTIONS***************************************************************************************************************/
+/*TERMISTOR INTERFACE FUNCTIONS************************************************************************************************************************************/
 
 /*Setup*/
 
-void setup_thermistor();               //prepare the thermistor to start reading
+void setup_mibspi_thermistor();        //prepare the thermistor to start reading
 
 /*Validating usage status (0/1)*/
 
-bool        measuring_charge_thermistor();    //Usage status = 0; inquires whether the car is charging while the thermistor is measuring?
-bool        measuring_run_thermistor();       //Usage status = 1; inquires whether the car is running while the thermistor is measuring?
+bool        measuring_charge_thermistor();      //Usage status = 0; inquires whether the car is charging while the thermistor is measuring?
+bool        measuring_run_thermistor();         //Usage status = 1; inquires whether the car is running while the thermistor is measuring?
 
 /*Reading Thermistor values*/
 
@@ -44,7 +48,6 @@ uint16_t    read_fault_thermistor();    //verifies if the operating temperatures
 void        print_fault_details_thermistor();     //Identifies and prints details of usage status (0/1), mux and channel corresponding to the occurred fault
 uint16_t    send_fault_signal_thermistor();       //flags a fault occurrence to the VCU and/or Dashboard or .....over SCI or something
 uint16_t    send_fault_details_thermistor();      //sends fault details to the VCU and/or Dashboard or...... over SCI or something
-
 
 
 #endif /* THERMISTOR_H_ */

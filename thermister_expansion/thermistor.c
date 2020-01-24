@@ -10,12 +10,10 @@
 #include "sys_vim.h"
 #include "stdbool.h"
 
-
-void check_faults()
+void setup_mibspi_thermistor();        //prepare the thermistor to start reading
 {
-    if (temp > MAX_TEMP_CHARGING)
-    {
-        // throw GPIO fault here
-    }
+
+}
+
 
 
