@@ -15,5 +15,3 @@ void setup_mibspi_thermistor();        //prepare the thermistor to start reading
 
 }
 
-
-
