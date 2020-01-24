@@ -11,11 +11,4 @@
 #include "stdbool.h"
 
 
-void check_faults()
-{
-    if (temp > MAX_TEMP_CHARGING)
-    {
-        // throw GPIO fault here
-    }
-
 
