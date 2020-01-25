@@ -1,12 +1,12 @@
 /** @file pinmux.c 
 *   @brief PINMUX Driver Implementation File
-*   @date 11-Dec-2018
-*   @version 04.07.01
+*   @date 07-July-2017
+*   @version 04.07.00
 *
 */
 
 /* 
-* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com  
+* Copyright (C) 2009-2016 Texas Instruments Incorporated - www.ti.com  
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -186,7 +186,7 @@ void muxInit(void){
     
     pinMuxReg->PINMMR8 =    PINMUX_PIN_39_HET1_13 | PINMUX_PIN_40_MIBSPI1NCS_2 | PINMUX_PIN_41_HET1_15;
     
-    pinMuxReg->PINMMR9 = ((~(pinMuxReg->PINMMR9 >> 18U) & 0x00000001U ) << 18U) | PINMUX_PIN_54_MIBSPI3NENA | PINMUX_PIN_55_MIBSPI3NCS_0;
+    pinMuxReg->PINMMR9 = ((~(pinMuxReg->PINMMR9 >> 18U) & 0x00000001U ) << 18U) | PINMUX_PIN_54_MIBSPI3NENA | PINMUX_PIN_55_GIOB_2;
     
     pinMuxReg->PINMMR10 =   PINMUX_PIN_86_AD1EVT;
     
@@ -243,7 +243,7 @@ void muxInit(void){
 /* USER CODE END */
 
     PINMUX_GATE_EMIF_CLK_ENABLE(OFF);
-    PINMUX_GIOB_DISABLE_HET2_ENABLE(OFF);
+    PINMUX_GIOB_DISABLE_HET2_ENABLE(ON);
     PINMUX_ALT_ADC_TRIGGER_SELECT(1);
     
 /* USER CODE BEGIN (4) */

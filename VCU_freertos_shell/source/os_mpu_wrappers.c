@@ -781,7 +781,7 @@ void MPU_vQueueUnregisterQueue( QueueHandle_t xQueue )
 
 const char *MPU_pcQueueGetName( QueueHandle_t xQueue )
 {
-	const char *xReturn;
+	const char *xReturn;MPU_vQueueDelete
 	BaseType_t xRunningPrivileged = prvRaisePrivilege();
 	xReturn = pcQueueGetName( xQueue );
 	portRESET_PRIVILEGE( xRunningPrivileged );

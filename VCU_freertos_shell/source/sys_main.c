@@ -1,14 +1,14 @@
 /** @file sys_main.c 
 *   @brief Application main file
-*   @date 11-Dec-2018
-*   @version 04.07.01
+*   @date 07-July-2017
+*   @version 04.07.00
 *
 *   This file contains an empty main function,
 *   which can be used for the application.
 */
 
 /* 
-* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2016 Texas Instruments Incorporated - www.ti.com 
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -84,8 +84,8 @@ static void vDataLoggingTask(void *);   // This task will send any important dat
 /*********************************************************************************
  *                              TASK PRIORITIES
  *********************************************************************************/
-#define THROTTLE_TASK_PRIORITY         2
-#define SENSOR_READ_TASK_PRIORITY      1
+#define THROTTLE_TASK_PRIORITY         3
+#define SENSOR_READ_TASK_PRIORITY      2
 #define STATE_MACHINE_TASK_PRIORITY    1
 #define DATA_LOGGING_TASK_PRIORITY     0 // same as idle task
 
@@ -96,8 +96,13 @@ static void vDataLoggingTask(void *);   // This task will send any important dat
 // would be nice to separate these into a separate priorities file
 
 /*********************************************************************************
+ *                          STATE ENUMERATION
+ *********************************************************************************/
+typedef enum {TRACTIVE_OFF, TRACTIVE_ON, RUNNING, FAULT} State;
+/*********************************************************************************
  *                          GLOBAL VARIABLE DECLARATIONS
  *********************************************************************************/
+State state = TRACTIVE_OFF;
 xQueueHandle xq;
 adcData_t FP_data[2];
 adcData_t *FP_data_ptr = &FP_data[0];
@@ -109,15 +114,24 @@ unsigned int FP_sensor_2_avg;
 uint16 FP_sensor_1_min = 0;
 uint16 FP_sensor_2_min = 0;
 
-uint16 FP_sensor_1_max = 4095;
-uint16 FP_sensor_2_max = 4095;
+uint16 FP_sensor_1_max = 4095; // 12-bit ADC
+uint16 FP_sensor_2_max = 4095; // 12-bit ADC
 uint16 FP_sensor_1_percentage;
 uint16 FP_sensor_2_percentage;
 uint16 FP_sensor_diff;
 
 uint8 i;
-char command[8];
+char command[8]; // used for ADC printing.. this is an array of 8 chars, each char is 8 bits
 long xStatus;
+
+/*********************************************************************************
+ *                               SYSTEM STATE FLAGS
+ *********************************************************************************/
+uint8_t TSAL = 1;
+uint8_t RTDS = 0;
+uint8_t BMS  = 1;
+uint8_t IMD  = 1;
+uint8_t BSPD = 1;
 /* USER CODE END */
 
 int main(void)
@@ -130,7 +144,6 @@ int main(void)
  *********************************************************************************/
     sciInit();
     gioInit();
-    sciInit(); // Twice for some reason?
     adcInit();
 
 /*********************************************************************************
@@ -141,6 +154,8 @@ int main(void)
     // this will be useful when passing the VCU data structure in between different tasks
 
     xq = xQueueCreate(5, sizeof(long));
+
+    // need to do an "if queue != NULL"
 
     // freeRTOS API to create a task, takes in a task name, stack size, something, priority, something else
     if (xTaskCreate(vStateMachineTask, (const char*)"StateMachineTask",  240, NULL,  (STATE_MACHINE_TASK_PRIORITY), NULL) != pdTRUE)
@@ -168,6 +183,8 @@ int main(void)
         sciSend(scilinREG,23,(unsigned char*)"SensorReadTask Creation Failed.\r\n");
         while(1);
     }
+
+
     if (xTaskCreate(vDataLoggingTask, (const char*)"DataLoggingTask",  240, NULL,  (DATA_LOGGING_TASK_PRIORITY), NULL) != pdTRUE)
     {
         // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
@@ -215,18 +232,74 @@ static void vStateMachineTask(void *pvParameters){
     char stbuf[64];
     int nchars;
 
+    TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
+    const TickType_t xFrequency = 500; // task frequency in ms
+
+    // Initialize the xLastWakeTime variable with the current time;
+    xLastWakeTime = xTaskGetTickCount();
+
     while(true)
     {
+        // Wait for the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        UARTSend(scilinREG, "STATE MACHINE UPDATE TASK\r\n");
+//        UARTSend(scilinREG, (char *)xLastWakeTime);
+
         xStatus = xQueueReceive(xq, &lrval, 30);
         nchars = ltoa(lrval, stbuf);
         UARTSend(scilinREG, (char *)stbuf);
         UARTSend(scilinREG, "\r\n");
 
-        vTaskDelay(10);
 
+        // MAKE SOME LED BLINK ON THE VCU! TECHNICALLY U HAVE 6 DIFFERENT ONES U CAN BLINK
+        // MAKE EACH TASK BLINK A DIFFERENT LED
 
-        // need to evaluate the state machine here:
-        // basically check what state we're in, based on that state, then check if any signals warrant a change of state
+/*********************** STATE MACHINE EVALUATION ***********************************/
+
+        if (state == TRACTIVE_OFF)
+        {
+            UARTSend(scilinREG, "TRACTIVE_OFF");
+            if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1)
+            {
+                // if BMS/IMD/BSPD = 1 then the shutdown circuit is closed
+                // TSAL = 1 indicates that the AIRs have closed
+                // tractive system should now be active
+                state = TRACTIVE_ON;
+            }
+        }
+        else if (state == TRACTIVE_ON)
+        {
+            UARTSend(scilinREG, "TRACTIVE_ON");
+            if (RTDS == 1)
+            {
+                // ready to drive signal is switched
+                state = RUNNING;
+            }
+        }
+        else if (state == RUNNING)
+        {
+            UARTSend(scilinREG, "RUNNING");
+            if (RTDS == 0)
+            {
+                // read to drive signal switched off
+                state = TRACTIVE_ON;
+            }
+            if (BMS == 0 || IMD == 0 || BSPD == 0 || TSAL == 0)
+            {
+                // FAULT in shutdown circuit, or AIRs have opened from TSAL
+                state = FAULT;
+            }
+
+        }
+        else if (state == FAULT)
+        {
+            UARTSend(scilinREG, "FAULT");
+            // uhhh turn on a fault LED here??
+            // how will we reset out of this?
+        }
+
+        UARTSend(scilinREG, "\r\n");
     }
 }
 
@@ -243,12 +316,21 @@ static void vStateMachineTask(void *pvParameters){
 static void vSensorReadTask(void *pvParameters){
 
     // any initialization
+    TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
+    const TickType_t xFrequency = 500; // task frequency in ms
+
+    // Initialize the xLastWakeTime variable with the current time;
+    xLastWakeTime = xTaskGetTickCount();
 
     while(true)
     {
-        gioToggleBit(gioPORTB, 1);
-        vTaskDelay(200);
+        // Wait for the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+        gioToggleBit(gioPORTB, 1);
+
+        UARTSend(scilinREG, "SENSOR READING TASK\r\n");
+//        UARTSend(scilinREG, xTaskGetTickCount());
         // read high voltage
 
         // read HV current
@@ -283,10 +365,22 @@ static void vSensorReadTask(void *pvParameters){
  * @Note                    - None
  ***********************************************************/
 static void vThrottleTask(void *pvParameters){
+
+    TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
+    const TickType_t xFrequency = 250; // task frequency in ms
+
+    // Initialize the xLastWakeTime variable with the current time;
+    xLastWakeTime = xTaskGetTickCount();
+
+
     while(true)
     {
+        // Wait for the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
         // read APPS signals
+        UARTSend(scilinREG, "THROTTLE CONTROL\r\n");
+//        UARTSend(scilinREG, xTaskGetTickCount());
 
         // how was this i from 0 to 10 selected?
         for(i=0; i<10; i++)
@@ -297,6 +391,12 @@ static void vThrottleTask(void *pvParameters){
             FP_sensor_1_sum += (unsigned int)FP_data[0].value;
             FP_sensor_2_sum += (unsigned int)FP_data[1].value;
         }
+
+        // check for short to GND/5V on sensor 1
+        // thresholds
+
+        // check for short to GND/3V3 on sensor 2
+        // thresholds
 
         // moving average signal conditioning.. worth it to graph this out and find a good filter time constant
         FP_sensor_1_avg = FP_sensor_1_sum/20;
@@ -328,12 +428,17 @@ static void vThrottleTask(void *pvParameters){
             UARTSend(scilinREG, "SENSOR DIFFERENCE FAULT\r\n");
         }
 
-
         // need to do APPS plausibility check with BSE
 
+        if (state == RUNNING)
+        {
+            // send DAC to inverter
+        }
+        else
+        {
+            // send 0 to DAC
+        }
 
-        // based on state, send out DAC to inverter
-        vTaskDelay(10);
     }
 }
 
@@ -351,16 +456,38 @@ static void vThrottleTask(void *pvParameters){
 static void vDataLoggingTask(void *pvParameters){
 
     // any initialization
+    TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
+    const TickType_t xFrequency = 2000; // task frequency in ms
+
+    // Initialize the xLastWakeTime variable with the current time;
+    xLastWakeTime = xTaskGetTickCount();
 
     while(true)
     {
-            gioToggleBit(gioPORTB, 2);
-            vTaskDelay(200); // will need to adjust this value
+        // Wait for the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        gioToggleBit(gioPORTB, 2);
+            UARTSend(scilinREG, "------------->DATA LOGGING TO DASHBOARD\r\n");
+//            UARTSend(scilinREG, xTaskGetTickCount());
+            //----> do we need to send battery voltage to dashboard?
+
 
             // log HV voltage, current TSAL state, shutdown circuit states to CAN
             // send to dashboard
             // this may or may not depend on state
     }
 
+}
+
+void gioNotification(gioPORT_t *port, uint32 bit)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (19) */
+    if (port == gioPORTB && bit == 2)
+    {
+        // RTDS switch
+        RTDS ^= 1;
+    }
 }
 /* USER CODE END */
