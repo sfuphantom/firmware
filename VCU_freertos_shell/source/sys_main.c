@@ -124,8 +124,8 @@ State state = TRACTIVE_OFF;
  *                          GLOBAL VARIABLE DECLARATIONS
  *********************************************************************************/
 xQueueHandle xq;
-adcData_t FP_data;
-adcData_t *FP_data_ptr = &FP_data;
+adcData_t FP_data[3];
+adcData_t *FP_data_ptr = &FP_data[0];
 unsigned int FP_sensor_1_sum = 0;
 unsigned int FP_sensor_1_avg;
 unsigned int FP_sensor_2_sum = 0;
@@ -458,7 +458,9 @@ static void vThrottleTask(void *pvParameters){
         adcStartConversion(adcREG1, adcGROUP1);
         while(!adcIsConversionComplete(adcREG1, adcGROUP1));
         adcGetData(adcREG1, 1U, FP_data_ptr);
-        BSE_sensor_sum = (unsigned int)FP_data_ptr->value;
+        BSE_sensor_sum = (unsigned int)FP_data[0].value;
+        FP_sensor_1_sum = (unsigned int)FP_data[1].value;
+        FP_sensor_2_sum = (unsigned int)FP_data[2].value;
 
 
 
@@ -494,6 +496,16 @@ static void vThrottleTask(void *pvParameters){
 
         NumberOfChars = ltoa(BSE_sensor_sum,(char *)command);
         if (BSE_PRINT) {UARTSend(scilinREG, "*****BSE**** ");}
+        if (BSE_PRINT) {sciSend(scilinREG, NumberOfChars, command);}
+        if (BSE_PRINT) {UARTSend(scilinREG, "   ");}
+
+        NumberOfChars = ltoa(FP_sensor_1_sum,(char *)command);
+        if (BSE_PRINT) {UARTSend(scilinREG, "*****APPS 1**** ");}
+        if (BSE_PRINT) {sciSend(scilinREG, NumberOfChars, command);}
+        if (BSE_PRINT) {UARTSend(scilinREG, "   ");}
+
+        NumberOfChars = ltoa(FP_sensor_2_sum,(char *)command);
+        if (BSE_PRINT) {UARTSend(scilinREG, "*****APPS 2**** ");}
         if (BSE_PRINT) {sciSend(scilinREG, NumberOfChars, command);}
         if (BSE_PRINT) {UARTSend(scilinREG, "\r\n");}
 
@@ -571,7 +583,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 //        UARTSend(scilinREG, "---------Interrupt Active\r\n");
         if (RTDS == 0)
         {
-            if (BSE_sensor_avg > 1000)
+            if (BSE_sensor_sum < 2000)
             {
                 RTDS = 1; // CHANGE STATE TO RUNNING
             }
