@@ -25,6 +25,8 @@ source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_sh
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_list.h
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_queue.h
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_semphr.h
+source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_timer.h
+source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_list.h
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/Phantom_sci.h
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/sci.h
 source/sys_main.obj: C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/reg_sci.h
@@ -61,6 +63,8 @@ C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_task.h
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_list.h: 
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_queue.h: 
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_semphr.h: 
+C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_timer.h: 
+C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/os_list.h: 
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/Phantom_sci.h: 
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/sci.h: 
 C:/Users/gabriel/Documents/Phantom/firmware/VCU_freertos_shell/include/reg_sci.h: 
