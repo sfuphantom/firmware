@@ -75,9 +75,10 @@
 /*********************************************************************************
  *                          DEBUG PRINTING DEFINES
  *********************************************************************************/
-#define TASK_PRINT 0
-#define APPS_PRINT 0
-#define BSE_PRINT  1
+#define TASK_PRINT  0
+#define STATE_PRINT 1
+#define APPS_PRINT  0
+#define BSE_PRINT   0
 /*********************************************************************************
  *                          TASK HEADER DECLARATIONS
  *********************************************************************************/
@@ -113,7 +114,7 @@ TimerHandle_t xTimers[NUMBER_OF_TIMERS];
 /* This timer is used to debounce the interrupts for the RTDS and SDC signals */
 bool INTERRUPT_AVAILABLE = true;
 
-void Timer_200ms(TimerHandle_t xTimers);
+void Timer_300ms(TimerHandle_t xTimers);
 /*********************************************************************************
  *                          STATE ENUMERATION
  *********************************************************************************/
@@ -153,6 +154,7 @@ long xStatus;
  *********************************************************************************/
 uint8_t TSAL = 1;
 uint8_t RTDS = 0;
+long RTDS_RAW = 0;
 uint8_t BMS  = 1;
 uint8_t IMD  = 1;
 uint8_t BSPD = 1;
@@ -178,7 +180,7 @@ int main(void)
              "RTDS_Timer",
              /* The timer period in ticks, must be
              greater than 0. */
-             pdMS_TO_TICKS(200),
+             pdMS_TO_TICKS(10),
              /* The timers will auto-reload themselves
              when they expire. */
              pdFALSE,
@@ -187,7 +189,7 @@ int main(void)
              is initialised to 0. */
              ( void * ) 0,
              /* Callback function for when the timer expires*/
-             Timer_200ms
+             Timer_300ms
            );
 
     if( xTimers[0] == NULL )
@@ -310,8 +312,8 @@ static void vStateMachineTask(void *pvParameters){
 
         xStatus = xQueueReceive(xq, &lrval, 30);
         nchars = ltoa(lrval, stbuf);
-        if (TASK_PRINT) {UARTSend(scilinREG, (char *)stbuf);}
-        if (TASK_PRINT) {UARTSend(scilinREG, "\r\n");}
+//        if (TASK_PRINT) {UARTSend(scilinREG, (char *)stbuf);}
+//        if (TASK_PRINT) {UARTSend(scilinREG, "\r\n");}
 
 
         // MAKE SOME LED BLINK ON THE VCU! TECHNICALLY U HAVE 6 DIFFERENT ONES U CAN BLINK
@@ -321,7 +323,7 @@ static void vStateMachineTask(void *pvParameters){
 
         if (state == TRACTIVE_OFF)
         {
-            if (TASK_PRINT) {UARTSend(scilinREG, "TRACTIVE_OFF");}
+            if (STATE_PRINT) {UARTSend(scilinREG, "TRACTIVE_OFF");}
             if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1)
             {
                 // if BMS/IMD/BSPD = 1 then the shutdown circuit is closed
@@ -332,7 +334,8 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == TRACTIVE_ON)
         {
-            if (TASK_PRINT) {UARTSend(scilinREG, "TRACTIVE_ON");}
+            if (STATE_PRINT) {UARTSend(scilinREG, "TRACTIVE_ON");}
+
             if (RTDS == 1)
             {
                 // ready to drive signal is switched
@@ -341,7 +344,8 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == RUNNING)
         {
-            if (TASK_PRINT) {UARTSend(scilinREG, "RUNNING");}
+            if (STATE_PRINT) {UARTSend(scilinREG, "RUNNING");}
+
             if (RTDS == 0)
             {
                 // read to drive signal switched off
@@ -356,12 +360,12 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == FAULT)
         {
-            if (TASK_PRINT) {UARTSend(scilinREG, "FAULT");}
+            if (STATE_PRINT) {UARTSend(scilinREG, "FAULT");}
             // uhhh turn on a fault LED here??
             // how will we reset out of this?
         }
 
-        if (TASK_PRINT) {UARTSend(scilinREG, "\r\n");}
+        if (STATE_PRINT) {UARTSend(scilinREG, "\r\n");}
     }
 }
 
@@ -384,12 +388,27 @@ static void vSensorReadTask(void *pvParameters){
     // Initialize the xLastWakeTime variable with the current time;
     xLastWakeTime = xTaskGetTickCount();
 
+    int nchars;
+    char stbuf[64];
+
     while(true)
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
         gioToggleBit(gioPORTB, 1);
+
+        RTDS_RAW = gioGetBit(gioPORTA, 2);
+
+        if ( gioGetBit(gioPORTA, 2) == 1)
+        {
+            RTDS = 0;
+            UARTSend(scilinREG, "RTDS RAW IS READ AS 1, RESETTING RTDS SIGNAL\r\n");
+        }
+        else
+        {
+            UARTSend(scilinREG, "RTDS RAW IS READ AS 0, RESETTING RTDS SIGNAL\r\n");
+        }
 
         if (TASK_PRINT) {UARTSend(scilinREG, "SENSOR READING TASK\r\n");}
 //        UARTSend(scilinREG, xTaskGetTickCount());
@@ -580,21 +599,23 @@ void gioNotification(gioPORT_t *port, uint32 bit)
     {
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         // RTDS switch
-//        UARTSend(scilinREG, "---------Interrupt Active\r\n");
-        if (RTDS == 0)
+        UARTSend(scilinREG, "---------Interrupt Active\r\n");
+        if (RTDS == 0 && gioGetBit(gioPORTA, 2) == 0)
         {
             if (BSE_sensor_sum < 2000)
             {
                 RTDS = 1; // CHANGE STATE TO RUNNING
+                UARTSend(scilinREG, "---------RTDS set to 1 in interrupt\r\n");
             }
         }
-        else
-        {
-            RTDS ^= 1;
-        }
+//        else
+//        {
+//            UARTSend(scilinREG, "---------RTDS set to 0 in interrupt\r\n");
+//            RTDS = 0;
+//        }
 
         INTERRUPT_AVAILABLE = false;
-        if (xTimerResetFromISR(xTimers[0], xHigherPriorityTaskWoken) != pdPASS)// after 200ms the timer will allow the interrupt to toggle the signal again
+        if (xTimerResetFromISR(xTimers[0], xHigherPriorityTaskWoken) != pdPASS)// after 300ms the timer will allow the interrupt to toggle the signal again
         {
             // timer reset failed
             UARTSend(scilinREG, "---------Timer reset failed-------\r\n");
@@ -603,7 +624,7 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 }
 
 /* Timer callback when it expires */
- void Timer_200ms(TimerHandle_t xTimers)
+ void Timer_300ms(TimerHandle_t xTimers)
  {
      INTERRUPT_AVAILABLE = true;
  }
