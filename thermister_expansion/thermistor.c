@@ -10,6 +10,11 @@
 #include "sys_core.h"
 
 
+/************************************************************************************************************************************************/
+//Setting up mibSPI communication with the ADC
+/************************************************************************************************************************************************/
+
+
 #define TransferGroup0           0x0
 #define TransferGroup1           0x1
 #define Channels                 12
@@ -33,9 +38,6 @@ rxData_Buffer[12];
 
 void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 {
-
-
-
 /*
  *  CS = 0
  *  Send = 0x3C40 - Request to enter Auto-2 Mode with Vref = 2* Vref as I/P range
@@ -105,7 +107,7 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
 
     }
 
-    if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
+    if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured == 1) {
 
        /*if((buff_get_free(&htemperature_buffer)==12)){*/
               mibspiGetData(mibspi, group, rxData_Buffer);
@@ -122,6 +124,17 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
         //}
 
     }
+}
+/************************************************************************************************************************************************/
+/*Validating usage status */
+/************************************************************************************************************************************************/
+uint8  measuring_charge_thermistor =   0;
+uint8 measuring_run_thermistor =   0;
+
+uint16_t validate_usage_status_thermistor (uint16_t status)
+{
+   (status == 0)   ?   (measuring_charge_thermistor = 1)   :   (measuring_run_thermistor = 1);
+   return status;
 }
 
 

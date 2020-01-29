@@ -21,14 +21,13 @@
 
 /*TERMISTOR INTERFACE FUNCTIONS************************************************************************************************************************************/
 
-/*Setup*/
+/*Setting up mibSPI communication with the ADC*/
 
 void setup_mibspi_thermistor();        //prepare the thermistor to start reading
 
 /*Validating usage status (0/1)*/
 
-bool        measuring_charge_thermistor();      //Usage status = 0; inquires whether the car is charging while the thermistor is measuring?
-bool        measuring_run_thermistor();         //Usage status = 1; inquires whether the car is running while the thermistor is measuring?
+uint16_t         validate_usage_status_thermistor(uint16_t status );      //Inquires whether the car is charging or running while the thermistor is measuring?
 
 /*Reading Thermistor values*/
 
