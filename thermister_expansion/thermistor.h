@@ -38,7 +38,6 @@ uint16_t    read_specific_mux_specific_channel_thermistor(uint8_t mux_identity, 
 
 /*Print ADC readings*/
 void        extract_thermistor_readings_rx_data_buffer();
-void        print_thermistor_readings_decimal();                   //prints using SCI
 void        print_thermistor_readings_voltage();                   //prints using SCI
 
 /*Converting Thermistor readings*/

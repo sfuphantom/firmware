@@ -147,7 +147,7 @@ uint8_t validate_usage_status_thermistor(uint8_t status )      //Inquires whethe
 }
 
 /************************************************************************************************************************************************/
-/*Reading Thermistor values*/
+/*Reading, Extracting and Printing Thermistor values*/
 /************************************************************************************************************************************************/
 
 uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     //reads and returns the thermistor values from a specific mux on all the channels
@@ -162,7 +162,7 @@ uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     
 
     //Printing the data received from the ADC
     extract_thermistor_readings_rx_data_buffer();
-//    print_thermistor_readings_decimal();
+
 
 }
 
@@ -175,10 +175,24 @@ void    extract_thermistor_readings_rx_data_buffer()
                                          //keeping only the Hex format of thermistor readings
     }
 }
-/*
-void    print_thermistor_readings_decimal()
+
+#define REFERENCE_VOLTAGE 2.5
+
+void    print_thermistor_readings_voltage()
 {
     sciInit();
+    uint16_t value, voltage, numberOfChars, i=0;
+    unsigned char command[8];
+
+
+    for(;   i<12;   i++)
+    {
+        value   =   (uint16_t)rxData_Buffer[i];
+        voltage =   ((1.0*value)/4095)*REFERENCE_VOLTAGE;
+
+        numberOfChars   =   ltoa(voltage,(char *)command);
+        sciSend(scilinREG,  10,  (unsigned char  *)"Channel : ");
+        sciSend(scilinREG,  numberOfChars,  command);
+    }
 }
-*/
 
