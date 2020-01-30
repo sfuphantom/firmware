@@ -64,6 +64,8 @@
 #include "adc.h"
 #include "gio.h"
 
+#include "MCP48FV_DAC_SPI.h" // DAC library written by Ataur Rehman
+
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -172,6 +174,12 @@ int main(void)
     sciInit();
     gioInit();
     adcInit();
+/*********************************************************************************
+ *                          PHANTOM LIBRARY INITIALIZATION
+ *********************************************************************************/
+    //using MCP48FV Library
+    MCP48FV_Init();
+    MCP48FV_Set_Value(400);//500 =5.00V, 250= 2.5V
 /*********************************************************************************
  *                          freeRTOS SOFTWARE TIMER SETUP
  *********************************************************************************/
@@ -543,10 +551,12 @@ static void vThrottleTask(void *pvParameters){
         if (state == RUNNING)
         {
             // send DAC to inverter
+//            MCP48FV_Set_Value(420);
         }
         else
         {
             // send 0 to DAC
+//            MCP48FV_Set_Value(0);
         }
 
     }

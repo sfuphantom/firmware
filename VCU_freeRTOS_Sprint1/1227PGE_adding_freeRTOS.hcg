@@ -229,7 +229,9 @@
       <HDRMIBSPI>
         <NAME>mibspi.h</NAME>
       </HDRMIBSPI>
-      <SRCMIBSPI/>
+      <SRCMIBSPI>
+        <NAME>mibspi.c</NAME>
+      </SRCMIBSPI>
       <HDRSPI_R>
         <NAME>reg_spi.h</NAME>
       </HDRSPI_R>
@@ -250,7 +252,9 @@
       <HDRADC>
         <NAME>adc.h</NAME>
       </HDRADC>
-      <SRCADC/>
+      <SRCADC>
+        <NAME>adc.c</NAME>
+      </SRCADC>
       <HET1ASMHDR>
         <NAME/>
       </HET1ASMHDR>
@@ -470,7 +474,7 @@
         <PATH>include\mibspi.h</PATH>
       </HDRMIBSPI>
       <SRCMIBSPI>
-        <PATH/>
+        <PATH>source\mibspi.c</PATH>
       </SRCMIBSPI>
     </FILENAMES>
   </MIBSPI>
@@ -509,7 +513,7 @@
         <PATH>include\adc.h</PATH>
       </HDRADC>
       <SRCADC>
-        <PATH/>
+        <PATH>source\adc.c</PATH>
       </SRCADC>
     </FILENAMES>
   </ADC>
