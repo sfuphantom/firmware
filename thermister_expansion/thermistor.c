@@ -8,6 +8,7 @@
 #include "thermistor.h"
 #include "sys_vim.h"
 #include "sys_core.h"
+#include "sci.h"
 
 
 /************************************************************************************************************************************************/
@@ -35,6 +36,11 @@ TG0_dummydata[11];
 static uint16
 rxData_Buffer[12];
 
+static uint16
+adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
+
+static uint16
+adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
 void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 {
@@ -51,9 +57,10 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
  *  CS=1
  */
 
+    /*
 static uint16
 adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
-/*
+*
  *   CS = 0
  *   Send = 0x3000 - Continue to operate in Auto-2 Mode
  *   Receive = Conversion Result of CH0, ADC acquires CH1 in this frame, but samples in the next frame
@@ -69,6 +76,7 @@ adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
  *
  */
 
+/*
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
@@ -128,13 +136,49 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
 /************************************************************************************************************************************************/
 /*Validating usage status */
 /************************************************************************************************************************************************/
+
 uint8  measuring_charge_thermistor =   0;
 uint8 measuring_run_thermistor =   0;
 
-uint16_t validate_usage_status_thermistor (uint16_t status)
+uint8_t validate_usage_status_thermistor(uint8_t status )      //Inquires whether the car is charging or running while the thermistor is measuring?
 {
    (status == 0)   ?   (measuring_charge_thermistor = 1)   :   (measuring_run_thermistor = 1);
    return status;
 }
 
+/************************************************************************************************************************************************/
+/*Reading Thermistor values*/
+/************************************************************************************************************************************************/
+
+uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     //reads and returns the thermistor values from a specific mux on all the channels
+{
+    while(adcConfigured){
+                   mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
+                   mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+                   ReceivedData = 0;
+                   mibspiTransfer(mibspiREG3, TransferGroup1);
+                   while(!ReceivedData){}
+            }
+
+    //Printing the data received from the ADC
+    extract_thermistor_readings_rx_data_buffer();
+//    print_thermistor_readings_decimal();
+
+}
+
+void    extract_thermistor_readings_rx_data_buffer()
+{
+    uint8_t i=0;
+    for (;  i<12;   i++)
+    {
+        rxData_Buffer[i]    &=  0x0FFF;  //Masking to remove channel address from the data received from the ADC and
+                                         //keeping only the Hex format of thermistor readings
+    }
+}
+/*
+void    print_thermistor_readings_decimal()
+{
+    sciInit();
+}
+*/
 

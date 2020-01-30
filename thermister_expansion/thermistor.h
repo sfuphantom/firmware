@@ -27,14 +27,19 @@ void setup_mibspi_thermistor();        //prepare the thermistor to start reading
 
 /*Validating usage status (0/1)*/
 
-uint16_t         validate_usage_status_thermistor(uint16_t status );      //Inquires whether the car is charging or running while the thermistor is measuring?
+uint8_t         validate_usage_status_thermistor(uint8_t status );      //Inquires whether the car is charging or running while the thermistor is measuring?
 
-/*Reading Thermistor values*/
+/*Reading Thermistor values*/  /*following three functions might require transitioning back to Manual mode*/
 
-uint16_t    read_all_muxes_all_channels_thermistor();               //reads and returns the thermistor values from all muxes on all channels
-uint16_t    read_all_muxes_specific_channel_thermistor();           //reads and returns the thermistor values from all muxes on a specific channel
-uint16_t    read_specific_mux_all_channels_thermistor();            //reads and returns the thermistor values from a specific mux on all the channels
-uint16_t    read_specific_mux_specific_channel_thermistor();        //reads and returns the thermistor values from a specific mux on a specific channel
+uint16_t    read_all_muxes_all_channels_thermistor();                                                       //reads and returns the thermistor values from all muxes on all channels
+uint16_t    read_all_muxes_specific_channel_thermistor(uint8_t channel_identity);                           //reads and returns the thermistor values from all muxes on a specific channel
+uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity);                                //reads and returns the thermistor values from a specific mux on all the channels
+uint16_t    read_specific_mux_specific_channel_thermistor(uint8_t mux_identity, uint8_t channel_identity);  //reads and returns the thermistor values from a specific mux on a specific channel
+
+/*Print ADC readings*/
+void        extract_thermistor_readings_rx_data_buffer();
+void        print_thermistor_readings_decimal();                   //prints using SCI
+void        print_thermistor_readings_voltage();                   //prints using SCI
 
 /*Converting Thermistor readings*/
 void        convert_reading_thermistor ();        //converts thermistor reading into temperature
