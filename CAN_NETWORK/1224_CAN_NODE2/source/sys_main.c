@@ -123,6 +123,7 @@ int main(void)
 
 /* USER CODE END */
 
+    return 0;
 }
 
 

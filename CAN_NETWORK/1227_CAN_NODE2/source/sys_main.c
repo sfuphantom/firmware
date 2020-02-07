@@ -59,10 +59,10 @@
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','2'};
 uint8 rx1_data[D_COUNT] = {0};
-uint8 rx2_data[D_COUNT] = {0};
+uint8 rx3_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
 uint8 *rx1_ptr = &rx1_data[0];
-uint8 *rx2_ptr = &rx2_data[0];
+uint8 *rx3_ptr = &rx3_data[0];
 
 static volatile uint32_t messageBox1Count = 0;
 static volatile uint32_t messageBox2Count = 0;
@@ -101,6 +101,9 @@ int main(void)
     /** - enabling error interrupts */
     canEnableErrorNotification(canREG1);
 
+    /** - Enable Status change Notification **/
+
+     canEnableStatusChangeNotification(canREG1);
 
     /* - starting transmission */
      for(cnt=0;cnt<D_COUNT;cnt++)
@@ -118,7 +121,7 @@ int main(void)
 
 /* USER CODE END */
 
-
+    return 0;
 }
 
 
@@ -155,8 +158,8 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
 
     if((node==canREG1) && (messageBox==canMESSAGE_BOX3)){
         while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX3));
-             canGetData(canREG1, canMESSAGE_BOX3, rx2_ptr); /* copy to RAM */
-             rx2_ptr +=8;
+             canGetData(canREG1, canMESSAGE_BOX3, rx3_ptr); /* copy to RAM */
+             rx3_ptr +=8;
              messageBox3Count++;
     }
 

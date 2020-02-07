@@ -27,9 +27,9 @@
 
 
 #define D_SIZE 6
-#define MSG_ID1 0x00000001
-#define MSG_ID2 0x00000002
-#define MSG_ID3 0x00000003
+#define MSG_ID1 0x294
+#define MSG_ID2 0x555
+#define MSG_ID3 0x64A
 
 uint8_t tx_Data[D_SIZE]={'N','O','D','E','-','3'};
 uint8_t rx_DataNode1[D_SIZE] ={0};
@@ -47,6 +47,7 @@ uint8_t *rx_ptr2 = &rx_DataNode2[0];
  */
 volatile bool errFlag =0; // Initially, no errors
 volatile bool messageSent =0;
+volatile bool sentOnce = 0;
 volatile bool RXFlag2 =0;
 volatile bool RXFlag3 =0;
 volatile uint32_t messageBox1Count =0;
@@ -85,7 +86,7 @@ int main(void)
 
 
     while(1){
-        if(messageSent && (bitCounter<=sizeof(tx_Data))){
+        if(messageSent && (bitCounter<=sizeof(tx_Data)) && (sentOnce==0)){
             tx_ptr += 8;
             CANMessageSet(CAN0_BASE,1, &canMsgObject1, MSG_OBJ_TYPE_TX);
             messageSent =0;
@@ -136,8 +137,7 @@ void CAN_Init(void){
        * Setting CAN0 bit rate @ 500KHz
        * SysCtlClockGet() used to determine clock rate used for clocking CAN module
        */
-      CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 500000);
-
+      CANBitRateSet(CAN0_BASE, SysCtlClockGet(), 100000);
 
 
       // Enable interrupts on the CAN peripheral.
@@ -147,12 +147,14 @@ void CAN_Init(void){
         * CAN_INT_ERROR = Enables CAN0 to generate Error interrupts
         * CAN_INT_STATUS = Enable CAN0 to generate interrupts on successful Transmission and/or Reception of messages
         */
-      CANIntEnable(CAN0_BASE, (CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS));
+      CANIntEnable(CAN0_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
 
       // Enable the NVIC interrupt; Enable the CAN interrupt on the processor (NVIC).
       IntEnable(INT_CAN0);
 
       CANEnable(CAN0_BASE);
+
+
 
       /* CAN Hardware Configured Completed here. */
 
@@ -162,8 +164,8 @@ void CAN_Init(void){
        * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
        */
       canMsgObject1.ui32MsgID = MSG_ID3;
-      canMsgObject1.ui32MsgIDMask = 0x000007FF;
-      canMsgObject1.ui32Flags = (MSG_OBJ_TX_INT_ENABLE | MSG_OBJ_EXTENDED_ID);
+      canMsgObject1.ui32MsgIDMask = 0;
+      canMsgObject1.ui32Flags = (MSG_OBJ_TX_INT_ENABLE);
       canMsgObject1.ui32MsgLen = sizeof(tx_Data);
       canMsgObject1.pui8MsgData = tx_ptr;
 
@@ -175,65 +177,69 @@ void CAN_Init(void){
 
 
       canMsgObject2.ui32MsgID = MSG_ID1;
-      canMsgObject2.ui32MsgIDMask = 0x000007FF;
-      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_EXTENDED_ID);  // Without the MSG_OBJ_EXTENDED_ID flag message not received. Why??
+      canMsgObject2.ui32MsgIDMask = 0x7FF;
+      canMsgObject2.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER);
       canMsgObject2.ui32MsgLen = 6;
 
 
       /*
-      * Initialize  canMsgObject2 with the MessageID = 1, for receiving message from Node1
+      * Initialize  canMsgObject2 with the MessageID = 2, for receiving message from Node2
       * canMsgObject1 MsgID = 1
       * CanMsgObject1 Mask for filtering msg, same as NODE1 and NODE2
       */
       canMsgObject3.ui32MsgID = MSG_ID2;
-      canMsgObject3.ui32MsgIDMask = 0x000007FF;
-      canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE |  MSG_OBJ_EXTENDED_ID);
-      //canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER | MSG_OBJ_EXTENDED_ID);
+      canMsgObject3.ui32MsgIDMask = 0x7FF;
+      canMsgObject3.ui32Flags = (MSG_OBJ_RX_INT_ENABLE | MSG_OBJ_USE_ID_FILTER);
       canMsgObject3.ui32MsgLen = 6;
+
+
+
 
 }
 void CANIntHandler(void){
 
+
+    CANIntDisable(CAN0_BASE, CAN_INT_MASTER | CAN_INT_ERROR | CAN_INT_STATUS);
     /*
      * Read CAN interrupt status to find the cause of interrupt
      */
     uint32_t intCause = CANIntStatus(CAN0_BASE, CAN_INT_STS_CAUSE); // Cause of Interrupt; Either Controller Status or Message Object caused interrupt
+    uint32_t intCause2 = CANIntStatus(CAN0_BASE, CAN_INT_STS_OBJECT); // returns a bit mask indicating which message objects have pending interrupts
 
-   if(intCause == CAN_INT_INTID_STATUS){
-       // Execute this block if the interrupt caused by CAN controller status
-       // Get the status of the controller using CANStatusGet
-       // Return from it is a field of status error bits - read API documentation for details about the
-       // error status bits.
-       // Reading the status clears the interrupt.
-
-       intCause = CANStatusGet(CAN0_BASE, CAN_STS_CONTROL);
+    if(intCause == CAN_INT_INTID_STATUS){
 
 
-       //Set a flag to indicate some error may have occurred.
-       errFlag = 1;
-   }else if(intCause==1){
+
+        intCause = CANStatusGet(CAN0_BASE, CAN_STS_CONTROL);
+
+
+    }else if(intCause==1){
                /*
                 * if Interrupt was caused by CAN message object 1 - execute this block
                 * Message object 1 is configured to Transmit a message on the CAN bus
                 * Therefore, an interrupt set by message Object 1 means transmission complete
                 * And Successful.
-                *
                 */
-               CANIntClear(CAN0_BASE, 1);
+
+            CANIntClear(CAN0_BASE, 1);
+
+            if(bitCounter<sizeof(tx_Data) && (messageSent == 0)){ // Only transmitting 6 characters right now; Will fix it
+               bitCounter++;
+               // Clear any error flags has the message was successfully sent
+               errFlag = 0;
                messageBox1Count++;
                messageSent=1;
+            }else if(bitCounter==sizeof(tx_Data)){
 
-               if(bitCounter<sizeof(tx_Data)){ // Only transmitting 6 characters right now; Will fix it
-                   bitCounter++;
-                   // Clear any error flags has the message was successfully sent
-                     errFlag = 0;
-               }else if(bitCounter==sizeof(tx_Data)){
-                   bitCounter=0;
-                   tx_ptr = &tx_Data[0];
-                   CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
-                   messageSent=0;
-                   // Clear any error flags has the message was successfully sent
-                  errFlag = 0;
+               bitCounter=0;
+               messageBox1Count++;
+               tx_ptr = &tx_Data[0];
+               //CANMessageSet(CAN0_BASE, 1, &canMsgObject1, MSG_OBJ_TYPE_TX);
+               messageSent=0;
+               // Clear any error flags has the message was successfully sent
+               errFlag = 0;
+               sentOnce = 1;
+
                }else{
                    errFlag=1;
                }
@@ -243,7 +249,6 @@ void CANIntHandler(void){
                * If Interrupt was caused by CAN message object 2 - execute this block
                * Message object 2 is configured to receive a message on the CAN bus
                * Therefore, an interrupt set by message Object 3 means a message has been received
-               *
                */
                CANIntClear(CAN0_BASE, 2);
                intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
@@ -258,8 +263,9 @@ void CANIntHandler(void){
                   * If Interrupt was caused by CAN message object 3 - execute this block
                   * Message object 3 is configured to receive a message on the CAN bus
                   * Therefore, an interrupt set by message Object 3 means a message has been received
-                  *
                   */
+
+
            CANIntClear(CAN0_BASE, 3);
            intCause = CANStatusGet(CAN0_BASE, CAN_STS_NEWDAT);
            if(intCause==3){
@@ -269,6 +275,9 @@ void CANIntHandler(void){
            }
 
    }
+
+
+    CANIntEnable(CAN0_BASE, (CAN_INT_MASTER | CAN_INT_ERROR |  CAN_INT_STATUS));
 }
 
 

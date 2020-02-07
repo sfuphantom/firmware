@@ -111,6 +111,13 @@ void canStatusChangeNotification(canBASE_t *node, uint32 notification)
 /* USER CODE END */
 }
 
+#pragma WEAK(canMessageNotification)
+void canMessageNotification(canBASE_t *node, uint32 messageBox)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (15) */
+/* USER CODE END */
+}
 
 /* USER CODE BEGIN (16) */
 /* USER CODE END */

@@ -59,11 +59,11 @@
 #define D_COUNT 6
 uint32 cnt=0, error =0, tx_done =0;
 uint8 tx_data[D_COUNT] = {'N','O','D','E','-','1'};
-uint8 rx1_data[D_COUNT] = {0};
 uint8 rx2_data[D_COUNT] = {0};
+uint8 rx3_data[D_COUNT] = {0};
 uint8 *tx_ptr = &tx_data[0];
-uint8 *rx1_ptr = &rx1_data[0];
 uint8 *rx2_ptr = &rx2_data[0];
+uint8 *rx3_ptr = &rx3_data[0];
 
 static volatile uint32_t messageBox1Count =0;
 static volatile uint32_t messageBox2Count =0;
@@ -102,28 +102,61 @@ int main(void)
     /** - enabling error interrupts */
     canEnableErrorNotification(canREG1);
 
+    /** - Enable Status change Notification **/
+
+    canEnableStatusChangeNotification(canREG1);
+
+
     /* - starting transmission */
 
      for(cnt=0;cnt<D_COUNT;cnt++)
       {
          canTransmit(canREG1, canMESSAGE_BOX1, tx_ptr); /* transmitting 8 different chunks 1 by 1 */
-         while(tx_done == 0){};                 /* ... wait until transmit request is through */
+         while(tx_done==0){};                 /* ... wait until transmit request is through */
          tx_done=0;
          tx_ptr +=8;    /* next chunk ... */
      }
 
 
-    while(1){
-
-    }; /* wait forever after tx-rx complete. */
+    while(1){}; /* wait forever after tx-rx complete. */
 
 /* USER CODE END */
 
-
+    return 0;
 }
 
 
 /* USER CODE BEGIN (4) */
+
+
+/** @fn void canStatusChangeNotification(canBASE_t *node, uint32 notification)
+*   @brief Status Change notification
+*   @param[in] node Pointer to CAN node:
+*              - canREG1: CAN1 node pointer
+*              - canREG2: CAN2 node pointer
+*              - canREG3: CAN3 node pointer
+*   @param[in] notification Status change notification code:
+*           - canLEVEL_TxOK      (0x08) : When successful transmission
+*           - canLEVEL_RxOK      (0x10) : When successful reception
+*           - canLEVEL_WakeUpPnd (0x200): When successful WakeUp to system initiated
+*           - canLEVEL_PDA       (0x400): When successful low power mode entrance
+*
+*   @note This function has to be provide by the user.
+*/
+
+/*
+ * void canStatusChangeNotification(canBASE_t *node, uint32 notification)
+{
+    if((node==canREG1) && (notification == canLEVEL_TxOK))
+    {
+        canMessageNotification(canREG1, canMESSAGE_BOX1);
+    }
+    else
+
+
+}
+*/
+
 
 /*
  * Directed here from canHigh1InterruptHandler defined in can.c
@@ -147,14 +180,14 @@ void canMessageNotification(canBASE_t *node, uint32 messageBox)
     */
     if((node==canREG1) && (messageBox==canMESSAGE_BOX2)){
         while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX2));
-             canGetData(canREG1, canMESSAGE_BOX2, rx1_ptr); /* copy to RAM */
-             rx1_ptr +=8;
+             canGetData(canREG1, canMESSAGE_BOX2, rx2_ptr); /* copy to RAM */
+             rx2_ptr +=8;
              messageBox2Count++;
     }
     if((node==canREG1) && (messageBox==canMESSAGE_BOX3)){
             while(!canIsRxMessageArrived(canREG1, canMESSAGE_BOX3));
-                 canGetData(canREG1, canMESSAGE_BOX3, rx2_ptr); /* copy to RAM */
-                 rx2_ptr +=8;
+                 canGetData(canREG1, canMESSAGE_BOX3, rx3_ptr); /* copy to RAM */
+                 rx3_ptr +=8;
                  messageBox3Count++;
      }
 }
