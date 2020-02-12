@@ -6,9 +6,6 @@
  */
 
 #include "thermistor.h"
-#include "sys_vim.h"
-#include "sys_core.h"
-#include "sci.h"
 
 
 /************************************************************************************************************************************************/
@@ -22,11 +19,10 @@
 
 static volatile int
 isTxComplete;
-static volatile int
+volatile int
 adcConfigured;
 static volatile int
 ReceivedData;
-
 static volatile int
 Processed;
 
@@ -41,6 +37,9 @@ adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
+
+static volatile int
+currentIndex;
 
 void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 {
@@ -80,13 +79,14 @@ adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
-/*
- * static uint16
+static uint16
 adc_mode[12]={ 0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000 ,0x0000};
 */
 
+/*
 static volatile int
 currentIndex;
+*/
 
         _enable_IRQ();  //Enables global interrupts
         mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
@@ -101,6 +101,14 @@ currentIndex;
         adcConfigured = 0;
         while(!adcConfigured){}
 
+        while(adcConfigured){
+               mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
+               mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+               ReceivedData = 0;
+               mibspiTransfer(mibspiREG3, TransferGroup1);
+               while(!ReceivedData){}
+               print_thermistor_readings_voltage();
+        }
 }
 
 void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
@@ -117,22 +125,18 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
 
     if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured == 1) {
 
-       /*if((buff_get_free(&htemperature_buffer)==12)){*/
-              mibspiGetData(mibspi, group, rxData_Buffer);
-              /*int i = 0;
-              for (;i<12;i++){
-                  (rxData_Buffer[i])&=~0xF000; /* Clear the upper 4 bits - Channel Address
-                   uint16 resistance = 10000 * ((4095/(rxData_Buffer[i])-1));
-                   rxData_Buffer[i] = resistance;
-              }*/
-              //buff_write(&htemperature_buffer, &rxData_Buffer, 12);
+
+            mibspiGetData(mibspi, group, rxData_Buffer);
+
               ReceivedData = 1;
-              //Processed = 1;
 
-        //}
 
+
+        }
     }
-}
+
+
+
 /************************************************************************************************************************************************/
 /*Validating usage status */
 /************************************************************************************************************************************************/
@@ -146,10 +150,11 @@ uint8_t validate_usage_status_thermistor(uint8_t status )      //Inquires whethe
    return status;
 }
 
+
 /************************************************************************************************************************************************/
 /*Reading, Extracting and Printing Thermistor values*/
 /************************************************************************************************************************************************/
-
+/*
 uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     //reads and returns the thermistor values from a specific mux on all the channels
 {
     while(adcConfigured){
@@ -165,6 +170,8 @@ uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     
 
 
 }
+*/
+/*
 
 void    extract_thermistor_readings_rx_data_buffer()
 {
@@ -175,24 +182,32 @@ void    extract_thermistor_readings_rx_data_buffer()
                                          //keeping only the Hex format of thermistor readings
     }
 }
+*/
 
 #define REFERENCE_VOLTAGE 2.5
 
 void    print_thermistor_readings_voltage()
 {
     sciInit();
-    uint16_t value, voltage, numberOfChars, i=0;
+    uint16_t value,  numberOfChars, i=0;
+    float voltage;
     unsigned char command[8];
 
 
     for(;   i<12;   i++)
     {
         value   =   (uint16_t)rxData_Buffer[i];
-        voltage =   ((1.0*value)/4095)*REFERENCE_VOLTAGE;
+        voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
 
-        numberOfChars   =   ltoa(voltage,(char *)command);
-        sciSend(scilinREG,  10,  (unsigned char  *)"Channel : ");
+        numberOfChars   =   ltoa(value,(char *)command);
+        sciSend(scilinREG,  16,  (unsigned char  *)"Voltage_MUX_1 : ");
         sciSend(scilinREG,  numberOfChars,  command);
+        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     }
+    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
+    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
+    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
 }
+
+
 

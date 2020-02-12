@@ -17,6 +17,9 @@
 
 #include "sys_common.h"
 #include "mibspi.h"
+#include "sys_vim.h"
+#include "sys_core.h"
+#include "sci.h"
 
 
 /*TERMISTOR INTERFACE FUNCTIONS************************************************************************************************************************************/
@@ -54,7 +57,7 @@ uint16_t    send_fault_signal_thermistor();       //flags a fault occurrence to 
 uint16_t    send_fault_details_thermistor();      //sends fault details to the VCU and/or Dashboard or...... over SCI or something
 
 /*mibspi Interrupts*/
-void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group);
+//void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group);
 
 
 #endif /* THERMISTOR_H_ */
