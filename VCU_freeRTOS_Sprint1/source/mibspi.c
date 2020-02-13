@@ -93,7 +93,7 @@ uint32 i ;
                      | (uint32)((uint32)0U << 21U)  /* wait on enable */
                      | (uint32)((uint32)0U << 20U)  /* shift direction */
                      | (uint32)((uint32)0U << 17U)  /* clock polarity */
-                     | (uint32)((uint32)0U << 16U)  /* clock phase */
+                     | (uint32)((uint32)1U << 16U)  /* clock phase */
                      | (uint32)((uint32)255U << 8U)  /* baudrate prescale */
                      | (uint32)((uint32)16U << 0U); /* data word length */
 

@@ -51,7 +51,8 @@ bool MCP48FV_Write(uint32_t cmdString){
     uint16_t txbuffer[]={(uint8_t) (cmdString>>16),(uint8_t) (cmdString>>8),(uint8_t) (cmdString>>0)};
     mibspiSetData(mibspiREG1,0,txbuffer);
     mibspiTransfer(mibspiREG1,0);
-    while(!(mibspiIsTransferComplete(mibspiREG1,0)));
+    while(!(mibspiIsTransferComplete(mibspiREG1,0))); // need a timeout
+    // start a timer, don't use a while loop forever
 
     return true;
 

@@ -81,9 +81,9 @@
  *                          DEBUG PRINTING DEFINES
  *********************************************************************************/
 #define TASK_PRINT  0
-#define STATE_PRINT 1
-#define APPS_PRINT  0
-#define BSE_PRINT   0
+#define STATE_PRINT 0
+#define APPS_PRINT  1
+#define BSE_PRINT   1
 /*********************************************************************************
  *                          TASK HEADER DECLARATIONS
  *********************************************************************************/
@@ -331,7 +331,7 @@ static void vStateMachineTask(void *pvParameters){
 
         if (state == TRACTIVE_OFF)
         {
-            if (STATE_PRINT) {UARTSend(sciREG, "TRACTIVE_OFF");}
+            if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_OFF********");}
             if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1)
             {
                 // if BMS/IMD/BSPD = 1 then the shutdown circuit is closed
@@ -342,7 +342,7 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == TRACTIVE_ON)
         {
-            if (STATE_PRINT) {UARTSend(sciREG, "TRACTIVE_ON");}
+            if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_ON********");}
 
             if (RTDS == 1)
             {
@@ -352,7 +352,7 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == RUNNING)
         {
-            if (STATE_PRINT) {UARTSend(sciREG, "RUNNING");}
+            if (STATE_PRINT) {UARTSend(sciREG, "********RUNNING********");}
 
             if (RTDS == 0)
             {
@@ -368,7 +368,7 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == FAULT)
         {
-            if (STATE_PRINT) {UARTSend(sciREG, "FAULT");}
+            if (STATE_PRINT) {UARTSend(sciREG, "********FAULT********");}
             // uhhh turn on a fault LED here??
             // how will we reset out of this?
         }
@@ -411,11 +411,11 @@ static void vSensorReadTask(void *pvParameters){
         if ( gioGetBit(gioPORTA, 2) == 1)
         {
             RTDS = 0;
-            UARTSend(sciREG, "RTDS RAW IS READ AS 1, RESETTING RTDS SIGNAL\r\n");
+//            UARTSend(sciREG, "RTDS RAW IS READ AS 1, RESETTING RTDS SIGNAL\r\n");
         }
         else
         {
-            UARTSend(sciREG, "RTDS RAW IS READ AS 0, RESETTING RTDS SIGNAL\r\n");
+//            UARTSend(sciREG, "RTDS RAW IS READ AS 0, RESETTING RTDS SIGNAL\r\n");
         }
 
         if (TASK_PRINT) {UARTSend(sciREG, "SENSOR READING TASK\r\n");}
