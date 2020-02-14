@@ -136,27 +136,6 @@ currentIndex;
 int main(void){
 /* USER CODE BEGIN (3) */
 
-//        _enable_IRQ();  //Enables global interrupts
-//        mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
-        //uint16_t rxADCdata;
-        /*
-         * Configuring ADS7952.
-         */
-/*
-        mibspiSetData(mibspiREG3, TransferGroup0, adc_configuration);
-        mibspiEnableGroupNotification(mibspiREG3, TransferGroup0, 0);
-        mibspiTransfer(mibspiREG3, TransferGroup0);
-        adcConfigured = 0;
-        while(!adcConfigured){}
-
-        while(adcConfigured){
-               mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
-               mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
-               ReceivedData = 0;
-               mibspiTransfer(mibspiREG3, TransferGroup1);
-               while(!ReceivedData){}
-        }
-*/
 
 setup_mibspi_thermistor();
 
@@ -167,29 +146,6 @@ setup_mibspi_thermistor();
 
 
 /* USER CODE BEGIN (4) */
-/*
-void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
-{
-    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-    mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
-
-    if (mibspi == mibspiREG3 && group == TransferGroup0) {
-                mibspiGetData(mibspi, group, TG0_dummydata);
-                mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-                adcConfigured = 1;
-
-    }
-
-    if (mibspi == mibspiREG3 && group == TransferGroup1 && adcConfigured==1) {
-
-
-              mibspiGetData(mibspi, group, rxData_Buffer);
-              ReceivedData = 1;
-
-        }
-
-    }
-*/
 
 
 /* USER CODE END */

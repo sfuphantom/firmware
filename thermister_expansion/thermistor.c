@@ -107,6 +107,7 @@ currentIndex;
                ReceivedData = 0;
                mibspiTransfer(mibspiREG3, TransferGroup1);
                while(!ReceivedData){}
+               extract_thermistor_readings_rx_data_buffer();
                print_thermistor_readings_voltage();
         }
 }
@@ -171,7 +172,7 @@ uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     
 
 }
 */
-/*
+
 
 void    extract_thermistor_readings_rx_data_buffer()
 {
@@ -182,7 +183,7 @@ void    extract_thermistor_readings_rx_data_buffer()
                                          //keeping only the Hex format of thermistor readings
     }
 }
-*/
+
 
 #define REFERENCE_VOLTAGE 2.5
 
