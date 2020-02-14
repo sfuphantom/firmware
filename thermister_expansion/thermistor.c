@@ -198,7 +198,7 @@ void    print_thermistor_readings_voltage()
     for(;   i<12;   i++)
     {
         value   =   (uint16_t)rxData_Buffer[i];
-        voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
+        voltage =   ((value));
 
         numberOfChars   =   ltoa(value,(char *)command);
         sciSend(scilinREG,  16,  (unsigned char  *)"Voltage_MUX_1 : ");
