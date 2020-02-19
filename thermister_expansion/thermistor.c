@@ -6,7 +6,6 @@
  */
 
 #include "thermistor.h"
-#include "temperature_yash.h"
 
 
 
@@ -64,6 +63,8 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
             {
                 mux = 0;
             }
+            update_mux(mux);
+
                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
                mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
                ReceivedData = 0;
@@ -177,11 +178,125 @@ void update_thermistor_temperature_and_flag_structure(int mux)
         //logging Temperature
         thermistor_temperature_and_flag_struct[MUX].temperature = DoCalculation( (((float)rxData_Buffer[channel])/4095)*REFERENCE_VOLTAGE);
         //Updating Flag
-        (thermistor_temperature_and_flag_struct[MUX].temperature >= 60) ?
-         thermistor_temperature_and_flag_struct[MUX].temperature_flag = 1 : thermistor_temperature_and_flag_struct[MUX].temperature_flag = 0;
+        (thermistor_temperature_and_flag_struct[MUX].temperature >= 60) ?  (thermistor_temperature_and_flag_struct[MUX].temperature_flag = 1) : (thermistor_temperature_and_flag_struct[MUX].temperature_flag = 0);
     }
 }
 
+void update_mux(uint8 current_mux)
+{
+    if (current_mux == 0)
+    {
+        gioSetBit(gioPORTA, 2, 0);
+        gioSetBit(gioPORTA, 5, 0);
+        gioSetBit(gioPORTA, 6, 0);
+        gioSetBit(gioPORTA, 7, 0);
+    }
+    else if (current_mux == 1)
+    {
+        gioSetBit(gioPORTA, 2, 1);
+        gioSetBit(gioPORTA, 5, 0);
+        gioSetBit(gioPORTA, 6, 0);
+        gioSetBit(gioPORTA, 7, 0);
+    }
+    else if (current_mux == 2)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 3)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 4)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 5)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 6)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 7)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 0);
+        }
+    else if (current_mux == 8)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 9)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 10)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 11)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 0);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 12)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 13)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 0);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 14)
+        {
+            gioSetBit(gioPORTA, 2, 0);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+    else if (current_mux == 15)
+        {
+            gioSetBit(gioPORTA, 2, 1);
+            gioSetBit(gioPORTA, 5, 1);
+            gioSetBit(gioPORTA, 6, 1);
+            gioSetBit(gioPORTA, 7, 1);
+        }
+}
 
 
 

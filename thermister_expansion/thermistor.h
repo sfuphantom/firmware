@@ -20,7 +20,9 @@
 #include "sys_vim.h"
 #include "sys_core.h"
 #include "sci.h"
-
+#include "temperature_yash.h"
+#include "gio.h"
+#include "stdlib.h"
 
 /*TERMISTOR INTERFACE FUNCTIONS************************************************************************************************************************************/
 
@@ -58,6 +60,10 @@ struct thermistor_temperature_and_flag
 struct thermistor_temperature_and_flag thermistor_temperature_and_flag_struct[TOTAL_MUXES];     //can be a double pointer
 
 void update_thermistor_temperature_and_flag_structure(int mux);
+
+/*Update mux*/
+
+void update_mux(uint8 current_mux);
 
 /*Reading faults*/
 
