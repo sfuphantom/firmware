@@ -46,6 +46,19 @@ void        print_thermistor_readings_voltage();                   //prints usin
 /*Converting Thermistor readings*/
 void        convert_reading_thermistor ();        //converts thermistor reading into temperature
 
+/*Structure for storing temperature and resistance values from the thermistor*/
+struct thermistor_temperature_and_flag
+{
+    int temperature;
+    int temperature_flag;       // 0 or 1
+};
+
+#define TOTAL_MUXES 192
+
+struct thermistor_temperature_and_flag thermistor_temperature_and_flag_struct[TOTAL_MUXES];     //can be a double pointer
+
+void update_thermistor_temperature_and_flag_structure(int mux);
+
 /*Reading faults*/
 
 uint16_t    read_fault_thermistor();    //verifies if the operating temperatures are within acceptable limits

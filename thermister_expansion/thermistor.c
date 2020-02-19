@@ -6,7 +6,7 @@
  */
 
 #include "thermistor.h"
-
+#include "temperature_yash.h"
 
 /************************************************************************************************************************************************/
 //Setting up mibSPI communication with the ADC
@@ -102,6 +102,8 @@ currentIndex;
         while(!adcConfigured){}
 
         while(adcConfigured){
+
+
                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
                mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
                ReceivedData = 0;
@@ -142,7 +144,7 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
 /*Validating usage status */
 /************************************************************************************************************************************************/
 
-uint8  measuring_charge_thermistor =   0;
+uint8 measuring_charge_thermistor =   0;
 uint8 measuring_run_thermistor =   0;
 
 uint8_t validate_usage_status_thermistor(uint8_t status )      //Inquires whether the car is charging or running while the thermistor is measuring?
@@ -168,19 +170,26 @@ uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     
 
     //Printing the data received from the ADC
     extract_thermistor_readings_rx_data_buffer();
-
-
 }
 */
 
-
 void    extract_thermistor_readings_rx_data_buffer()
 {
-    uint8_t i=0;
-    for (;  i<12;   i++)
+    uint8_t channel=0;
+    for (;  channel<12;   channel++)
     {
-        rxData_Buffer[i]    &=  0x0FFF;  //Masking to remove channel address from the data received from the ADC and
+        rxData_Buffer[channel]    &=  0x0FFF;  //Masking to remove channel address from the data received from the ADC and
                                          //keeping only the Hex format of thermistor readings
+    }
+}
+
+void update_thermistor_temperature_and_flag_structure(int mux)
+{
+    int channel = 0, MUX = mux*12;
+    for (; channel < 12; channel++, MUX++)
+    {
+        thermistor_temperature_and_flag_struct[MUX].temperature = rxData_Buffer[channel];
+        //add a function to evaluate the temperature and set the flag
     }
 }
 
@@ -191,20 +200,30 @@ void    print_thermistor_readings_voltage()
 {
     sciInit();
     uint16_t value,  numberOfChars, i=0;
-    float voltage;
+    uint16_t voltage;
     unsigned char command[8];
 
 
     for(;   i<12;   i++)
     {
         value   =   (uint16_t)rxData_Buffer[i];
-        voltage =   ((value));
+//        voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
+        voltage =   2.3;
+
+
+//        printf("Channel : ");
+//        printf("%d", i);
+//        printf(" - ");
+//        printf("%d", voltage);
+//        printf("\n");
 
         numberOfChars   =   ltoa(value,(char *)command);
         sciSend(scilinREG,  16,  (unsigned char  *)"Voltage_MUX_1 : ");
         sciSend(scilinREG,  numberOfChars,  command);
         sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     }
+
+//    printf("\n");
     sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");

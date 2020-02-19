@@ -56,88 +56,12 @@
 #include "thermistor.h"
 /* USER CODE END */
 
-/** @fn void main(void)
-*   @brief Application main function
-*   @note This function is empty by default.
-*
-*   This function is called after startup.
-*   The user can use this function to implement the application.
-*/
-
-/* USER CODE BEGIN (2) */
-
-/*uint16_t adc_mode_register[12] ={0x2800,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000,0x2000};  ADC runnning in Auto-1 mode*/
-/*
-#define TransferGroup0           0x0
-#define TransferGroup1           0x1
-#define Channels                 12
-
-static volatile int
-isTxComplete;
-volatile int
-adcConfigured;
-static volatile int
-ReceivedData;
-
-static volatile int
-Processed;
-
-static uint16
-TG0_dummydata[11];
-
-static uint16
-rxData_Buffer[12];
-*/
-/*
- *  CS = 0
- *  Send = 0x3C40 - Request to enter Auto-2 Mode with Vref = 2* Vref as I/P range
- *  Receive = Invalid Data
- *  CS=1
- *
- *  CS=0
- *  Entered Auto-2 Mode
- *  Send = 0x92C0  - Program the Auto-2 Program Register; Selecting the last Channel to Scan starting at Ch0
- *  Receive = Invalid Data; But ADC acquires CH0 input in this frame, but samples in the next frame.
- *  CS=1
- */
-/*
-static uint16
-adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
-*/
-/*
- *   CS = 0
- *   Send = 0x3000 - Continue to operate in Auto-2 Mode
- *   Receive = Conversion Result of CH0, ADC acquires CH1 in this frame, but samples in the next frame
- *   CS = 1
- *
- *
- *   CS = 0
- *   Send = 0x3000 - Continue to operate in Auto-2 Mode
- *   Receive = Conversion Result of CH1, ADC acquires CH2 in this frame, but samples in the next frame
- *   CS = 1
- *
- *   Continue this till CH11 is sampled. At CH11 sampling, ADC selects CH0 and repeats the process.
- *
- */
-/*
-static uint16
-adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
-*/
-/*
- * static uint16
-adc_mode[12]={ 0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000 ,0x0000};
-*/
-/*
-static volatile int
-currentIndex;
-*/
-/* USER CODE END */
 
 int main(void){
 /* USER CODE BEGIN (3) */
 
-
 setup_mibspi_thermistor();
+
 
 /* USER CODE END */
 
