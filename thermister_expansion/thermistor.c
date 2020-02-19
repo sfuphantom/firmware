@@ -8,10 +8,11 @@
 #include "thermistor.h"
 #include "temperature_yash.h"
 
+
+
 /************************************************************************************************************************************************/
 //Setting up mibSPI communication with the ADC
 /************************************************************************************************************************************************/
-
 
 #define TransferGroup0           0x0
 #define TransferGroup1           0x1
@@ -43,51 +44,6 @@ currentIndex;
 
 void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 {
-/*
- *  CS = 0
- *  Send = 0x3C40 - Request to enter Auto-2 Mode with Vref = 2* Vref as I/P range
- *  Receive = Invalid Data
- *  CS=1
- *
- *  CS=0
- *  Entered Auto-2 Mode
- *  Send = 0x92C0  - Program the Auto-2 Program Register; Selecting the last Channel to Scan starting at Ch0
- *  Receive = Invalid Data; But ADC acquires CH0 input in this frame, but samples in the next frame.
- *  CS=1
- */
-
-    /*
-static uint16
-adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
-*
- *   CS = 0
- *   Send = 0x3000 - Continue to operate in Auto-2 Mode
- *   Receive = Conversion Result of CH0, ADC acquires CH1 in this frame, but samples in the next frame
- *   CS = 1
- *
- *
- *   CS = 0
- *   Send = 0x3000 - Continue to operate in Auto-2 Mode
- *   Receive = Conversion Result of CH1, ADC acquires CH2 in this frame, but samples in the next frame
- *   CS = 1
- *
- *   Continue this till CH11 is sampled. At CH11 sampling, ADC selects CH0 and repeats the process.
- *
- */
-
-/*
-static uint16
-adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
-
-static uint16
-adc_mode[12]={ 0x0000,0x0000, 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000 ,0x0000};
-*/
-
-/*
-static volatile int
-currentIndex;
-*/
-
         _enable_IRQ();  //Enables global interrupts
         mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
         //uint16_t rxADCdata;
@@ -103,14 +59,22 @@ currentIndex;
 
         while(adcConfigured){
 
-
+            uint8 mux = 0;
+            if (mux == 15)
+            {
+                mux = 0;
+            }
                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
                mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
                ReceivedData = 0;
                mibspiTransfer(mibspiREG3, TransferGroup1);
                while(!ReceivedData){}
+
                extract_thermistor_readings_rx_data_buffer();
+               update_thermistor_temperature_and_flag_structure(mux);
+               mux++;
                print_thermistor_readings_voltage();
+
         }
 }
 
@@ -138,8 +102,6 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
         }
     }
 
-
-
 /************************************************************************************************************************************************/
 /*Validating usage status */
 /************************************************************************************************************************************************/
@@ -157,45 +119,19 @@ uint8_t validate_usage_status_thermistor(uint8_t status )      //Inquires whethe
 /************************************************************************************************************************************************/
 /*Reading, Extracting and Printing Thermistor values*/
 /************************************************************************************************************************************************/
-/*
-uint16_t    read_specific_mux_all_channels_thermistor(uint8_t mux_identity)     //reads and returns the thermistor values from a specific mux on all the channels
-{
-    while(adcConfigured){
-                   mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
-                   mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
-                   ReceivedData = 0;
-                   mibspiTransfer(mibspiREG3, TransferGroup1);
-                   while(!ReceivedData){}
-            }
 
-    //Printing the data received from the ADC
-    extract_thermistor_readings_rx_data_buffer();
-}
-*/
 
 void    extract_thermistor_readings_rx_data_buffer()
 {
-    uint8_t channel=0;
+    uint8 channel=0;
     for (;  channel<12;   channel++)
     {
         rxData_Buffer[channel]    &=  0x0FFF;  //Masking to remove channel address from the data received from the ADC and
-                                         //keeping only the Hex format of thermistor readings
+                                               //keeping only the Hex format of thermistor readings
     }
 }
-
-void update_thermistor_temperature_and_flag_structure(int mux)
-{
-    int channel = 0, MUX = mux*12;
-    for (; channel < 12; channel++, MUX++)
-    {
-        thermistor_temperature_and_flag_struct[MUX].temperature = rxData_Buffer[channel];
-        //add a function to evaluate the temperature and set the flag
-    }
-}
-
 
 #define REFERENCE_VOLTAGE 2.5
-
 void    print_thermistor_readings_voltage()
 {
     sciInit();
@@ -207,7 +143,7 @@ void    print_thermistor_readings_voltage()
     for(;   i<12;   i++)
     {
         value   =   (uint16_t)rxData_Buffer[i];
-//        voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
+//      voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
         voltage =   2.3;
 
 
@@ -223,11 +159,31 @@ void    print_thermistor_readings_voltage()
         sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     }
 
-//    printf("\n");
-    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
-    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
-    sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
+//        printf("\n");
+        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
+        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
+        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
 }
+
+/************************************************************************************************************************************************/
+/*Updating the Temperature logging sructure*/
+/************************************************************************************************************************************************/
+
+void update_thermistor_temperature_and_flag_structure(int mux)
+{
+    uint8 channel = 0, MUX = mux*12;
+    for (; channel < 12; channel++, MUX++)
+    {
+        //logging Temperature
+        thermistor_temperature_and_flag_struct[MUX].temperature = DoCalculation( (((float)rxData_Buffer[channel])/4095)*REFERENCE_VOLTAGE);
+        //Updating Flag
+        (thermistor_temperature_and_flag_struct[MUX].temperature >= 60) ?
+         thermistor_temperature_and_flag_struct[MUX].temperature_flag = 1 : thermistor_temperature_and_flag_struct[MUX].temperature_flag = 0;
+    }
+}
+
+
+
 
 
 
