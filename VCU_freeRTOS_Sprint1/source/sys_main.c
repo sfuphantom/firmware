@@ -80,10 +80,10 @@
 /*********************************************************************************
  *                          DEBUG PRINTING DEFINES
  *********************************************************************************/
-#define TASK_PRINT  0
+#define TASK_PRINT  1
 #define STATE_PRINT 0
-#define APPS_PRINT  1
-#define BSE_PRINT   1
+#define APPS_PRINT  0
+#define BSE_PRINT   0
 /*********************************************************************************
  *                          TASK HEADER DECLARATIONS
  *********************************************************************************/
@@ -179,7 +179,7 @@ int main(void)
  *********************************************************************************/
     //using MCP48FV Library
     MCP48FV_Init();
-    MCP48FV_Set_Value(400);//500 =5.00V, 250= 2.5V
+//    MCP48FV_Set_Value(400);//500 =5.00V, 250= 2.5V
 /*********************************************************************************
  *                          freeRTOS SOFTWARE TIMER SETUP
  *********************************************************************************/
@@ -329,6 +329,7 @@ static void vStateMachineTask(void *pvParameters){
 
 /*********************** STATE MACHINE EVALUATION ***********************************/
 
+
         if (state == TRACTIVE_OFF)
         {
             if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_OFF********");}
@@ -403,6 +404,8 @@ static void vSensorReadTask(void *pvParameters){
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        MCP48FV_Set_Value(100);
 
         gioToggleBit(gioPORTA, 5);
 
@@ -551,7 +554,7 @@ static void vThrottleTask(void *pvParameters){
         if (state == RUNNING)
         {
             // send DAC to inverter
-//            MCP48FV_Set_Value(420);
+//            MCP48FV_Set_Value(300);
         }
         else
         {
@@ -586,6 +589,8 @@ static void vDataLoggingTask(void *pvParameters){
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        MCP48FV_Set_Value(300);
 
         gioToggleBit(gioPORTA, 7);
         if (TASK_PRINT) {UARTSend(sciREG, "------------->DATA LOGGING TO DASHBOARD\r\n");}
