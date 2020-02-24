@@ -25,7 +25,10 @@ bool MCP48FV_Init(){
 */
 bool MCP48FV_Set_Value(uint16_t targetVoltage){
 
-   if(targetVoltage>500)return false;
+   if(targetVoltage>496)
+   {
+       targetVoltage = 496;
+   }
     uint32_t enableBitPrecent= ((targetVoltage+5)*1000)/(DAC_HIGHEST_VOLTAGE*100);
     uint32_t dacRegister= (enableBitPrecent*0xFF)/1000;
 

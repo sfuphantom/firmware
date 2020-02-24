@@ -63,6 +63,7 @@
 #include <stdio.h>
 #include "adc.h"
 #include "gio.h"
+#include "het.h"
 
 #include "MCP48FV_DAC_SPI.h" // DAC library written by Ataur Rehman
 
@@ -80,10 +81,11 @@
 /*********************************************************************************
  *                          DEBUG PRINTING DEFINES
  *********************************************************************************/
-#define TASK_PRINT  1
+#define TASK_PRINT  0
 #define STATE_PRINT 0
-#define APPS_PRINT  0
-#define BSE_PRINT   0
+#define APPS_PRINT  0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
+#define BSE_PRINT   0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
+
 /*********************************************************************************
  *                          TASK HEADER DECLARATIONS
  *********************************************************************************/
@@ -111,15 +113,17 @@ static void vDataLoggingTask(void *);   // This task will send any important dat
 /*********************************************************************************
  *                          SOFTWARE TIMER INITIALIZATION
  *********************************************************************************/
-#define NUMBER_OF_TIMERS   1
+#define NUMBER_OF_TIMERS   2
 
 /* array to hold handles to the created timers*/
 TimerHandle_t xTimers[NUMBER_OF_TIMERS];
 
 /* This timer is used to debounce the interrupts for the RTDS and SDC signals */
 bool INTERRUPT_AVAILABLE = true;
+bool THROTTLE_AVAILABLE = false; // used to only enable throttle after the buzzer has gone for 2 seconds
 
 void Timer_300ms(TimerHandle_t xTimers);
+void Timer_2s(TimerHandle_t xTimers);
 /*********************************************************************************
  *                          STATE ENUMERATION
  *********************************************************************************/
@@ -174,6 +178,10 @@ int main(void)
     sciInit();
     gioInit();
     adcInit();
+    hetInit();
+    pwmStop(hetRAM1, pwm0); // stop the ready to drive buzzer PWM from starting automatically
+    // maybe this can be changed in halcogen?
+
 /*********************************************************************************
  *                          PHANTOM LIBRARY INITIALIZATION
  *********************************************************************************/
@@ -201,6 +209,27 @@ int main(void)
              Timer_300ms
            );
 
+    xTimers[1] = xTimerCreate
+            ( /* Just a text name, not used by the RTOS
+             kernel. */
+             "RTDS_Timer",
+             /* The timer period in ticks, must be
+             greater than 0. */
+             pdMS_TO_TICKS(2000),
+             /* The timers will auto-reload themselves
+             when they expire. */
+             pdFALSE,
+             /* The ID is used to store a count of the
+             number of times the timer has expired, which
+             is initialised to 0. */
+             ( void * ) 0,
+             /* Callback function for when the timer expires*/
+             Timer_2s
+           );
+
+
+    // with more timers being added it's more worth it to do a for loop for initializing each one here at the start
+
     if( xTimers[0] == NULL )
     {
          /* The timer was not created. */
@@ -212,6 +241,24 @@ int main(void)
          even if one was it would be ignored because the RTOS
          scheduler has not yet been started. */
          if( xTimerStart( xTimers[0], 0 ) != pdPASS )
+         {
+             /* The timer could not be set into the Active
+             state. */
+             UARTSend(sciREG, "The timer could not be set into the active state.\r\n");
+         }
+    }
+
+    if( xTimers[1] == NULL )
+    {
+         /* The timer was not created. */
+        UARTSend(sciREG, "The timer was not created.\r\n");
+    }
+    else
+    {
+         /* Start the timer.  No block time is specified, and
+         even if one was it would be ignored because the RTOS
+         scheduler has not yet been started. */
+         if( xTimerStart( xTimers[1], 0 ) != pdPASS )
          {
              /* The timer could not be set into the Active
              state. */
@@ -405,7 +452,7 @@ static void vSensorReadTask(void *pvParameters){
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-        MCP48FV_Set_Value(100);
+//        MCP48FV_Set_Value(100);
 
         gioToggleBit(gioPORTA, 5);
 
@@ -459,7 +506,7 @@ static void vSensorReadTask(void *pvParameters){
 static void vThrottleTask(void *pvParameters){
 
     TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
-    const TickType_t xFrequency = 250; // task frequency in ms
+    const TickType_t xFrequency = 10; // task frequency in ms
 
     // Initialize the xLastWakeTime variable with the current time;
     xLastWakeTime = xTaskGetTickCount();
@@ -524,6 +571,16 @@ static void vThrottleTask(void *pvParameters){
 //        if (APPS_PRINT) {UARTSend(scilinREG, command);}
 //        if (APPS_PRINT) {UARTSend(scilinREG, "\r\n");}
 
+        // brake light (flickers if pedal is around 2000 and is noisily jumping above and below!)
+        if (BSE_sensor_sum < 2000)
+        {
+            gioSetBit(gioPORTA, 6, 1);
+        }
+        else
+        {
+            gioSetBit(gioPORTA, 6, 0);
+        }
+
         NumberOfChars = ltoa(BSE_sensor_sum,(char *)command);
         if (BSE_PRINT) {UARTSend(sciREG, "*****BSE**** ");}
         if (BSE_PRINT) {sciSend(sciREG, NumberOfChars, command);}
@@ -551,15 +608,29 @@ static void vThrottleTask(void *pvParameters){
 
         // need to do APPS plausibility check with BSE
 
-        if (state == RUNNING)
+        if (state == RUNNING && THROTTLE_AVAILABLE)
         {
             // send DAC to inverter
-//            MCP48FV_Set_Value(300);
+            unsigned int apps_avg = 0.5*(FP_sensor_1_sum + FP_sensor_2_sum); // averaging the two foot pedal signals
+            unsigned int throttle = 0.23640662*apps_avg - 88.6524825; // equation mapping the averaged signals to 0->500 for the DAC driver
+            // ^ this equation may need to be modified for the curtis voltage lower limit and upper limit
+            // i.e. map from 0.6V (60) to 4.5V (450) or something like that, instead of 0->500 (0V -> 5V)
+
+
+            MCP48FV_Set_Value(throttle); // send throttle value to DAC driver
+
+            // Print out DAC output
+            NumberOfChars = ltoa(throttle,(char *)command);
+
+            // printing debug:
+//            sciSend(sciREG, NumberOfChars, command);
+//            UARTSend(sciREG, "\r\n");
         }
         else
         {
             // send 0 to DAC
-//            MCP48FV_Set_Value(0);
+            MCP48FV_Set_Value(0);
+            THROTTLE_AVAILABLE = false;
         }
 
     }
@@ -590,7 +661,7 @@ static void vDataLoggingTask(void *pvParameters){
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-        MCP48FV_Set_Value(300);
+//        MCP48FV_Set_Value(300);
 
         gioToggleBit(gioPORTA, 7);
         if (TASK_PRINT) {UARTSend(sciREG, "------------->DATA LOGGING TO DASHBOARD\r\n");}
@@ -619,8 +690,19 @@ void gioNotification(gioPORT_t *port, uint32 bit)
         {
             if (BSE_sensor_sum < 2000)
             {
+                gioSetBit(gioPORTA, 6, 1);
                 RTDS = 1; // CHANGE STATE TO RUNNING
                 UARTSend(sciREG, "---------RTDS set to 1 in interrupt\r\n");
+
+                // ready to drive buzzer, need to start a 2 second timer here
+                pwmStart(hetRAM1, pwm0);
+
+                // reset the 2 second timer to let the buzzer ring for 2 seconds
+                if (xTimerResetFromISR(xTimers[1], xHigherPriorityTaskWoken) != pdPASS)// after 2s the timer will allow the interrupt to toggle the signal again
+                {
+                    // timer reset failed
+                    UARTSend(sciREG, "---------Timer reset failed-------\r\n");
+                }
             }
         }
 //        else
@@ -642,6 +724,13 @@ void gioNotification(gioPORT_t *port, uint32 bit)
  void Timer_300ms(TimerHandle_t xTimers)
  {
      INTERRUPT_AVAILABLE = true;
+ }
+
+ /* Timer callback when it expires for the ready to drive sound */
+ void Timer_2s(TimerHandle_t xTimers)
+ {
+     pwmStop(hetRAM1, pwm0);
+     THROTTLE_AVAILABLE = true;
  }
 
 void vApplicationMallocFailedHook( void )

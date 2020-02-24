@@ -95,7 +95,7 @@ uint32 i ;
                      | (uint32)((uint32)0U << 17U)  /* clock polarity */
                      | (uint32)((uint32)1U << 16U)  /* clock phase */
                      | (uint32)((uint32)255U << 8U)  /* baudrate prescale */
-                     | (uint32)((uint32)16U << 0U); /* data word length */
+                     | (uint32)((uint32)8U << 0U); /* data word length */
 
     /** - Data Format 1 */
     mibspiREG1->FMT1 = (uint32)((uint32)0U << 24U)  /* wdelay */
