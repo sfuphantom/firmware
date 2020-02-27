@@ -1,5 +1,11 @@
 #include "LV_monitor.h"
 
+#include "sys_common.h"
+#include "i2c.h"
+#include "het.h"
+#include "gio.h"
+#include "stdlib.h"
+#include "sci.h"
 
 void lv_monitorInit(){
 
