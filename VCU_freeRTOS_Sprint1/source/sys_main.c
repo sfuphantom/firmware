@@ -180,6 +180,11 @@ int main(void)
     adcInit();
     hetInit();
     pwmStop(hetRAM1, pwm0); // stop the ready to drive buzzer PWM from starting automatically
+
+    // turn off RGB LEDs
+    pwmStart(hetRAM1, pwm1);
+    pwmStart(hetRAM1, pwm2);
+    pwmStart(hetRAM1, pwm3);
     // maybe this can be changed in halcogen?
 
 /*********************************************************************************
@@ -351,7 +356,7 @@ static void vStateMachineTask(void *pvParameters){
     int nchars;
 
     TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
-    const TickType_t xFrequency = 500; // task frequency in ms
+    const TickType_t xFrequency = 100; // task frequency in ms
 
     // Initialize the xLastWakeTime variable with the current time;
     xLastWakeTime = xTaskGetTickCount();
@@ -390,6 +395,11 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == TRACTIVE_ON)
         {
+            pwmSetDuty(hetRAM1, pwm2, 100U);
+            pwmSetDuty(hetRAM1, pwm3, 100U);
+            pwmSetDuty(hetRAM1, pwm1, 50U);
+
+
             if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_ON********");}
 
             if (RTDS == 1)
@@ -400,6 +410,10 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == RUNNING)
         {
+            pwmSetDuty(hetRAM1, pwm1, 100U);
+            pwmSetDuty(hetRAM1, pwm3, 100U);
+            pwmSetDuty(hetRAM1, pwm2, 50U);
+
             if (STATE_PRINT) {UARTSend(sciREG, "********RUNNING********");}
 
             if (RTDS == 0)
@@ -439,7 +453,7 @@ static void vSensorReadTask(void *pvParameters){
 
     // any initialization
     TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
-    const TickType_t xFrequency = 500; // task frequency in ms
+    const TickType_t xFrequency = 100; // task frequency in ms
 
     // Initialize the xLastWakeTime variable with the current time;
     xLastWakeTime = xTaskGetTickCount();
@@ -454,7 +468,7 @@ static void vSensorReadTask(void *pvParameters){
 
 //        MCP48FV_Set_Value(100);
 
-        gioToggleBit(gioPORTA, 5);
+//        gioToggleBit(gioPORTA, 5);
 
         RTDS_RAW = gioGetBit(gioPORTA, 2);
 
@@ -651,7 +665,7 @@ static void vDataLoggingTask(void *pvParameters){
 
     // any initialization
     TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
-    const TickType_t xFrequency = 2000; // task frequency in ms
+    const TickType_t xFrequency = 500; // task frequency in ms
 
     // Initialize the xLastWakeTime variable with the current time;
     xLastWakeTime = xTaskGetTickCount();
@@ -663,7 +677,7 @@ static void vDataLoggingTask(void *pvParameters){
 
 //        MCP48FV_Set_Value(300);
 
-        gioToggleBit(gioPORTA, 7);
+//        gioToggleBit(gioPORTA, 7);
         if (TASK_PRINT) {UARTSend(sciREG, "------------->DATA LOGGING TO DASHBOARD\r\n");}
 //            UARTSend(scilinREG, xTaskGetTickCount());
             //----> do we need to send battery voltage to dashboard?
