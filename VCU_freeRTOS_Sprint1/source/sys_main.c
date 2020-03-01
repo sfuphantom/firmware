@@ -1,14 +1,14 @@
 /** @file sys_main.c 
 *   @brief Application main file
-*   @date 07-July-2017
-*   @version 04.07.00
+*   @date 11-Dec-2018
+*   @version 04.07.01
 *
 *   This file contains an empty main function,
 *   which can be used for the application.
 */
 
 /* 
-* Copyright (C) 2009-2016 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -59,11 +59,15 @@
 #include "os_semphr.h"
 #include "os_timer.h"
 #include "Phantom_sci.h"
+#include "phantom_can.h"
 #include "stdlib.h" // stdlib.h has ltoa() which we use for our simple SCI printing routine.
 #include <stdio.h>
 #include "adc.h"
 #include "gio.h"
 #include "het.h"
+#include "can.h"
+#include "esm.h"
+#include "sys_core.h"
 
 #include "MCP48FV_DAC_SPI.h" // DAC library written by Ataur Rehman
 
@@ -82,7 +86,7 @@
  *                          DEBUG PRINTING DEFINES
  *********************************************************************************/
 #define TASK_PRINT  0
-#define STATE_PRINT 0
+#define STATE_PRINT 1
 #define APPS_PRINT  0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
 #define BSE_PRINT   0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
 
@@ -153,10 +157,12 @@ uint16 FP_sensor_2_max = 4095; // 12-bit ADC
 uint16 FP_sensor_1_percentage;
 uint16 FP_sensor_2_percentage;
 uint16 FP_sensor_diff;
+uint8 VCU_CAN_MSG[8] = {0};
 
 uint8 i;
 char command[8]; // used for ADC printing.. this is an array of 8 chars, each char is 8 bits
 long xStatus;
+
 
 /*********************************************************************************
  *                               SYSTEM STATE FLAGS
@@ -186,6 +192,9 @@ int main(void)
     pwmStart(hetRAM1, pwm2);
     pwmStart(hetRAM1, pwm3);
     // maybe this can be changed in halcogen?
+    _enable_interrupt_();
+    canInit();
+    canEnableErrorNotification(canREG1);
 
 /*********************************************************************************
  *                          PHANTOM LIBRARY INITIALIZATION
@@ -329,8 +338,6 @@ int main(void)
     // infinite loop to prevent code from ending. The scheduler will now pre-emptively switch between tasks.
     while(1);
 /* USER CODE END */
-
-    return 0;
 }
 
 
@@ -495,6 +502,13 @@ static void vSensorReadTask(void *pvParameters){
         // TSAL state
 
         // CAN status from BMS (this may need an interrupt for when data arrives, and maybe stored in a buffer? maybe not.. we should try both)
+
+        VCU_CAN_MSG[0] = 'I';
+        VCU_CAN_MSG[1] = 'm';
+        VCU_CAN_MSG[2] = 'O';
+        VCU_CAN_MSG[3] = 'K';
+
+        CANSend(VCU_CAN_MSG);
 
         // read LV voltage, current
 

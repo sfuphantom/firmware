@@ -5,7 +5,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="${build_artifact:VCU_freeRTOS_Sprint1}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="VCU_freeRTOS_Sprint1"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:VCU_freeRTOS_Sprint1}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="C:/Users\gabriel\Documents\Phantom\firmware\VCU_freeRTOS_Sprint1\Debug\VCU_freeRTOS_Sprint1.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1227.ccxml.SEGGER J-Link Emulator/CortexR4" value="C:/Users\Mahmoud Ahmed\firmware\VCU_freeRTOS_Sprint1\Debug\VCU_freeRTOS_Sprint1.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/VCU_freeRTOS_Sprint1"/>
 </listAttribute>

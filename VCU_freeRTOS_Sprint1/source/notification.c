@@ -1,7 +1,7 @@
 /** @file notification.c 
 *   @brief User Notification Definition File
-*   @date 07-July-2017
-*   @version 04.07.00
+*   @date 11-Dec-2018
+*   @version 04.07.01
 *
 *   This file  defines  empty  notification  routines to avoid
 *   linker errors, Driver expects user to define the notification. 
@@ -12,7 +12,7 @@
 */
 
 /* 
-* Copyright (C) 2009-2016 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -51,6 +51,7 @@
 #include "esm.h"
 #include "sys_selftest.h"
 #include "adc.h"
+#include "can.h"
 #include "gio.h"
 #include "mibspi.h"
 #include "sci.h"
@@ -108,6 +109,32 @@ void adcNotification(adcBASE_t *adc, uint32 group)
 }
 
 /* USER CODE BEGIN (12) */
+/* USER CODE END */
+#pragma WEAK(canErrorNotification)
+void canErrorNotification(canBASE_t *node, uint32 notification)
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (13) */
+/* USER CODE END */
+}
+
+#pragma WEAK(canStatusChangeNotification)
+void canStatusChangeNotification(canBASE_t *node, uint32 notification)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (14) */
+/* USER CODE END */
+}
+
+#pragma WEAK(canMessageNotification)
+void canMessageNotification(canBASE_t *node, uint32 messageBox)  
+{
+/*  enter user code between the USER CODE BEGIN and USER CODE END. */
+/* USER CODE BEGIN (15) */
+/* USER CODE END */
+}
+
+/* USER CODE BEGIN (16) */
 /* USER CODE END */
 #pragma WEAK(gioNotification)
 void gioNotification(gioPORT_t *port, uint32 bit)
