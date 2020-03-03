@@ -65,6 +65,8 @@
 #include "gio.h"
 #include "het.h"
 
+#include "reg_het.h"
+
 #include "MCP48FV_DAC_SPI.h" // DAC library written by Ataur Rehman
 
 /* USER CODE END */
@@ -93,6 +95,8 @@ static void vStateMachineTask(void *);  // This task will evaluate the state mac
 static void vSensorReadTask(void *);    // This task will read all the sensors in the vehicle (except for the APPS which requires more critical response)
 static void vThrottleTask(void *);      // This task reads the APPS, performs signal plausibility, and controls the inverter through a DAC
 static void vDataLoggingTask(void *);   // This task will send any important data over CAN to the dashboard for logging onto the SD card
+static void vWatchdogTask(void *);      // This task will monitor all the threads and make sure they are all running, if not (code hangs/freezes or task doesn't get run)
+                                        // it will fail to pet the watchdog and the watchdog timer will reset the MCU
 
 // task handle creation??? shouldn't they need to be passed into the xTaskCreate function?
 
@@ -103,6 +107,7 @@ static void vDataLoggingTask(void *);   // This task will send any important dat
 #define SENSOR_READ_TASK_PRIORITY      2
 #define STATE_MACHINE_TASK_PRIORITY    1
 #define DATA_LOGGING_TASK_PRIORITY     0 // same as idle task
+#define WATCHDOG_TASK_PRIORITY         0 // same as idle task
 
 // there may also be interrupt/ISR priorities for:
 // CAN messages
@@ -186,6 +191,9 @@ int main(void)
     pwmStart(hetRAM1, pwm2);
     pwmStart(hetRAM1, pwm3);
     // maybe this can be changed in halcogen?
+
+    // initialize HET pins ALL to output.. may need to change this later
+    gioSetDirection(hetPORT1, 0xFFFFFFFF);
 
 /*********************************************************************************
  *                          PHANTOM LIBRARY INITIALIZATION
@@ -317,6 +325,14 @@ int main(void)
         while(1);
     }
 
+    if (xTaskCreate(vWatchdogTask, (const char*)"WatchdogTask",  240, NULL,  WATCHDOG_TASK_PRIORITY, NULL) != pdTRUE)
+    {
+        // if xTaskCreate returns something != pdTRUE, then the task failed, wait in this infinite loop..
+        // probably need a better error handler
+        sciSend(sciREG,23,(unsigned char*)"WatchdogTask Creation Failed.\r\n");
+        while(1);
+    }
+
     // all tasks have been created successfully
     UARTSend(sciREG, "Tasks created\r\n"); // We want to replace scilinREG with something like "PC_UART". and the BMS one to be "BMS_UART"
     // will need our own hardware defines file to do this for all the ports and pins we use..
@@ -365,6 +381,9 @@ static void vStateMachineTask(void *pvParameters){
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        // for timing:
+        gioSetBit(hetPORT1, 9, 1);
 
         if (TASK_PRINT) {UARTSend(sciREG, "STATE MACHINE UPDATE TASK\r\n");}
 
@@ -436,6 +455,9 @@ static void vStateMachineTask(void *pvParameters){
         }
 
         if (STATE_PRINT) {UARTSend(sciREG, "\r\n");}
+
+        // for timing:
+        gioSetBit(hetPORT1, 9, 0);
     }
 }
 
@@ -465,6 +487,9 @@ static void vSensorReadTask(void *pvParameters){
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        // for timing:
+        gioSetBit(hetPORT1, 25, 1);
 
 //        MCP48FV_Set_Value(100);
 
@@ -503,6 +528,9 @@ static void vSensorReadTask(void *pvParameters){
         // check for all errors here and update VCU data structure or state machine flags accordingly
 
         // will also need a lookup table or data structure that has error messages and LED codes for whatever fault flags are on
+
+        // for timing:
+        gioSetBit(hetPORT1, 25, 0);
     }
 }
 
@@ -530,6 +558,9 @@ static void vThrottleTask(void *pvParameters){
     {
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+        // for timing:
+        gioSetBit(hetPORT1, 5, 1);
 
         // read APPS signals
         if (TASK_PRINT) {UARTSend(sciREG, "THROTTLE CONTROL\r\n");}
@@ -647,6 +678,9 @@ static void vThrottleTask(void *pvParameters){
             THROTTLE_AVAILABLE = false;
         }
 
+        // for timing:
+        gioSetBit(hetPORT1, 5, 0);
+
     }
 }
 
@@ -675,6 +709,9 @@ static void vDataLoggingTask(void *pvParameters){
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
+        // for timing:
+        gioSetBit(hetPORT1, 4, 1);
+
 //        MCP48FV_Set_Value(300);
 
 //        gioToggleBit(gioPORTA, 7);
@@ -686,10 +723,47 @@ static void vDataLoggingTask(void *pvParameters){
             // log HV voltage, current TSAL state, shutdown circuit states to CAN
             // send to dashboard
             // this may or may not depend on state
+
+        // for timing:
+        gioSetBit(hetPORT1, 4, 0);
     }
 
 }
 
+/***********************************************************
+ * @function                - vWatchdogTask
+ *
+ * @brief                   - This task will monitor all threads and pet the watchdog if everything is fine. Else it will let the watchdog reset the MCU
+ *
+ * @param[in]               - pvParameters
+ *
+ * @return                  - None
+ * @Note                    - None
+ ***********************************************************/
+
+static void vWatchdogTask(void *pvParameters){
+
+    // any initialization
+    TickType_t xLastWakeTime;          // will hold the timestamp at which the task was last unblocked
+    const TickType_t xFrequency = 300; // task frequency in ms
+    // watchdog timeout is 1.6 seconds
+
+    // Initialize the xLastWakeTime variable with the current time;
+    xLastWakeTime = xTaskGetTickCount();
+
+    while(true)
+    {
+        // Wait for the next cycle
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+//        MCP48FV_Set_Value(300);
+
+//        gioToggleBit(gioPORTA, 7);
+        if (TASK_PRINT) {UARTSend(sciREG, "------------->WATCHDOG TASK\r\n");}
+//            UARTSend(scilinREG, xTaskGetTickCount());
+    }
+
+}
 void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
