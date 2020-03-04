@@ -92,10 +92,6 @@ void main(void)
     sciReceive(scilinREG, 5, (unsigned char*)&command);
 
 
-
-
-
-
 //
 
     /* infinite loop */

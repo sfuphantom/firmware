@@ -1,16 +1,12 @@
 #include <temperature.h>
 
-/*int getTemperature(struct temperatureConverter aTempConvertertest);
-int getResistance(struct temperatureConverter aTempConvertertest);
-float getResistanceFromVoltage(float voltage);
-*/
 
-int getTemperature(struct temperatureConverter aTempConvertertest)
+int getTemperature(struct TemperatureConverter aTempConvertertest)
 {
     return aTempConvertertest.temperature;
 }
 
-int getResistance(struct temperatureConverter aTempConvertertest)
+int getResistance(struct TemperatureConverter aTempConvertertest)
 {
     return aTempConvertertest.resistance;
 }
@@ -21,16 +17,22 @@ float getResistanceFromVoltage(float voltage)
     return resistance;
 }
 
+void initializeFaultCheck()
+{
+    struct FaultCheck FaultCheckStruct;
+    FaultCheckStruct.overtemp = false;
+    FaultCheckStruct.undertemp = false;
+}
 void InitializeTemperature()
 {
     int i = 0;
-    //struct temperatureConverter test[MAX_ELEMENTS];
-      int temperature[MAX_ELEMENTS] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
+
+    int temperature[MAX_ELEMENTS] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
                                         22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
                                         41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,
                                         60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80};
 
-        float resistance[] = {29490, 28160, 26890,25690, 24540, 23460, 22430, 21440,
+    float resistance[] = {29490, 28160, 26890,25690, 24540, 23460, 22430, 21440,
                                         20510, 19620, 18780, 17980, 17210, 16480, 15790, 15130,
                                         14500, 13900, 13330, 12780, 12260, 11770, 11290, 10840,
                                         10410, 10000, 9602, 9226, 8866, 8522, 8194, 7879, 7579,
@@ -41,45 +43,32 @@ void InitializeTemperature()
                                         2055, 1990, 1928, 1868, 1810, 1754, 1700, 1648, 1598,
                                         1550, 1503, 1458};
 
-        for(i = 0; i < MAX_ELEMENTS; i++)
-        {
-                test[i].temperature = temperature[i];
-                test[i].resistance  = resistance[i];
-        }
-
+    for(i = 0; i < MAX_ELEMENTS; i++)
+    {
+        test[i].temperature = temperature[i];
+        test[i].resistance  = resistance[i];
+    }
 }
+
 int DoCalculation(float inputVoltage){
     int i = 0;
     float inputResistance = 0.0;
-
-
-//    for(i = 0; i < MAX_ELEMENTS; i++)
-//    {
-//         printf("%d",test[i].temperature);
-//         printf(":");
-//         printf("%f",test[i].resistance);
-//         printf("\n");
-//    }
 
     // Find the temperature
     while(inputVoltage != - 1 )
     {
         bool loop = false;
-        // printf("\nEnter resistance:\t");
-        // scanf("%d", &inputResistance);
-
-//        printf("\nEnter voltage:\t");
-//        scanf("%f", &inputVoltage);
-
         inputResistance = getResistanceFromVoltage(inputVoltage);
-//        printf("resistance: ");
-//        printf("%f\n", inputResistance);
 
-        if(inputResistance > test[0].resistance)            // temperature is below zero degrees
-           return -1;
+        if(inputResistance > test[0].resistance) {           // temperature is below zero degrees
+            FaultCheckStruct.undertemp = true;
+            return -1;
+        }
 
-        else if(inputResistance < test[MAX_ELEMENTS-1].resistance) // temperature is above 81 degrees
+        else if(inputResistance < test[MAX_ELEMENTS-1].resistance){  // temperature is above 81 degrees
+            FaultCheckStruct.overtemp = true;
             return 82;
+        }
 
         else{
             for(i = 0; i < MAX_ELEMENTS; i++)
@@ -101,10 +90,9 @@ int DoCalculation(float inputVoltage){
 
                             }
                         }
-                }
-            }
+                    }
+            } // end for loop
         }
     }
-
-}
+}// end DoCalculation
 

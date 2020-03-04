@@ -2,7 +2,8 @@
  * temperature.h
  *
  *  Created on: Feb 6, 2020
- *      Author: yashv
+ *  Updated on: Mar 3, 2020
+ *      Author: YashBhavnani
  */
 
 #ifndef _TEMPERATURE_H_
@@ -12,14 +13,21 @@
 #include<stdbool.h>
 #define MAX_ELEMENTS 81
 
-struct temperatureConverter
+struct TemperatureConverter
 {
     int temperature;
     float resistance;
 };
-struct temperatureConverter test[MAX_ELEMENTS];
-int getTemperature(struct temperatureConverter aTempConvertertest);
-int getResistance(struct temperatureConverter aTempConvertertest);
+
+struct FaultCheck
+{
+    bool overtemp;
+    bool undertemp;
+};
+
+struct TemperatureConverter test[MAX_ELEMENTS];
+int getTemperature(struct TemperatureConverter aTempConvertertest);
+int getResistance(struct TemperatureConverter aTempConvertertest);
 float getResistanceFromVoltage(float voltage);
 int DoCalculation(float inputVoltage);
 void InitializeTemperature();
