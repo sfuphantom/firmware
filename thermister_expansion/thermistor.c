@@ -77,7 +77,7 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 
                extract_thermistor_readings_rx_data_buffer();
                update_thermistor_temperature_and_flag_structure(input);
-               print_thermistor_readings_voltage();
+               print_thermistor_readings_voltage(input);
 
                gioSetBit(gioPORTB, 2, 0);
             }
@@ -154,43 +154,29 @@ void    extract_thermistor_readings_rx_data_buffer()
     }
 }
 
-#define REFERENCE_VOLTAGE 2.5
-void    print_thermistor_readings_voltage()
+#define REFERENCE_VOLTAGE 3.0
+void    print_thermistor_readings_voltage(uint8 input)
 {
     sciInit();
-    uint16_t value,  numberOfChars, i=0;
-    uint16_t voltage;
-    unsigned char command[8];
 
+    uint16 value, location = input*12, channel = 0;
+    float voltage;
 
-    for(;   i<12;   i++)
+    for(;   channel<12;   channel++, location++)
     {
-        value   =   (uint16_t)rxData_Buffer[i];
-//      voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
-        voltage =   2.3;
+        value   =   (uint16)rxData_Buffer[channel];
+        voltage =   (((float)value)/4095)*REFERENCE_VOLTAGE;
 
+        char* buff[90];
 
-//        printf("Channel : ");
-//        printf("%d", i);
-//        printf(" - ");
-//        printf("%d", voltage);
-//        printf("\n");
+        snprintf(buff, 90, "INPUT : CHANNEL : VOLTAGE : TEMP\t||\t%d : %d\t: %f : %d\n\r", input, channel+1, (float)voltage, thermistor_temperature_and_flag_struct[location].temperature);
+        sciSend(scilinREG, 90,(uint8 *)buff );
 
-//        char buff[50];
-//        snprintf();
-
-
-
-        numberOfChars   =   ltoa(value,(char *)command);
-        sciSend(scilinREG,  16,  (unsigned char  *)"Voltage_MUX_1 : ");
-        sciSend(scilinREG,  numberOfChars,  command);
-        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
     }
+    char* buff[25];
+    snprintf(buff, 25, "\n\r");
+    sciSend(scilinREG, 25,(uint8 *)buff );
 
-//        printf("\n");
-        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
-        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
-        sciSend(scilinREG,  2,  (unsigned char  *)"\r\n");
 }
 
 /************************************************************************************************************************************************/
