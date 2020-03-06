@@ -6,7 +6,7 @@
 #include "stdlib.h"
 #include "sci.h"
 
-
+static unsigned char command; //used for sci
 
 #define LV_DATA_COUNT  2
 
@@ -26,7 +26,7 @@ void lv_monitorInit();
 //need to initalize i2c before using
 
 
-int LV_reading(uint16_t mode);
+uint16_t LV_reading(uint16_t mode);
 /*
 list of input for mode to get reading.
 1. LV_Shunt_register
@@ -43,3 +43,5 @@ LV_reading(LV_current_register);
 
 
 */
+
+

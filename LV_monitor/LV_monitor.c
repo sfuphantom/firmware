@@ -1,5 +1,4 @@
 #include "LV_monitor.h"
-
 #include "sys_common.h"
 #include "i2c.h"
 #include "het.h"
@@ -9,7 +8,7 @@
 
 void lv_monitorInit(){
 
-    const uint8_t LV_Calibration[4] = {0x14,0x00}; //this is a calculated value 5120->0x1400
+   uint8 LV_Calibration[2] = {0x14,0x00}; //this is a calculated value 5120->0x1400
 
 /* USER CODE BEGIN (3) */
 
@@ -77,7 +76,7 @@ void lv_monitorInit(){
     //while(i2cIsMasterReady(i2cREG1) != true);
 }
 
-int LV_reading(uint16_t mode){
+uint16_t LV_reading(uint16_t mode){
 
     while(i2cIsMasterReady(i2cREG1) != true);
 
@@ -169,6 +168,10 @@ int LV_reading(uint16_t mode){
     }
     else if(mode == LV_current_register){
         MSBnLSB_data *= 1;
+        if(MSBnLSB_data > 65000){ //if bus voltage is off, the output is around 65520, so setting to 0
+            MSBnLSB_data = 0;
+        }
+
     }
     else if(mode == LV_Shunt_register){
          MSBnLSB_data *= 2.5;
