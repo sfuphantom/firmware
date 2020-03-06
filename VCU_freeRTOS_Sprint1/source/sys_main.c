@@ -159,6 +159,10 @@ uint16 FP_sensor_1_percentage;
 uint16 FP_sensor_2_percentage;
 uint16 FP_sensor_diff;
 
+#define BLUE_LED  pwm1
+#define GREEN_LED pwm2
+#define RED_LED   pwm3
+
 uint8 i;
 char command[8]; // used for ADC printing.. this is an array of 8 chars, each char is 8 bits
 long xStatus;
@@ -171,7 +175,10 @@ uint8_t RTDS = 0;
 long RTDS_RAW = 0;
 uint8_t BMS  = 1;
 uint8_t IMD  = 1;
-uint8_t BSPD = 1;
+uint8_t BSPD = 0;
+
+uint32_t blue_duty = 100;
+uint32_t blue_flag = 0;
 /* USER CODE END */
 
 int main(void)
@@ -187,9 +194,9 @@ int main(void)
     pwmStop(hetRAM1, pwm0); // stop the ready to drive buzzer PWM from starting automatically
 
     // turn off RGB LEDs
-    pwmStart(hetRAM1, pwm1);
-    pwmStart(hetRAM1, pwm2);
-    pwmStart(hetRAM1, pwm3);
+    pwmStart(hetRAM1, BLUE_LED); // blue
+    pwmStart(hetRAM1, GREEN_LED); // green
+    pwmStart(hetRAM1, RED_LED); // red
     // maybe this can be changed in halcogen?
 
     // initialize HET pins ALL to output.. may need to change this later
@@ -403,6 +410,36 @@ static void vStateMachineTask(void *pvParameters){
 
         if (state == TRACTIVE_OFF)
         {
+//            pwmSetDuty(hetRAM1, BLUE_LED, 50U); // blue LED
+            pwmSetDuty(hetRAM1, GREEN_LED, 100U); // green LED
+            pwmSetDuty(hetRAM1, RED_LED, 100U); // red LED
+
+            hetSIGNAL_t dutycycle_and_period;
+            dutycycle_and_period.duty = blue_duty;
+            dutycycle_and_period.period = 1000;
+//            = {(unsigned int)1, (double)100}; // duty cycle in %, period in us
+
+            pwmSetSignal(hetRAM1, BLUE_LED, dutycycle_and_period);
+
+            if (blue_duty <= 0)
+            {
+                blue_flag = 1; // 1 means rising
+            }
+            else if (blue_duty >= 100)
+            {
+                blue_flag = 0; // 0 means falling
+            }
+
+            if (blue_flag == 1)
+            {
+                blue_duty+= 5;
+            }
+            else
+            {
+                blue_duty-= 5;
+            }
+
+
             if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_OFF********");}
             if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1)
             {
@@ -414,9 +451,9 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == TRACTIVE_ON)
         {
-            pwmSetDuty(hetRAM1, pwm2, 100U);
-            pwmSetDuty(hetRAM1, pwm3, 100U);
-            pwmSetDuty(hetRAM1, pwm1, 50U);
+            pwmSetDuty(hetRAM1, GREEN_LED, 100U);
+            pwmSetDuty(hetRAM1, RED_LED, 100U);
+            pwmSetDuty(hetRAM1, BLUE_LED, 50U); // blue
 
 
             if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_ON********");}
@@ -429,9 +466,9 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == RUNNING)
         {
-            pwmSetDuty(hetRAM1, pwm1, 100U);
-            pwmSetDuty(hetRAM1, pwm3, 100U);
-            pwmSetDuty(hetRAM1, pwm2, 50U);
+            pwmSetDuty(hetRAM1, BLUE_LED, 100U); // blue LED
+            pwmSetDuty(hetRAM1, RED_LED, 100U); // red LED
+            pwmSetDuty(hetRAM1, GREEN_LED, 50U); // green LED
 
             if (STATE_PRINT) {UARTSend(sciREG, "********RUNNING********");}
 
@@ -756,11 +793,10 @@ static void vWatchdogTask(void *pvParameters){
         // Wait for the next cycle
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
-//        MCP48FV_Set_Value(300);
-
-//        gioToggleBit(gioPORTA, 7);
         if (TASK_PRINT) {UARTSend(sciREG, "------------->WATCHDOG TASK\r\n");}
 //            UARTSend(scilinREG, xTaskGetTickCount());
+
+        gioToggleBit(hetPORT1, 2);
     }
 
 }
