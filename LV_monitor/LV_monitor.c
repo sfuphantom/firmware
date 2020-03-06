@@ -28,7 +28,7 @@ void lv_monitorInit(){
 
     /* I2C Init as per GUI
      *  Mode = Master - Transmitter
-     *  baud rate = 100KHz
+     *  baud rate = 400KHz
      *  Count = 10
      *  Bit Count = 8bit
      */
