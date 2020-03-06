@@ -56,8 +56,19 @@
 #include "thermistor.h"
 /* USER CODE END */
 
+/** @fn void main(void)
+*   @brief Application main function
+*   @note This function is empty by default.
+*
+*   This function is called after startup.
+*   The user can use this function to implement the application.
+*/
 
-int main(void){
+/* USER CODE BEGIN (2) */
+/* USER CODE END */
+
+int main(void)
+{
 /* USER CODE BEGIN (3) */
 
 setup_mibspi_thermistor();

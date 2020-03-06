@@ -38,6 +38,9 @@ adc_configuration[11] = {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 static uint16
 adc_mode[12]={0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000};
 
+//static uint16
+//adc_mode[12]={0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800,0x3800};
+
 static volatile int
 currentIndex;
 
@@ -45,6 +48,7 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 {
         _enable_IRQ();  //Enables global interrupts
         mibspiInit();   //Initialize the mibspi3 module; mibspi3 = mibspiREG3
+        gioInit();      //Initialize the GIO module;
         //uint16_t rxADCdata;
         /*
          * Configuring ADS7952.
@@ -58,12 +62,12 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
 
         while(adcConfigured){
 
-            uint8 mux = 0;
-            if (mux == 15)
+            uint8 input = 0;
+            for(; input < 8; input++)
             {
-                mux = 0;
-            }
-            update_mux(mux);
+//               update_input(input);
+               update_input(4);
+
 
                mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
                mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
@@ -72,11 +76,29 @@ void setup_mibspi_thermistor()        //prepare the thermistor to start reading
                while(!ReceivedData){}
 
                extract_thermistor_readings_rx_data_buffer();
-               update_thermistor_temperature_and_flag_structure(mux);
-               mux++;
+               update_thermistor_temperature_and_flag_structure(input);
                print_thermistor_readings_voltage();
 
+               gioSetBit(gioPORTB, 2, 0);
+            }
         }
+
+//            while(adcConfigured){
+//
+//                uint8 mux = 0;
+//                update_mux(mux);
+//
+//                           mibspiSetData(mibspiREG3, TransferGroup1, adc_mode);
+//                           mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+//                           ReceivedData = 0;
+//                           mibspiTransfer(mibspiREG3, TransferGroup1);
+//                           while(!ReceivedData){}
+//
+//                           extract_thermistor_readings_rx_data_buffer();
+////                           update_thermistor_temperature_and_flag_structure(mux);
+//                           print_thermistor_readings_voltage();
+//
+//        }
 }
 
 void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
@@ -154,6 +176,11 @@ void    print_thermistor_readings_voltage()
 //        printf("%d", voltage);
 //        printf("\n");
 
+//        char buff[50];
+//        snprintf();
+
+
+
         numberOfChars   =   ltoa(value,(char *)command);
         sciSend(scilinREG,  16,  (unsigned char  *)"Voltage_MUX_1 : ");
         sciSend(scilinREG,  numberOfChars,  command);
@@ -170,133 +197,73 @@ void    print_thermistor_readings_voltage()
 /*Updating the Temperature logging sructure*/
 /************************************************************************************************************************************************/
 
-void update_thermistor_temperature_and_flag_structure(int mux)
+void update_thermistor_temperature_and_flag_structure(uint8 input)      //logging and updating flag functions can be merged
 {
-    uint8 channel = 0, MUX = mux*12;
-    for (; channel < 12; channel++, MUX++)
+    uint8 location = input*12, channel = 0;
+    for (; channel < 12; channel++, location++)
     {
         //logging Temperature
-        thermistor_temperature_and_flag_struct[MUX].temperature = DoCalculation( (((float)rxData_Buffer[channel])/4095)*REFERENCE_VOLTAGE);
+        thermistor_temperature_and_flag_struct[location].temperature = DoCalculation( (((float)rxData_Buffer[channel])/4095)*REFERENCE_VOLTAGE);
         //Updating Flag
-        (thermistor_temperature_and_flag_struct[MUX].temperature >= 60) ?  (thermistor_temperature_and_flag_struct[MUX].temperature_flag = 1) : (thermistor_temperature_and_flag_struct[MUX].temperature_flag = 0);
+        (thermistor_temperature_and_flag_struct[location].temperature >= 60) ?  (thermistor_temperature_and_flag_struct[location].temperature_flag = 1) : (thermistor_temperature_and_flag_struct[location].temperature_flag = 0);
     }
 }
 
-void update_mux(uint8 current_mux)
+void update_input(uint8 current_input)      //can have a structure array and quickly approach the element the GIO config depending on the current mux, instead of scanning
 {
-    if (current_mux == 0)
+    gioSetBit(gioPORTB, 2, 1);
+
+    if (current_input == 0)
     {
-        gioSetBit(gioPORTA, 2, 0);
         gioSetBit(gioPORTA, 5, 0);
         gioSetBit(gioPORTA, 6, 0);
         gioSetBit(gioPORTA, 7, 0);
     }
-    else if (current_mux == 1)
+    else if (current_input == 1)
     {
-        gioSetBit(gioPORTA, 2, 1);
-        gioSetBit(gioPORTA, 5, 0);
+        gioSetBit(gioPORTA, 5, 1);
         gioSetBit(gioPORTA, 6, 0);
         gioSetBit(gioPORTA, 7, 0);
+
+        gioSetBit(gioPORTB, 2, 0);
     }
-    else if (current_mux == 2)
+    else if (current_input == 2)
         {
-            gioSetBit(gioPORTA, 2, 0);
-            gioSetBit(gioPORTA, 5, 1);
-            gioSetBit(gioPORTA, 6, 0);
-            gioSetBit(gioPORTA, 7, 0);
-        }
-    else if (current_mux == 3)
-        {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 1);
-            gioSetBit(gioPORTA, 6, 0);
-            gioSetBit(gioPORTA, 7, 0);
-        }
-    else if (current_mux == 4)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 0);
             gioSetBit(gioPORTA, 6, 1);
             gioSetBit(gioPORTA, 7, 0);
         }
-    else if (current_mux == 5)
+    else if (current_input == 3)
         {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 0);
-            gioSetBit(gioPORTA, 6, 1);
-            gioSetBit(gioPORTA, 7, 0);
-        }
-    else if (current_mux == 6)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 1);
             gioSetBit(gioPORTA, 6, 1);
             gioSetBit(gioPORTA, 7, 0);
         }
-    else if (current_mux == 7)
+    else if (current_input == 4)
         {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 1);
-            gioSetBit(gioPORTA, 6, 1);
-            gioSetBit(gioPORTA, 7, 0);
-        }
-    else if (current_mux == 8)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 0);
             gioSetBit(gioPORTA, 6, 0);
             gioSetBit(gioPORTA, 7, 1);
         }
-    else if (current_mux == 9)
+    else if (current_input == 5)
         {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 0);
-            gioSetBit(gioPORTA, 6, 0);
-            gioSetBit(gioPORTA, 7, 1);
-        }
-    else if (current_mux == 10)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 1);
             gioSetBit(gioPORTA, 6, 0);
             gioSetBit(gioPORTA, 7, 1);
         }
-    else if (current_mux == 11)
+    else if (current_input == 6)
         {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 1);
-            gioSetBit(gioPORTA, 6, 0);
-            gioSetBit(gioPORTA, 7, 1);
-        }
-    else if (current_mux == 12)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 0);
             gioSetBit(gioPORTA, 6, 1);
             gioSetBit(gioPORTA, 7, 1);
         }
-    else if (current_mux == 13)
+    else if (current_input == 7)
         {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 0);
-            gioSetBit(gioPORTA, 6, 1);
-            gioSetBit(gioPORTA, 7, 1);
-        }
-    else if (current_mux == 14)
-        {
-            gioSetBit(gioPORTA, 2, 0);
             gioSetBit(gioPORTA, 5, 1);
             gioSetBit(gioPORTA, 6, 1);
             gioSetBit(gioPORTA, 7, 1);
         }
-    else if (current_mux == 15)
-        {
-            gioSetBit(gioPORTA, 2, 1);
-            gioSetBit(gioPORTA, 5, 1);
-            gioSetBit(gioPORTA, 6, 1);
-            gioSetBit(gioPORTA, 7, 1);
-        }
-}
+    }
 
 
 

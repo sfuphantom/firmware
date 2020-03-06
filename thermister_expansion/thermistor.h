@@ -51,15 +51,15 @@ void        convert_reading_thermistor ();        //converts thermistor reading 
 /*Structure for storing temperature and resistance values from the thermistor*/
 struct thermistor_temperature_and_flag
 {
-    int temperature;
-    int temperature_flag;       // 0 or 1
+    uint16 temperature;
+    uint16 temperature_flag;       // 0 or 1
 };
 
-#define TOTAL_MUXES 192
+#define TOTAL_MUXES 96
 
 struct thermistor_temperature_and_flag thermistor_temperature_and_flag_struct[TOTAL_MUXES];     //can be a double pointer
 
-void update_thermistor_temperature_and_flag_structure(int mux);
+void update_thermistor_temperature_and_flag_structure(uint8 mux);
 
 /*Update mux*/
 
