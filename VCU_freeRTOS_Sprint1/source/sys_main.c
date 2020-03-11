@@ -68,6 +68,7 @@
 #include "reg_het.h"
 
 #include "MCP48FV_DAC_SPI.h" // DAC library written by Ataur Rehman
+#include "LV_monitor.h"      // INA226 Current Sense Amplifier Library written by David Cao
 
 /* USER CODE END */
 
@@ -179,6 +180,9 @@ uint8_t BSPD = 0;
 
 uint32_t blue_duty = 100;
 uint32_t blue_flag = 0;
+
+// change to better data type
+int lv_current = 0;
 /* USER CODE END */
 
 int main(void)
@@ -187,6 +191,7 @@ int main(void)
 /*********************************************************************************
  *                          HALCOGEN PERIPHERAL INITIALIZATION
  *********************************************************************************/
+    _enable_IRQ();
     sciInit();
     gioInit();
     adcInit();
@@ -208,6 +213,9 @@ int main(void)
     //using MCP48FV Library
     MCP48FV_Init();
 //    MCP48FV_Set_Value(400);//500 =5.00V, 250= 2.5V
+
+    // LV monitor library
+    lv_monitorInit();
 /*********************************************************************************
  *                          freeRTOS SOFTWARE TIMER SETUP
  *********************************************************************************/
@@ -559,6 +567,8 @@ static void vSensorReadTask(void *pvParameters){
         // CAN status from BMS (this may need an interrupt for when data arrives, and maybe stored in a buffer? maybe not.. we should try both)
 
         // read LV voltage, current
+
+        lv_current = LV_reading(LV_current_register);
 
         // make sure state machine signal flags are updated
 
