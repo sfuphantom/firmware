@@ -14,13 +14,13 @@ void lv_monitorInit(){
 /* USER CODE BEGIN (3) */
 
     //Testing SCI
-    _enable_IRQ();
+//    _enable_IRQ();
     /* Initialize SCI module */
 //    sciInit();
 //    gioInit();
     i2cInit();
 
-    gioSetBit(gioPORTA,6,1);
+//    gioSetBit(gioPORTA,6,1);
 
     // int repeat = 0; int delay =1000000;
     // int i = 0;

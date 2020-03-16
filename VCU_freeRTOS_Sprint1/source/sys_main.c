@@ -86,8 +86,8 @@
  *********************************************************************************/
 #define TASK_PRINT  0
 #define STATE_PRINT 0
-#define APPS_PRINT  0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
-#define BSE_PRINT   0 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
+#define APPS_PRINT  1 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
+#define BSE_PRINT   1 // if this is enabled, it hogs the whole cpu since the task it runs in is called every 10ms and is the highest priority. doesn't allow other tasks/interrupts to run
 
 /*********************************************************************************
  *                          TASK HEADER DECLARATIONS
@@ -171,12 +171,13 @@ long xStatus;
 /*********************************************************************************
  *                               SYSTEM STATE FLAGS
  *********************************************************************************/
-uint8_t TSAL = 1;
+uint8_t TSAL = 0;
 uint8_t RTDS = 0;
 long RTDS_RAW = 0;
 uint8_t BMS  = 1;
 uint8_t IMD  = 1;
-uint8_t BSPD = 0;
+uint8_t BSPD = 1;
+uint8_t BSE_FAULT = 0;
 
 uint32_t blue_duty = 100;
 uint32_t blue_flag = 0;
@@ -449,12 +450,16 @@ static void vStateMachineTask(void *pvParameters){
 
 
             if (STATE_PRINT) {UARTSend(sciREG, "********TRACTIVE_OFF********");}
-            if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1)
+            if (BMS == 1 && IMD == 1 && BSPD == 1 && TSAL == 1 && BSE_FAULT == 0)
             {
                 // if BMS/IMD/BSPD = 1 then the shutdown circuit is closed
                 // TSAL = 1 indicates that the AIRs have closed
                 // tractive system should now be active
                 state = TRACTIVE_ON;
+            }
+            else if (BSE_FAULT == 1)
+            {
+                state = FAULT;
             }
         }
         else if (state == TRACTIVE_ON)
@@ -471,6 +476,8 @@ static void vStateMachineTask(void *pvParameters){
                 // ready to drive signal is switched
                 state = RUNNING;
             }
+
+            // Mechanism to switch back to tractive off from this state? or into error state?
         }
         else if (state == RUNNING)
         {
@@ -494,9 +501,18 @@ static void vStateMachineTask(void *pvParameters){
         }
         else if (state == FAULT)
         {
+            pwmSetDuty(hetRAM1, BLUE_LED, 100U); // blue LED
+            pwmSetDuty(hetRAM1, RED_LED, 50U); // red LED
+            pwmSetDuty(hetRAM1, GREEN_LED, 100U); // green LED
+
             if (STATE_PRINT) {UARTSend(sciREG, "********FAULT********");}
             // uhhh turn on a fault LED here??
             // how will we reset out of this?
+
+            if (BSE_FAULT == 0)
+            {
+                state = TRACTIVE_OFF;
+            }
         }
 
         if (STATE_PRINT) {UARTSend(sciREG, "\r\n");}
@@ -633,11 +649,29 @@ static void vThrottleTask(void *pvParameters){
 
 
 
+
         // check for short to GND/5V on sensor 1
         // thresholds
 
         // check for short to GND/3V3 on sensor 2
         // thresholds
+
+        // check for short to GND/5V on BSE
+        if (BSE_sensor_sum < 409)
+        {
+            // if it's less than 0.5V, then assume shorted to GND as this is not normal range
+            BSE_FAULT = 1;
+        }
+        else if (BSE_sensor_sum > 3685) // change from magic number to a #define BSE_MAX_VALUE
+        {
+            // if it's greater than 4.5V, then assume shorted to 5V as this is not normal range
+            BSE_FAULT = 1;
+        }
+        else
+        {
+            // should be in normal range
+            BSE_FAULT = 0;
+        }
 
         // moving average signal conditioning.. worth it to graph this out and find a good filter time constant
 //        FP_sensor_1_avg = FP_sensor_1_sum/10;
