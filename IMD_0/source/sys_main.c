@@ -51,12 +51,7 @@
 
 #include "stdlib.h" // contains ltoa
 
-//#define PMU_Cycle
 #define RTI_Cycle
-
-#ifdef PMU_Cycle
-#include "sys_pmu.h"
-#endif //PMU_Cycle
 
 /* USER CODE END */
 
@@ -65,30 +60,20 @@
 #include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
-// Measurement Method used - please specify !!!
-#ifdef PMU_Cycle
-volatile unsigned long cycles_PMU_start, cycles_PMU_end, cycles_PMU_measure, cycles_PMU_comp,
-cycles_PMU_code;
-volatile float time_PMU_code;
-#endif //PMU_Cycle
-
-static uint8_t flag = 0;
+static const float FREQ_RUNNING_COUNTER = 10000000.00; // 10Mhz
+static uint8_t rise_flag = 0;
+static const uint32_t UINT32_MAX_ = 4294967295;
 
 #ifdef RTI_Cycle
 static uint32_t time1 = 0;
 static uint32_t time2 = 0;
-//static uint32_t period = 0;
 float period = 0.0;
 float frequency = 0.0;
-
-
-
 #endif //RTI_Cycle
 
 // SCI variables
 unsigned int NumberofChars, value;
 unsigned char command[8];
-
 const float f_HCLK = 160.00;
 /* USER CODE END */
 
@@ -106,26 +91,17 @@ const float f_HCLK = 160.00;
 int main(void)
 {
 /* USER CODE BEGIN (3) */
-    // -- Measurement Initialization --
-    #ifdef PMU_Cycle
-    _pmuInit_();
-    _pmuEnableCountersGlobal_();
-    _pmuSetCountEvent_(pmuCOUNTER0, PMU_CYCLE_COUNT); // PMU_INST_ARCH_EXECUTED
-    _pmuStartCounters_(pmuCYCLE_COUNTER);
-    #endif //PMU_Cycle
-
+    // Initialization --
     hetInit();
     gioInit();
     rtiInit();
     sciInit();
     rtiResetCounter(rtiCOUNTER_BLOCK1);
-   // gioSetBit(gioPORTB,2,1);
 
-    //  vimREG->CHANMAP[61]=2;
-        _enable_IRQ();
+    _enable_IRQ();
 
-        gioEnableNotification(gioPORTA,5);
-        rtiStartCounter(rtiCOUNTER_BLOCK1);
+    gioEnableNotification(gioPORTA,5);
+    rtiStartCounter(rtiCOUNTER_BLOCK1);
 
     while(1){
 
@@ -153,67 +129,36 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 {
 /*  enter user code between the USER CODE BEGIN and USER CODE END. */
 /* USER CODE BEGIN (19) */
-    // no matter what the period is, the ticks are
-    // 42, 2, 3, 4, 6, 5, 6, 5, 6, 5
+
     if(port == gioPORTA && bit == 5) {
+
+        //LED on board
         gioToggleBit(gioPORTB,2);
 
         // first rising edge
-        if(flag == 0){
+        if(rise_flag == 0){
             // -- Measurement Execution --
-            #ifdef PMU_Cycle
-            _pmuResetCounters_();
-            _pmuStartCounters_(pmuCOUNTER0);
-            cycles_PMU_start = _pmuGetEventCount_(pmuCOUNTER0);
-            #endif //PMU_Cycle
-
             #ifdef RTI_Cycle
-//            rtiStartCounter(rtiCOUNTER_BLOCK1);
-//            time1 = rtiGetCurrentTick(rtiCOMPARE1);
+//          time1 = rtiGetCurrentTick(rtiCOMPARE1);
             time1 = rtiREG1->CNT[1].FRCx;
-
-            if (time1 > 10000000)
-            {
-                // this is currently wrong, but need to prevent overflow
-                rtiResetCounter(rtiCOUNTER_BLOCK1);
-            }
+            //rtiResetCounter(rtiCOUNTER_BLOCK1);
             #endif //RTI_Cycle
-            flag=1;
+            rise_flag=1;
         }
-        // for some reason time 1 is always ahead of time 2
+
         else {
-            #ifdef PMU_Cycle
-            _pmuStopCounters_(pmuCOUNTER0);
-            cycles_PMU_end = _pmuGetEventCount_(pmuCOUNTER0);
-            cycles_PMU_measure = cycles_PMU_end - cycles_PMU_start;
-            time_PMU_code = cycles_PMU_code / (f_HCLK); // time_code [us], f_HCLK [MHz]
-            #endif //PMU_Cycle
-
             #ifdef RTI_Cycle
-//            time2 = rtiGetCurrentTick(rtiCOMPARE1);
             time2 = rtiREG1->CNT[1].FRCx;
-
             if(time1 < time2) {
-                period = ((float)time2 - (float)time1)/10000000; // free running counter is one tick every 10MHz
+                period = ((float)time2 - (float)time1)/FREQ_RUNNING_COUNTER ; // free running counter is one tick every 10MHz
                 frequency = 1/period;
             }
+            // accounting for overflow? need to know max
             else {
-                period = ((float)time2 + (10000000-(float)time1))/10000000;
-//                period = time1 + (10000-time2); // the number is tick max
+                period = ((float)time2 + (UINT32_MAX_-(float)time1))/FREQ_RUNNING_COUNTER;
             }
-//            rtiStopCounter(rtiCOUNTER_BLOCK1);
-           // rtiResetCounter(rtiCOUNTER_BLOCK1);
             #endif //RTI_Cycle
-
-            /*
-            // -- Code Cycles / Run Time Calculation --
-            #ifdef PMU_Cycle
-            cycles_PMU_code = cycles_PMU_measure - cycles_PMU_comp;
-            time_PMU_code = cycles_PMU_code / (f_HCLK); // time_code [us], f_HCLK [MHz]
-            //time_PMU_code = cycles_PMU_code / (f_HCLK * loop_Count_max); //
-            #endif //PMU_Cycle
-            */
-            flag=0;
+            rise_flag=0;
         }
     }
 }
