@@ -1,0 +1,1 @@
+"./DAC_SPI_dash.obj" "./main.obj" "./tm4c123fh6pm_startup_ccs.obj" "C:/ti/TivaWare_C_Series-2.1.4.178/driverlib/ccs/Debug/driverlib.lib" "../tm4c123fh6pm.cmd" -llibc.a 

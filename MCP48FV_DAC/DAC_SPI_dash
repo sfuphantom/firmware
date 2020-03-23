@@ -1,0 +1,26 @@
+#ifndef INCLUDE_DAC_SPI_dash
+#define INCLUDE_DAC_SPI_dash
+
+
+#include "stdbool.h"
+#include <stdbool.h>
+#include "inc/hw_memmap.h"
+#include "inc/hw_ssi.h"
+#include "inc/hw_types.h"
+#include "driverlib/ssi.h"
+
+bool MCP48FV_init(); // Init the SSI communication
+
+bool MCP48FV_setValue(unint16t targetVoltage); //checking target Voltage
+
+bool MCP48FV_write(uint32t cmdString); //write command to the DAC
+
+uint32_t cmdCreator(uint8_t address, uint8_t cmdReadWrite, uint8_t cmderr, uint16_t dataBit);// setting command to interface to the DAC
+
+uint16_t readRegister (uint8_t registerAddress);
+uint16_t MCP48FV_Read();
+
+#endif 
+
+
+
