@@ -26,6 +26,8 @@ source/sys_main.obj: C:/Users/sumre/Documents/firmware/IMD_0/include/reg_rti.h
 source/sys_main.obj: C:/Users/sumre/Documents/firmware/IMD_0/include/sci.h
 source/sys_main.obj: C:/Users/sumre/Documents/firmware/IMD_0/include/reg_sci.h
 source/sys_main.obj: C:/ti/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdlib.h
+source/sys_main.obj: ../source/IMD.h
+source/sys_main.obj: C:/ti/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdlib.h
 
 ../source/sys_main.c: 
 C:/Users/sumre/Documents/firmware/IMD_0/include/het.h: 
@@ -52,4 +54,6 @@ C:/Users/sumre/Documents/firmware/IMD_0/include/rti.h:
 C:/Users/sumre/Documents/firmware/IMD_0/include/reg_rti.h: 
 C:/Users/sumre/Documents/firmware/IMD_0/include/sci.h: 
 C:/Users/sumre/Documents/firmware/IMD_0/include/reg_sci.h: 
+C:/ti/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdlib.h: 
+../source/IMD.h: 
 C:/ti/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/include/stdlib.h: 
