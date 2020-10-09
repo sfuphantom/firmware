@@ -53,8 +53,8 @@ void send_simulated_thermistor_data (uint8 test_data_format_type) //receive the 
 /***************************************************************************************************************************************************/
 
 
-void mibspiGroupNotification(mibspiREG3, TransferGroup0)
-{
-    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-
-}
+//void mibspiGroupNotification(mibspiREG3, TransferGroup0)
+//{
+//    mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+//
+//}

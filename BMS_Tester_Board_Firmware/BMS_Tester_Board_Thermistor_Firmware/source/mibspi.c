@@ -74,7 +74,7 @@ uint32 i ;
     mibspiREG1->MIBSPIE = (mibspiREG1->MIBSPIE & 0xFFFFFFFEU) | 1U;
 
     /** MIBSPI1 master mode and clock configuration */
-    mibspiREG1->GCR1 = (mibspiREG1->GCR1 & 0xFFFFFFFCU) | ((uint32)((uint32)0U << 1U)  /* CLOKMOD */
+    mibspiREG1->GCR1 = (mibspiREG1->GCR1 & 0xFFFFFFFCU) | ((uint32)((uint32)1U << 1U)  /* CLOKMOD */
                   | 0U);  /* MASTER */
 
     /** MIBSPI1 enable pin configuration */
@@ -87,7 +87,7 @@ uint32 i ;
                       | (uint32)((uint32)0U << 0U);  /* C2EDELAY */
 
     /** - Data Format 0 */
-    mibspiREG1->FMT0 = (uint32)((uint32)0U << 24U)  /* wdelay */
+    mibspiREG1->FMT0 = (uint32)((uint32)1U << 24U)  /* wdelay */
                      | (uint32)((uint32)0U << 23U)  /* parity Polarity */
                      | (uint32)((uint32)0U << 22U)  /* parity enable */
                      | (uint32)((uint32)0U << 21U)  /* wait on enable */
@@ -105,7 +105,7 @@ uint32 i ;
                      | (uint32)((uint32)0U << 20U)  /* shift direction */
                      | (uint32)((uint32)0U << 17U)  /* clock polarity */
                      | (uint32)((uint32)0U << 16U)  /* clock phase */
-                     | (uint32)((uint32)39U << 8U)  /* baudrate prescale */
+                     | (uint32)((uint32)79U << 8U)  /* baudrate prescale */
                      | (uint32)((uint32)16U << 0U); /* data word length */
 
     /** - Data Format 2 */
@@ -207,7 +207,7 @@ uint32 i ;
 
             while (i < (11U-1U))
             {
-                mibspiRAM1->tx[i].control = (uint16)((uint16)4U << 13U)  /* buffer mode */
+                mibspiRAM1->tx[i].control = (uint16)((uint16)5U << 13U)  /* buffer mode */
                                           | (uint16)((uint16)0U << 12U)  /* chip select hold */
                                           | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                           | (uint16)((uint16)1U << 11U)  /* lock transmission */
@@ -217,7 +217,7 @@ uint32 i ;
                 i++;
             }
 #endif
-            mibspiRAM1->tx[i].control = (uint16)((uint16)4U << 13U)  /* buffer mode */
+            mibspiRAM1->tx[i].control = (uint16)((uint16)5U << 13U)  /* buffer mode */
                                       | (uint16)((uint16)0U << 12U) /* chip select hold */
                                       | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                       | (uint16)((uint16)0U << 8U)  /* data format */
@@ -236,7 +236,7 @@ uint32 i ;
 
             while (i < ((11U+12U)-1U))
             {
-                mibspiRAM1->tx[i].control = (uint16)((uint16)4U << 13U)  /* buffer mode */
+                mibspiRAM1->tx[i].control = (uint16)((uint16)5U << 13U)  /* buffer mode */
                                           | (uint16)((uint16)0U << 12U)  /* chip select hold */
                                           | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                           | (uint16)((uint16)1U << 11U)  /* lock transmission */
@@ -247,7 +247,7 @@ uint32 i ;
                 i++;
             }
 #endif
-            mibspiRAM1->tx[i].control = (uint16)((uint16)4U << 13U)  /* buffer mode */
+            mibspiRAM1->tx[i].control = (uint16)((uint16)5U << 13U)  /* buffer mode */
                                       | (uint16)((uint16)0U << 12U) /* chip select hold */
                                       | (uint16)((uint16)0U << 10U)  /* enable WDELAY */
                                       | (uint16)((uint16)0U << 8U)  /* data format */
@@ -570,7 +570,7 @@ uint32 i ;
                       | (uint32)((uint32)0U << 0U);  /* C2EDELAY */
 
     /** - Data Format 0 */
-    mibspiREG3->FMT0 = (uint32)((uint32)1U << 24U)  /* wdelay */
+    mibspiREG3->FMT0 = (uint32)((uint32)0U << 24U)  /* wdelay */
                      | (uint32)((uint32)0U << 23U)  /* parity Polarity */
                      | (uint32)((uint32)0U << 22U)  /* parity enable */
                      | (uint32)((uint32)0U << 21U)  /* wait on enable */

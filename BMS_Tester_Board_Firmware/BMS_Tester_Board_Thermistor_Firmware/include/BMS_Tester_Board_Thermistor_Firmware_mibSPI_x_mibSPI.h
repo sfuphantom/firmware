@@ -19,7 +19,7 @@
 
 
 
-
+uint8   verify_slave_connection();      //can be based on the master module in consideration -> Parameter eg.  mibspiBASE_t *mibspi
 
 
 #endif /* INCLUDE_BMS_TESTER_BOARD_THERMISTOR_FIRMWARE_MIBSPI_X_MIBSPI_H_ */

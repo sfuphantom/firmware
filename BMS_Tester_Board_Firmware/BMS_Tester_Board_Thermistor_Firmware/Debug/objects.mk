@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS :=
+LIBS := -lrtsv7R4_T_be_v3D16_eabi.lib
 

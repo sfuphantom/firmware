@@ -50,6 +50,7 @@
 #include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
+#include "BMS_Tester_Board_Thermistor_Firmware_mibSPI_x_mibSPI.h"
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -66,6 +67,7 @@
 int main(void)
 {
 /* USER CODE BEGIN (3) */
+    initialize_mibspi_mibspi_comm();
 /* USER CODE END */
 
     return 0;
