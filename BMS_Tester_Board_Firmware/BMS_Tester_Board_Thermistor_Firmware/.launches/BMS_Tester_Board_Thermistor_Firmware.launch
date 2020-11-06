@@ -7,7 +7,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="BMS_Tester_Board_Thermistor_Firmware"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe_0/CortexR4" value="BMS_Tester_Board_Thermistor_Firmware"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:BMS_Tester_Board_Thermistor_Firmware}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe_0/CortexR4" value="D:\Team Phantom\Embedded\firmware\BMS_Tester_Board_Firmware\BMS_Tester_Board_Thermistor_Firmware\Debug\BMS_Tester_Board_Thermistor_Firmware.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe_0/CortexR4" value="D:\OneDrive - sfu.ca\Skills\Embedded\Firmware\firmware\BMS_Tester_Board_Firmware\BMS_Tester_Board_Thermistor_Firmware\Debug\BMS_Tester_Board_Thermistor_Firmware.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/BMS_Tester_Board_Thermistor_Firmware"/>
 </listAttribute>

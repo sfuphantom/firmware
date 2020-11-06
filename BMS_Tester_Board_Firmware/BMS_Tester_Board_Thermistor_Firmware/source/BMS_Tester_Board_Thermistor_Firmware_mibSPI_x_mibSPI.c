@@ -6,7 +6,7 @@
  */
 
 
-#include "BMS_Tester_Board_Thermistor_Firmware_mibSPI_x_mibSPI.h""
+#include "BMS_Tester_Board_Thermistor_Firmware_mibSPI_x_mibSPI.h"
 
 
 /***********************************************************************************************************************************************************/
@@ -21,14 +21,14 @@
      * MOSI -   BoosterPackSite-1-j5-pin-6
      * MISO -   BoosterPackSite-1-j5-pin-7
      * CLK  -   BoosterPackSite-1-j2-pin-7
-     * CS   -   BoosterPackSite-1-j5-pin-3
+     * CS1   -   BoosterPackSite-1-j5-pin-3
      */
 //SLAVE     -   mibspi1
     /*
      * MOSI -   BoosterPackSite-2-j9-pin-6
      * MISO -   BoosterPackSite-2-j9-pin-7
      * CLK  -   BoosterPackSite-2-j6-pin-7
-     * CS   -   BoosterPackSite-2-j9-pin-8
+     * CS1   -   BoosterPackSite-2-j9-pin-8
      */
 
 
@@ -58,7 +58,11 @@
 //------------------------------------------------------------------------------------------------------------------------------------------------
 //16-bit data words sent by the master for configuring the ADC in Auto-2 mode
 uint16
-adc_config[config_words]  =   {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
+//adc_config[config_words]  =   {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3C00, 0x3000, 0x9300};
+//adc_config[config_words]  =   {0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x3C00, 0x3000, 0x9300};
+adc_config[config_words]  =   {0x8888, 0x8888, 0x8888, 0x8888, 0x8888, 0x8888, 0x8888, 0x8888, 0x3C00, 0x3000, 0x9300};
+
+//adc_config[config_words]  =   {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0x3C00, 0x3000, 0x9300};
 
 //16-bit data words sent by the master to keep the ADC operating in Auto-2 mode
 uint16
@@ -68,7 +72,20 @@ adc_mode[channels]        =   {0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,0x3000,
 //------------------------------------------------------------------------------------------------------------------------------------------------
 //16-bit data words sent by the slave (disguised as the ADC) to confirm its readiness to transfer test data
 uint16
-slave_ready[config_words]   =   {0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0001, 0x0000, 0x0000, 0x0001,0x0000, 0x0000};   //001-001-001-00
+//slave_ready[config_words]   =   {0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,0x0000, 0x0000};   //001-001-001-00
+//slave_ready[config_words]   =   {0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001, 0x0001};   //001-001-001-00
+//slave_ready[config_words]   =   {0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101, 0x0101};   //001-001-001-00
+//slave_ready[config_words]   =   {0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110, 0x0110};   //001-001-001-00
+
+//slave_ready[config_words]   =   {0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010, 0x0010};   //001-001-001-00
+slave_ready[config_words]   =   {0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555, 0x5555};   //001-001-001-00
+
+//slave_ready[config_words]   =   {0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000};   //001-001-001-00
+//slave_ready[config_words]   =   {0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00, 0xFF00};   //001-001-001-00
+//slave_ready[config_words]   =   {0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF, 0x00FF};   //001-001-001-00
+
+//slave_ready[config_words]   =   {0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111, 0x1111};   //001-001-001-00
+//slave_ready[config_words]   =   {0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF};   //001-001-001-00
 
 //16-bit test-data words sent by the slave (disguised as the ADC)
 uint16
@@ -127,10 +144,14 @@ uint8   initialize_mibspi_mibspi_comm(void)
 
   //enable group notifications
     mibspiEnableGroupNotification(mibspiREG3, TransferGroup0_M, 0);
-//  mibspiEnableGroupNotification(mibspiREG1, TransferGroup0_S, 0);           //wouldn't this clash with the preceding group notification
+    mibspiEnableGroupNotification(mibspiREG1, TransferGroup0_S, 0);           //wouldn't this clash with the preceding group notification
 
   //send configuration data
+
+    mibspiTransfer(mibspiREG1, TransferGroup0_S);
     mibspiTransfer(mibspiREG3, TransferGroup0_M);
+
+    gioSetBit(gioPORTA, 7, 1);
 
   //wait until ADC configured
     while   (!adc_configured){};
