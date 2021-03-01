@@ -70,6 +70,7 @@
 #include "mibspi.h"
 #include "gio.h"
 #include "sys_vim.h"
+#include "hv_driver.h"
 #include "sys_core.h"
 /* USER CODE END */
 
@@ -101,6 +102,9 @@ bool TX_AVAILABLE = false;  // flags to only transfer mibspi data from slave whe
 bool tx_master = false;     // flags to only transfer mibspi data from master when current transfer has finished
 
 int i = 0;
+float adc_output = 0.0;
+
+
 /* USER CODE END */
 
 int main(void)
@@ -140,6 +144,9 @@ int main(void)
 
                 tx_master = false;
             }
+
+            adc_output =  getADCdata(RX_Yash_Master[1]);
+
 
             // what do i do with RX_Yash_Master array now?
 
