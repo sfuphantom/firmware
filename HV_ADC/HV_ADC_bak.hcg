@@ -7,7 +7,7 @@
     <tools>ti</tools>
   </DEVICE>
   <VERSION>
-    <version>04.07.01</version>
+    <version>04.06.00</version>
   </VERSION>
   <HET1>
     <FILENAME>
@@ -370,18 +370,6 @@
       <SRC14FEE/>
       <SRC15FEE/>
       <SRC16FEE/>
-      <SSWFHDRERRATA>
-        <NAME>errata_SSWF021_45.h</NAME>
-        <PATH>include\errata_SSWF021_45.h</PATH>
-      </SSWFHDRERRATA>
-      <SSWFHDREGERRATA>
-        <NAME>errata_SSWF021_45_defs.h</NAME>
-        <PATH>include\errata_SSWF021_45_defs.h</PATH>
-      </SSWFHDREGERRATA>
-      <SSWFSRCERRATA>
-        <NAME>errata_SSWF021_45.c</NAME>
-        <PATH>source\errata_SSWF021_45.c</PATH>
-      </SSWFSRCERRATA>
     </FILENAMES>
   </SYSTEM>
   <PINMUX>

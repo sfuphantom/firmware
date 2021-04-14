@@ -1,14 +1,11 @@
-/** @file sys_phantom.c 
-*   @brief Phantom Interrupt Source File
+/** @file errata_SSWF021_45.c 
+*   @brief errata for PLLs 
 *   @date 11-Dec-2018
 *   @version 04.07.01
 *
-*   This file contains:
-*   - Phantom Interrupt Handler
 */
-
 /* 
-* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com  
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -41,27 +38,12 @@
 *
 */
 
+#ifndef INCLUDE_ERRATA_SSWF021_45_H_
+#define INCLUDE_ERRATA_SSWF021_45_H_
 
-#include "sys_common.h"
-#include "sys_vim.h"
+uint32 _errata_SSWF021_45_both_plls(uint32 count);
+uint32 _errata_SSWF021_45_pll1(uint32 count);
+uint32 _errata_SSWF021_45_pll2(uint32 count);
 
-/* USER CODE BEGIN (0) */
-/* USER CODE END */
 
-/* Phantom Interrupt Handler */
-
-/* USER CODE BEGIN (1) */
-/* USER CODE END */
-
-#pragma CODE_STATE(phantomInterrupt, 32)
-#pragma INTERRUPT(phantomInterrupt, IRQ)
-#pragma WEAK(phantomInterrupt)
-
-void phantomInterrupt(void)
-{
-/* USER CODE BEGIN (2) */
-/* USER CODE END */
-}
-
-/* USER CODE BEGIN (3) */
-/* USER CODE END */
+#endif /* INCLUDE_ERRATA_SSWF021_45_H_ */

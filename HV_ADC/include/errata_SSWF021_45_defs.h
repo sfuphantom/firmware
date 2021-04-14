@@ -1,17 +1,11 @@
-/** @file reg_system.h
-*   @brief System Register Layer Header File
+/** @file errata_SSWF021_45.c 
+*   @brief errata for PLLs 
 *   @date 11-Dec-2018
 *   @version 04.07.01
-*   
-*   This file contains:
-*   - Definitions
-*   - Types
-*   .
-*   which are relevant for the System driver.
+*
 */
-
 /* 
-* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com 
+* Copyright (C) 2009-2018 Texas Instruments Incorporated - www.ti.com  
 * 
 * 
 *  Redistribution and use in source and binary forms, with or without 
@@ -44,25 +38,11 @@
 *
 */
 
+#ifndef INCLUDE_ERRATA_SSWF021_45_DEFS_H_
+#define INCLUDE_ERRATA_SSWF021_45_DEFS_H_
 
-#ifndef __REG_SYSTEM_H__
-#define __REG_SYSTEM_H__
-
-#include "sys_common.h"
-#include "reg_gio.h"
-
-
-/* System Register Frame 1 Definition */
-/** @struct systemBase1
-*   @brief System Register Frame 1 Definition
-*
-*   This type is used to access the System 1 Registers.
-*/
-/** @typedef systemBASE1_t
-*   @brief System Register Frame 1 Type Definition
-*
-*   This type is used to access the System 1 Registers.
-*/
+typedef unsigned int uint32_t;
+typedef uint32_t uint32;
 typedef volatile struct systemBase1
 {
     uint32 SYSPC1;                 /* 0x0000 */
@@ -130,36 +110,6 @@ typedef volatile struct systemBase1
     uint32 SSIF;                   /* 0x00F8 */
 } systemBASE1_t;
 
-
-/** @def systemREG1
-*   @brief System Register Frame 1 Pointer
-*
-*   This pointer is used by the system driver to access the system frame 1 registers.
-*/
-#define systemREG1 ((systemBASE1_t *)0xFFFFFF00U)
-
-/** @def systemPORT
-*   @brief ECLK GIO Port Register Pointer
-*
-*   Pointer used by the GIO driver to access I/O PORT of System/Eclk
-*   (use the GIO drivers to access the port pins).
-*/
-#define systemPORT ((gioPORT_t *)0xFFFFFF04U)
-
-/* USER CODE BEGIN (0) */
-/* USER CODE END */
-
-/* System Register Frame 2 Definition */
-/** @struct systemBase2
-*   @brief System Register Frame 2 Definition
-*
-*   This type is used to access the System 2 Registers.
-*/
-/** @typedef systemBASE2_t
-*   @brief System Register Frame 2 Type Definition
-*
-*   This type is used to access the System 2 Registers.
-*/
 typedef volatile struct systemBase2
 {
     uint32 PLLCTL3;        /* 0x0000 */
@@ -168,7 +118,7 @@ typedef volatile struct systemBase2
     uint32   rsvd2[6U];     /* 0x000C */
     uint32 ECPCNTRL0;      /* 0x0024 */
     uint32   rsvd3[5U];     /* 0x0028 */
-    uint32 CLK2CNTL;       /* 0x003C */	
+    uint32 CLK2CNTL;       /* 0x003C */
     uint32 VCLKACON1;      /* 0x0040 */
     uint32  rsvd4[11U];     /* 0x0044 */
     uint32  CLKSLIP;       /* 0x0070 */
@@ -180,12 +130,76 @@ typedef volatile struct systemBase2
     uint32  DIEIDH_REG3;   /* 0x00FC */
 } systemBASE2_t;
 
-/** @def systemREG2
-*   @brief System Register Frame 2 Pointer
-*
-*   This pointer is used by the system driver to access the system frame 2 registers.
-*/
+typedef volatile struct esmBase
+{
+    uint32 EEPAPR1;           /* 0x0000                 */
+    uint32 DEPAPR1;           /* 0x0004                 */
+    uint32 IESR1;             /* 0x0008                 */
+    uint32 IECR1;             /* 0x000C                 */
+    uint32 ILSR1;             /* 0x0010                 */
+    uint32 ILCR1;             /* 0x0014                 */
+    uint32 SR1[3U];           /* 0x0018, 0x001C, 0x0020 */
+    uint32 EPSR;              /* 0x0024                 */
+    uint32 IOFFHR;            /* 0x0028                 */
+    uint32 IOFFLR;            /* 0x002C                 */
+    uint32 LTCR;              /* 0x0030                 */
+    uint32 LTCPR;             /* 0x0034                 */
+    uint32 EKR;               /* 0x0038                 */
+    uint32 SSR2;              /* 0x003C                 */
+    uint32 IEPSR4;            /* 0x0040                 */
+    uint32 IEPCR4;            /* 0x0044                 */
+    uint32 IESR4;             /* 0x0048                 */
+    uint32 IECR4;             /* 0x004C                 */
+    uint32 ILSR4;             /* 0x0050                 */
+    uint32 ILCR4;             /* 0x0054                 */
+    uint32 SR4[3U];           /* 0x0058, 0x005C, 0x0060 */
+} esmBASE_t;
+
+typedef volatile struct dccBase
+{
+    uint32 GCTRL;      	    /**< 0x0000: DCC Control Register		*/
+    uint32 REV;      		/**< 0x0004: DCC Revision Id Register 	*/
+    uint32 CNT0SEED;    	/**< 0x0008: DCC Counter0 Seed Register	*/
+    uint32 VALID0SEED;      /**< 0x000C: DCC Valid0 Seed Register 	*/
+    uint32 CNT1SEED;		/**< 0x0010: DCC Counter1 Seed Register 	*/
+    uint32 STAT; 			/**< 0x0014: DCC Status Register 		*/
+    uint32 CNT0;    		/**< 0x0018: DCC Counter0 Value Register 	*/
+    uint32 VALID0;    	    /**< 0x001C: DCC Valid0 Value Register 	*/
+    uint32 CNT1;      	    /**< 0x0020: DCC Counter1 Value Register	*/
+    uint32 CNT1CLKSRC;   	/**< 0x0024: DCC Counter1 Clock Source Selection Register 	*/
+    uint32 CNT0CLKSRC;   	/**< 0x0028: DCC Counter0 Clock Source Selection Register 	*/
+} dccBASE_t;
+
+enum dcc1clocksource
+{
+    DCC1_CNT0_HF_LPO    = 0x5U,    /**< Alias for DCC1 CNT 0 CLOCK SOURCE 0*/
+    DCC1_CNT0_TCK       = 0xAU,    /**< Alias for DCC1 CNT 0 CLOCK SOURCE 1*/
+    DCC1_CNT0_OSCIN     = 0xFU,    /**< Alias for DCC1 CNT 0 CLOCK SOURCE 2*/
+
+    DCC1_CNT1_PLL1      = 0x0U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 0*/
+    DCC1_CNT1_PLL2      = 0x1U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 1*/
+    DCC1_CNT1_LF_LPO    = 0x2U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 2*/
+    DCC1_CNT1_HF_LPO    = 0x3U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 3*/
+    DCC1_CNT1_EXTCLKIN1 = 0x5U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 4*/
+    DCC1_CNT1_EXTCLKIN2 = 0x6U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 6*/
+    DCC1_CNT1_VCLK      = 0x8U,    /**< Alias for DCC1 CNT 1 CLOCK SOURCE 8*/
+    DCC1_CNT1_N2HET1_31 = 0xAU     /**< Alias for DCC1 CNT 1 CLOCK SOURCE 9*/
+};
+
+#define SYS_CLKSRC_PLL1 0x00000002U
+#define SYS_CLKSRC_PLL2 0x00000040U
+#define SYS_CLKCNTRL_PENA 0x00000100U
+#define ESM_SR1_PLL1SLIP 0x400U
+#define ESM_SR4_PLL2SLIP 0x400U
+#define PLL1 0x08
+#define PLL2 0x80
+#define dcc1CNT1_CLKSRC_PLL1 0x0000A000U
+#define dcc1CNT1_CLKSRC_PLL2 0x0000A001U
+
+#define systemREG1 ((systemBASE1_t *)0xFFFFFF00U)
 #define systemREG2 ((systemBASE2_t *)0xFFFFE100U)
+#define esmREG ((esmBASE_t *)0xFFFFF500U)
+#define dccREG1   ((dccBASE_t *)0xFFFFEC00U)
 
 
-#endif
+#endif /* INCLUDE_ERRATA_SSWF021_45_DEFS_H_ */
