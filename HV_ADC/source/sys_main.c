@@ -145,7 +145,7 @@ int main(void)
                 tx_master = false;
             }
 
-            adc_output =  getADCdata(RX_Yash_Master[1]);
+            adc_output =  getADCdata(RX_Yash_Master[0]);
 
 
             // what do i do with RX_Yash_Master array now?
