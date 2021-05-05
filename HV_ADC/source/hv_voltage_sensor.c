@@ -73,7 +73,7 @@ static void normal_hv_vs_operation()
     // HV_VS operate between 123V and 168V range
        int current_voltage = 168;
        while (current_voltage >= 123)
-            ADC_output = getADCdigital(current_voltage);
+            ADC_output = (uint16)getADCdigital(current_voltage);
             //TX_ADS7044_Slave[1] = ADC_output;
             adcVoltageRamp(ADC_output);
             //time delay?
@@ -83,13 +83,13 @@ static void normal_hv_vs_operation()
 static void hv_vs_both_bounds()
 {
     //sending lower bound voltage of 125
-    ADC_output = getADCdigital(125);
+    ADC_output = (uint16)getADCdigital(125);
     adcVoltageRamp(ADC_output);
     //TX_ADS7044_Slave[1] = ADC_output;
 
     //wait for some time after sending first data?
     //sending upper bound voltage of 168
-    ADC_output = getADCdigital(168);
+    ADC_output = (uint16)getADCdigital(168);
     adcVoltageRamp(ADC_output);
     //TX_ADS7044_Slave[1] = ADC_output;
 }
@@ -98,13 +98,13 @@ static void hv_vs_out_of_range()
 {
     // HV_VS doesn't operate outside normal operating range between 125V and 168V
     //sending ADC output voltage below the lower bound voltage
-    ADC_output = getADCdigital(120);
+    ADC_output = (uint16)getADCdigital(120);
     adcVoltageRamp(ADC_output);
     //TX_ADS7044_Slave[1] = ADC_output;
 
     //wait for some time after sending first data?
     //sending ADC output voltage above the upper bound voltage
-    ADC_output = getADCdigital(170);
+    ADC_output = (uint16)getADCdigital(170);
     adcVoltageRamp(ADC_output);
     //TX_ADS7044_Slave[1] = ADC_output;
 }
@@ -113,7 +113,7 @@ static void hv_vs_at_zero()
 {
     // HV_VS indicate 0 voltage
     // sending ADC output voltage of 0
-    ADC_output = 0;
+    ADC_output = (uint16)0;
     //TX_ADS7044_Slave[1] = ADC_output;
     adcVoltageRamp(ADC_output);
 }
@@ -124,7 +124,7 @@ static void hv_vs_sweep()
     //Sweep test with 1V increment from 125V to 168V
     int input_voltage = 125;
     while(input_voltage <=168){
-        ADC_output = getADCdigital(input_voltage);
+        ADC_output = (uint16)getADCdigital(input_voltage);
         //TX_ADS7044_Slave[1] = ADC_output;
         adcVoltageRamp(ADC_output);
         //time delay?
