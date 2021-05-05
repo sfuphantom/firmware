@@ -71,13 +71,13 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
-//#include "hv_voltage_sensor.c"
-#include "adc_test.c"
+#include "hv_voltage_sensor.c"
+//#include "adc_test.c"
 #include "hv_voltage_sensor.h"
 /* USER CODE END */
 
 /* USER CODE BEGIN (2) */
-void adcVoltageRamp();
+//void adcVoltageRamp();
 void adcSlaveDataSetup();
 
 /* Transfer Group 0 */
@@ -94,7 +94,7 @@ uint16 RX_Data_Slave[1]  = {0};
 /* Continuous data to send to the ADC
  *
  */
-uint16 TX_ADS7044_Slave[1] = {0};
+//uint16 TX_ADS7044_Slave[1] = {0};
 uint16 RX_Yash_Master[1]   = {0};
 uint16 RX_ADS7044_Slave[1] = {0};
 
@@ -115,15 +115,17 @@ int main(void)
 
     adcSlaveDataSetup();
 
-    adcVoltageRamp();
 
-    //while(1)
-    //{
+    while(1)
+    {
+        //adcVoltageRamp();
+        hv_vs_process(NORMAL_HV_VS_OPERATION);
         // test functions for sending data to TX_ADS7044_Slave[1]
-        uint16 i;
-        i = normal_hv_vs_operation(168);
-        TX_ADS7044_Slave[1]=i;
-    //}
+        //uint16 i;
+        //i = normal_hv_vs_operation(168);
+        //i =hv_vs_at_zero();
+        //TX_ADS7044_Slave[0]= i;
+    }
 
 /* USER CODE END */
 
@@ -182,13 +184,6 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
  *                 ADC SLAVE SETUP FUNCTIONS - DO NOT MODIFY
  *****************************************************************************/
 /* used for ramping up and down the measured voltage simulated by the ADC */
-
-void adcVoltageRamp()
-{
-    mibspiSetData(mibspiREG3, TransferGroup1, TX_ADS7044_Slave);
-    mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
-    mibspiTransfer(mibspiREG3, TransferGroup1);
-}
 
 void adcSlaveDataSetup()
 {

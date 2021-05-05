@@ -11,6 +11,6 @@
 #include "stdint.h"
 #include "system.h"
 
-extern uint16 TX_ADS7044_Slave[1];
+//extern uint16 TX_ADS7044_Slave[1];
 void hv_vs_process(uint8_t state);
 #endif /* PHANTOM_DRIVERS_INCLUDE_HV_VOLTAGE_SENSOR_H_ */
