@@ -71,10 +71,11 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
+#include "hv_voltage_sensor.c"
+#include "hv_voltage_sensor.h"
 /* USER CODE END */
 
 /* USER CODE BEGIN (2) */
-void adcVoltageRamp();
 void adcSlaveDataSetup();
 
 /* Transfer Group 0 */
@@ -90,17 +91,13 @@ uint16 RX_Data_Slave[1]  = {0};
 /* Continuous data to send to the ADC
  *
  */
-uint16 TX_Yash_Master[1]   = {0xFFFF}; // how many bits do we need to send? 14 bits only are sent out
-uint16 TX_ADS7044_Slave[1] = {0};
+TX_ADS7044_Slave[1] = {0};
 uint16 RX_Yash_Master[1]   = {0};
 uint16 RX_ADS7044_Slave[1] = {0};
-
-int sign = 1;
 
 bool TX_AVAILABLE = false;  // flags to only transfer mibspi data from slave when current transfer has finished
 bool tx_master = false;     // flags to only transfer mibspi data from master when current transfer has finished
 
-int i = 0;
 /* USER CODE END */
 
 int main(void)
@@ -113,52 +110,16 @@ int main(void)
     /* Slave Data */
     adcSlaveDataSetup();
 
-//    /* Master Data */
-    /* Here you are sending data from master to the slave, TX_Data_Master is the array being sent, what should be in there? */
-    /* How many bits should you be sending? */
-    /* Why are we sending this first data ONCE in transfergroup0 and then switching to sending different transfergroup1 data in an infinite while loop? */
-    mibspiSetData(mibspiREG1, TransferGroup0, TX_Data_Master);
-    mibspiEnableGroupNotification(mibspiREG1, TransferGroup0, 0);
-    mibspiTransfer(mibspiREG1, TransferGroup0);
+    adcVoltageRamp();
 
     while(1)
     {
-
-
-        if (TX_AVAILABLE == true) /* Needed to enable slave data send */
-        {
-            adcVoltageRamp(); /* Slave function: used for ramping up and down the measured voltage simulated by the ADC */
-
-            /* Master Data Sending */
-            if (tx_master == true)
-            {
-                /* Here you are sending data from master to the slave, TX_Yash_Master is the array being sent, what should be in there? */
-                /* How many bits should you be sending? */
-                mibspiSetData(mibspiREG1, TransferGroup1, TX_Yash_Master);
-                mibspiEnableGroupNotification(mibspiREG1, TransferGroup1, 0);
-                mibspiTransfer(mibspiREG1, TransferGroup1);
-
-                tx_master = false;
-            }
-
-            // what do i do with RX_Yash_Master array now?
-
-            // 14 bit array, 12 of those bits are actual data..
-
-            // get those 12 bits from there..
-
-            // convert that value into HV Bus voltage
-
-            // print out for now: SCI scilinSend()
-
-            TX_AVAILABLE = false;
-        }
+        // test functions for sending data to TX_ADS7044_Slave[1]
+        HV_VS_AT_ZERO;
 
     }
 
-
 /* USER CODE END */
-
     return 0;
 }
 
@@ -194,18 +155,18 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
     /**********************************
      *  TESTING FOR SLAVE FUNCTIONALITY
      ***********************************/
-    //    if (mibspi == mibspiREG3 && group == TransferGroup1)
-    //    {
-    //        mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
-    //        mibspiGetData(mibspi, group, RX_ADS7044_Slave);
-    //        TX_AVAILABLE = true;
-    //    }
-    //
-    //    if (mibspi == mibspiREG3 && group == TransferGroup0)
-    //    {
-    //        mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
-    //        TX_AVAILABLE = true;
-    //    }
+        if (mibspi == mibspiREG3 && group == TransferGroup1)
+        {
+            mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
+            mibspiGetData(mibspi, group, RX_ADS7044_Slave);
+            TX_AVAILABLE = true;
+        }
+
+        if (mibspi == mibspiREG3 && group == TransferGroup0)
+        {
+            mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+            TX_AVAILABLE = true;
+        }
 }
 
 /*****************************************************************************
@@ -218,20 +179,6 @@ void adcVoltageRamp()
     mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
     mibspiTransfer(mibspiREG3, TransferGroup1);
 
-    TX_ADS7044_Slave[0] += sign*15;
-
-    if (TX_ADS7044_Slave[0] >= 4000)
-    {
-        sign = -1;
-    }
-    else if (TX_ADS7044_Slave[0] <= 100)
-    {
-        sign = 1;
-    }
-    else
-    {
-        /* sign remains same */
-    }
 }
 
 void adcSlaveDataSetup()
