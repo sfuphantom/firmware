@@ -22,7 +22,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="${build_artifact:HV_ADC}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="HV_ADC"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:HV_ADC}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="C:/Users\gabriel\Documents\Phantom\firmware\HV_ADC\Debug\HV_ADC.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS570LS1224.ccxml.Texas Instruments XDS110 USB Debug Probe/CortexR4" value="C:\Users\ryanh\Desktop\firmware\HV_ADC\Debug\HV_ADC.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/HV_ADC"/>
 </listAttribute>

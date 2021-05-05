@@ -71,16 +71,19 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
-#include "hv_voltage_sensor.c"
+//#include "hv_voltage_sensor.c"
+#include "adc_test.c"
 #include "hv_voltage_sensor.h"
 /* USER CODE END */
 
 /* USER CODE BEGIN (2) */
+void adcVoltageRamp();
 void adcSlaveDataSetup();
 
 /* Transfer Group 0 */
 /* Initial data to be sent the very first time on power up to the ADC
  * NOTE: May or may not need to be changed
+ *
  */
 uint16 TX_Data_Master[1] = {0xAAAA};
 uint16 TX_Data_Slave[1]  = {0};
@@ -91,7 +94,7 @@ uint16 RX_Data_Slave[1]  = {0};
 /* Continuous data to send to the ADC
  *
  */
-TX_ADS7044_Slave[1] = {0};
+uint16 TX_ADS7044_Slave[1] = {0};
 uint16 RX_Yash_Master[1]   = {0};
 uint16 RX_ADS7044_Slave[1] = {0};
 
@@ -103,23 +106,27 @@ bool tx_master = false;     // flags to only transfer mibspi data from master wh
 int main(void)
 {
 /* USER CODE BEGIN (3) */
+
     _enable_IRQ();
 
     mibspiInit();
 
     /* Slave Data */
+
     adcSlaveDataSetup();
 
     adcVoltageRamp();
 
-    while(1)
-    {
+    //while(1)
+    //{
         // test functions for sending data to TX_ADS7044_Slave[1]
-        HV_VS_AT_ZERO;
-
-    }
+        uint16 i;
+        i = normal_hv_vs_operation(168);
+        TX_ADS7044_Slave[1]=i;
+    //}
 
 /* USER CODE END */
+
     return 0;
 }
 
@@ -135,6 +142,7 @@ int main(void)
  *
  * Usually some array like RX_Yash_Master
  */
+
 void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
 {
 
@@ -155,6 +163,7 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
     /**********************************
      *  TESTING FOR SLAVE FUNCTIONALITY
      ***********************************/
+
         if (mibspi == mibspiREG3 && group == TransferGroup1)
         {
             mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
@@ -173,12 +182,12 @@ void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
  *                 ADC SLAVE SETUP FUNCTIONS - DO NOT MODIFY
  *****************************************************************************/
 /* used for ramping up and down the measured voltage simulated by the ADC */
+
 void adcVoltageRamp()
 {
     mibspiSetData(mibspiREG3, TransferGroup1, TX_ADS7044_Slave);
     mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
     mibspiTransfer(mibspiREG3, TransferGroup1);
-
 }
 
 void adcSlaveDataSetup()
