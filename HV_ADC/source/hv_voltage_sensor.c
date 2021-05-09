@@ -10,6 +10,7 @@
 #include "mibspi.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 uint16 ADC_output;
 
@@ -35,6 +36,33 @@ void hv_vs_process(uint8_t state)
     }
 }
 
+static int twosComplement(int negative_output){
+    negative_output=negative_output*(-1);
+    int binary[] = {1000000000000};
+    int twoscomplement =0;
+    int i;
+    // converting to a binary value in ones complement form
+    for (i=12;i>negative_output;i--){
+        binary[i]=negative_output%2;
+        negative_output=negative_output/2;
+    }
+    // converting to twos complement
+    for (i=1;i<13;i++){
+        if (binary[i]==0){
+            binary[i]=1;
+        }
+        else if(binary[i]==1){
+            binary[i]=0;
+        }
+    }
+    for (i=12;i>0;i--){
+        int exp =0;
+        twoscomplement = twoscomplement+binary[i]*pow(2,exp);
+    }
+    twoscomplement = twoscomplement*(-1)+1;
+    return twoscomplement;
+}
+
 static int getADCdigital(int battery_voltage)
 {
    int output_voltage;
@@ -42,8 +70,11 @@ static int getADCdigital(int battery_voltage)
    if (battery_voltage >=144){
        output_voltage = (int)(((battery_voltage *(4.99/479.99))-1.5)*8.2/2.048*4096);
    }
-   else {
+   else{
        output_voltage = (int)((1.5-(battery_voltage *(4.99/479.99)))*8.2/(-2.048)*4096);
+       if(output_voltage<0){
+           output_voltage = twosComplement(output_voltage);
+       }
    }
    return output_voltage;
 }

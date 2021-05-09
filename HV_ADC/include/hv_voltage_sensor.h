@@ -30,4 +30,6 @@ static void hv_vs_sweep();
 static int getADCdigital(int battery_voltage);
 static void spiSetup(uint16 voltage);
 void hv_vs_process(uint8_t state);
+static int twosComplement(int negative_output);
+
 #endif /* PHANTOM_DRIVERS_INCLUDE_HV_VOLTAGE_SENSOR_H_ */
