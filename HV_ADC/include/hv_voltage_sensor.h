@@ -11,6 +11,23 @@
 #include "stdint.h"
 #include "system.h"
 
-//extern uint16 TX_ADS7044_Slave[1];
+typedef enum
+{
+    NORMAL_HV_VS_OPERATION,
+    HV_VS_BOTH_BOUNDS,
+    HV_VS_OUT_OF_RANGE,
+    HV_VS_AT_ZERO,
+    HV_VS_SWEEP
+} testcases_name;
+
+// Static function prototypes
+static void normal_hv_vs_operation();
+static void hv_vs_both_bounds();
+static void hv_vs_out_of_range();
+static void hv_vs_both_bounds();
+static void hv_vs_at_zero();
+static void hv_vs_sweep();
+static int getADCdigital(int battery_voltage);
+static void spiSetup(uint16 voltage);
 void hv_vs_process(uint8_t state);
 #endif /* PHANTOM_DRIVERS_INCLUDE_HV_VOLTAGE_SENSOR_H_ */
