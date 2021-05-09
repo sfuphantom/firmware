@@ -71,8 +71,6 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
-#include "hv_voltage_sensor.c"
-//#include "adc_test.c"
 #include "hv_voltage_sensor.h"
 /* USER CODE END */
 
@@ -94,7 +92,6 @@ uint16 RX_Data_Slave[1]  = {0};
 /* Continuous data to send to the ADC
  *
  */
-//uint16 TX_ADS7044_Slave[1] = {0};
 uint16 RX_Yash_Master[1]   = {0};
 uint16 RX_ADS7044_Slave[1] = {0};
 
@@ -118,21 +115,13 @@ int main(void)
 
     while(1)
     {
-        //adcVoltageRamp();
-        hv_vs_process(NORMAL_HV_VS_OPERATION);
-        // test functions for sending data to TX_ADS7044_Slave[1]
-        //uint16 i;
-        //i = normal_hv_vs_operation(168);
-        //i =hv_vs_at_zero();
-        //TX_ADS7044_Slave[0]= i;
+        hv_vs_process(HV_VS_AT_ZERO);
     }
 
 /* USER CODE END */
 
     return 0;
 }
-
-
 /* USER CODE BEGIN (4) */
 /***************************************************************************************************************
  *                  MIBSPI INTERRUPTS

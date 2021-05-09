@@ -5,33 +5,13 @@
  *      Author: Ryan Heo
  */
 
-#include <math.h>
 #include "sys_common.h"
 #include "hv_voltage_sensor.h"
 #include "mibspi.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 uint16 ADC_output;
-//uint16 TX_ADS7044_Slave[1];
-
-static void adcVoltageRamp(uint16 voltage);
-
-typedef enum
-{
-    NORMAL_HV_VS_OPERATION,
-    HV_VS_BOTH_BOUNDS,
-    HV_VS_OUT_OF_RANGE,
-    HV_VS_AT_ZERO,
-    HV_VS_SWEEP
-} testcases_name;
-
-// Static function prototypes
-static void normal_hv_vs_operation();
-static void hv_vs_both_bounds();
-static void hv_vs_out_of_range();
-static void hv_vs_both_bounds();
-static void hv_vs_at_zero();
-static void hv_vs_sweep();
-static int getADCdigital(int battery_voltage);
 
 void hv_vs_process(uint8_t state)
 {
@@ -60,10 +40,10 @@ static int getADCdigital(int battery_voltage)
    int output_voltage;
    // convert accumulator voltage to ADC output in integer form
    if (battery_voltage >=144){
-       output_voltage = (int)(((battery_voltage *(4.99/479.99))-1.5)*8.2/2.048*pow(2,12));
+       output_voltage = (int)(((battery_voltage *(4.99/479.99))-1.5)*8.2/2.048*4096);
    }
    else {
-       output_voltage = (int)((1.5-(battery_voltage *(4.99/479.99)))*8.2/(-2.048)*pow(2,12));
+       output_voltage = (int)((1.5-(battery_voltage *(4.99/479.99)))*8.2/(-2.048)*4096);
    }
    return output_voltage;
 }
@@ -74,8 +54,7 @@ static void normal_hv_vs_operation()
        int current_voltage = 168;
        while (current_voltage >= 123)
             ADC_output = (uint16)getADCdigital(current_voltage);
-            //TX_ADS7044_Slave[1] = ADC_output;
-            adcVoltageRamp(ADC_output);
+            spiSetup(ADC_output);
             //time delay?
             current_voltage -= 5;
 }
@@ -84,14 +63,12 @@ static void hv_vs_both_bounds()
 {
     //sending lower bound voltage of 125
     ADC_output = (uint16)getADCdigital(125);
-    adcVoltageRamp(ADC_output);
-    //TX_ADS7044_Slave[1] = ADC_output;
+    spiSetup(ADC_output);
 
     //wait for some time after sending first data?
     //sending upper bound voltage of 168
     ADC_output = (uint16)getADCdigital(168);
-    adcVoltageRamp(ADC_output);
-    //TX_ADS7044_Slave[1] = ADC_output;
+    spiSetup(ADC_output);
 }
 
 static void hv_vs_out_of_range()
@@ -99,14 +76,12 @@ static void hv_vs_out_of_range()
     // HV_VS doesn't operate outside normal operating range between 125V and 168V
     //sending ADC output voltage below the lower bound voltage
     ADC_output = (uint16)getADCdigital(120);
-    adcVoltageRamp(ADC_output);
-    //TX_ADS7044_Slave[1] = ADC_output;
+    spiSetup(ADC_output);
 
     //wait for some time after sending first data?
     //sending ADC output voltage above the upper bound voltage
     ADC_output = (uint16)getADCdigital(170);
-    adcVoltageRamp(ADC_output);
-    //TX_ADS7044_Slave[1] = ADC_output;
+    spiSetup(ADC_output);
 }
 
 static void hv_vs_at_zero()
@@ -114,27 +89,24 @@ static void hv_vs_at_zero()
     // HV_VS indicate 0 voltage
     // sending ADC output voltage of 0
     ADC_output = (uint16)0;
-    //TX_ADS7044_Slave[1] = ADC_output;
-    adcVoltageRamp(ADC_output);
+    spiSetup(ADC_output);
 }
 
 static void hv_vs_sweep()
 {
-
     //Sweep test with 1V increment from 125V to 168V
     int input_voltage = 125;
     while(input_voltage <=168){
         ADC_output = (uint16)getADCdigital(input_voltage);
-        //TX_ADS7044_Slave[1] = ADC_output;
-        adcVoltageRamp(ADC_output);
+        spiSetup(ADC_output);
         //time delay?
         input_voltage += 1;
     }
 }
 
-static void adcVoltageRamp(uint16 voltage)
+static void spiSetup(uint16 voltage)
 {
-    mibspiSetData(mibspiREG3, 1, voltage);
+    mibspiSetData(mibspiREG3, 1, &voltage);
     mibspiEnableGroupNotification(mibspiREG3, 1, 0);
     mibspiTransfer(mibspiREG3,1);
 }
