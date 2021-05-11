@@ -12,7 +12,26 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define TransferGroup0 0
+#define TransferGroup1 1
+
 uint16 ADC_output;
+
+/* Transfer Group 0 */
+/* Initial data to be sent the very first time on power up to the ADC
+ * NOTE: May or may not need to be changed
+ *
+ */
+uint16 TX_Data_Master[1] = {0xAAAA};
+uint16 TX_Data_Slave[1]  = {0};
+uint16 RX_Data_Master[1] = {0};
+uint16 RX_Data_Slave[1]  = {0};
+
+uint16 RX_Yash_Master[1]   = {0};
+uint16 RX_ADS7044_Slave[1] = {0};
+
+bool TX_AVAILABLE = false;  // flags to only transfer mibspi data from slave when current transfer has finished
+bool tx_master = false;     // flags to only transfer mibspi data from master when current transfer has finished
 
 void hv_vs_process(uint8_t state)
 {
@@ -156,4 +175,54 @@ static void hv_vs_sweep()
 
 static void spiSetup(uint16 voltage)
 {
+    mibspiSetData(mibspiREG3, TransferGroup1, &voltage);
+    mibspiEnableGroupNotification(mibspiREG3, TransferGroup1, 0);
+    mibspiTransfer(mibspiREG3,TransferGroup1);
+}
+
+void mibspiGroupNotification(mibspiBASE_t *mibspi, uint32 group)
+{
+
+    if (mibspi == mibspiREG1 && group == TransferGroup0)
+     {
+         mibspiDisableGroupNotification(mibspiREG1, TransferGroup0);
+         mibspiGetData(mibspi, group, RX_Data_Master);
+         tx_master = true;
+     }
+
+    if (mibspi == mibspiREG1 && group == TransferGroup1)
+    {
+        mibspiDisableGroupNotification(mibspiREG1, TransferGroup1);
+        mibspiGetData(mibspi, group, RX_Yash_Master);
+        tx_master = true;
+    }
+
+    /**********************************
+     *  TESTING FOR SLAVE FUNCTIONALITY
+     ***********************************/
+
+        if (mibspi == mibspiREG3 && group == TransferGroup1)
+        {
+            mibspiDisableGroupNotification(mibspiREG3, TransferGroup1);
+            mibspiGetData(mibspi, group, RX_ADS7044_Slave);
+            TX_AVAILABLE = true;
+        }
+
+        if (mibspi == mibspiREG3 && group == TransferGroup0)
+        {
+            mibspiDisableGroupNotification(mibspiREG3, TransferGroup0);
+            TX_AVAILABLE = true;
+        }
+}
+
+/*****************************************************************************
+ *                 ADC SLAVE SETUP FUNCTIONS - DO NOT MODIFY
+ *****************************************************************************/
+/* used for ramping up and down the measured voltage simulated by the ADC */
+
+void adcSlaveDataSetup()
+{
+    mibspiSetData(mibspiREG3, TransferGroup0, TX_Data_Slave);
+    mibspiEnableGroupNotification(mibspiREG3, TransferGroup0, 0);
+    mibspiTransfer(mibspiREG3, TransferGroup0);
 }
