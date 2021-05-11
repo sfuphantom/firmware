@@ -38,16 +38,19 @@ void hv_vs_process(uint8_t state)
 
 static int twosComplement(int negative_output){
     negative_output=negative_output*(-1);
-    int binary[] = {1000000000000};
-    int twoscomplement =0;
+    int carry = 1;
+    int binary[] ={1,0,0,0,0,0,0,0,0,0,0,0,0};
+    int twoscomplement=0;
     int i;
+
     // converting to a binary value in ones complement form
-    for (i=12;i>negative_output;i--){
+    for (i=12;negative_output>0;i--){
         binary[i]=negative_output%2;
         negative_output=negative_output/2;
     }
-    // converting to twos complement
-    for (i=1;i<13;i++){
+
+    // converting to ones' complement
+    for (i=1;i<=12;i++){
         if (binary[i]==0){
             binary[i]=1;
         }
@@ -55,11 +58,27 @@ static int twosComplement(int negative_output){
             binary[i]=0;
         }
     }
+
+    // converting to twos' complement
     for (i=12;i>0;i--){
+        if(binary[i] == 1 && carry == 1){
+            binary[i] = 0;
+        }
+        else if(binary[i] == 0 && carry == 1){
+            binary[i] = 1;
+            carry = 0;
+        }
+        else{
+            binary[i] = binary[i];
+        }
+    }
+
+    // converting back to an unsigned decimal
+    for (i=12;i>=0;i--){
         int exp =0;
         twoscomplement = twoscomplement+binary[i]*pow(2,exp);
+        exp +=1;
     }
-    twoscomplement = twoscomplement*(-1)+1;
     return twoscomplement;
 }
 
@@ -86,7 +105,7 @@ static void normal_hv_vs_operation()
        while (current_voltage >= 123)
             ADC_output = (uint16)getADCdigital(current_voltage);
             spiSetup(ADC_output);
-            //time delay?
+            //Delay
             current_voltage -= 5;
 }
 
@@ -96,7 +115,7 @@ static void hv_vs_both_bounds()
     ADC_output = (uint16)getADCdigital(125);
     spiSetup(ADC_output);
 
-    //wait for some time after sending first data?
+    //Delay
     //sending upper bound voltage of 168
     ADC_output = (uint16)getADCdigital(168);
     spiSetup(ADC_output);
@@ -109,7 +128,7 @@ static void hv_vs_out_of_range()
     ADC_output = (uint16)getADCdigital(120);
     spiSetup(ADC_output);
 
-    //wait for some time after sending first data?
+    //Delay
     //sending ADC output voltage above the upper bound voltage
     ADC_output = (uint16)getADCdigital(170);
     spiSetup(ADC_output);
@@ -130,14 +149,11 @@ static void hv_vs_sweep()
     while(input_voltage <=168){
         ADC_output = (uint16)getADCdigital(input_voltage);
         spiSetup(ADC_output);
-        //time delay?
+        //Delay
         input_voltage += 1;
     }
 }
 
 static void spiSetup(uint16 voltage)
 {
-    mibspiSetData(mibspiREG3, 1, &voltage);
-    mibspiEnableGroupNotification(mibspiREG3, 1, 0);
-    mibspiTransfer(mibspiREG3,1);
 }
