@@ -55,7 +55,7 @@ void hv_vs_process(uint8_t state)
 static int twosComplement(int negative_output){
     negative_output=negative_output*(-1);
     int carry = 1;
-    int binary[] ={1,0,0,0,0,0,0,0,0,0,0,0};
+    int binary[]={1,0,0,0,0,0,0,0,0,0,0,0};
     int twoscomplement=0;
     int i;
 
@@ -103,10 +103,10 @@ static int getADCdigital(int battery_voltage)
    int output_voltage;
    // convert accumulator voltage to ADC output in integer form
    if (battery_voltage >=144){
-       output_voltage = (int)(((battery_voltage *(4.99/479.99))-1.5)*8.2/2.048*4096);
+       output_voltage = (int)(((battery_voltage *(4.99/479.99))-1.5)*8.2/2.0475*2047);
    }
    else{
-       output_voltage = (int)((1.5-(battery_voltage *(4.99/479.99)))*8.2/(-2.048)*4096);
+       output_voltage = (int)((1.5-(battery_voltage *(4.99/479.99)))*8.2/(-2.0475)*2047);
        if(output_voltage<0){
            output_voltage = twosComplement(output_voltage);
        }
