@@ -15,20 +15,24 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
+//#include "timer.c"
 
 typedef enum
 {
-    NORMAL_HV_VS_OPERATION,
-    HV_VS_BOTH_BOUNDS,
-    HV_VS_OUT_OF_RANGE,
+    HV_VS_LOWER_BOUND,
+    HV_VS_UPPER_BOUND,
+    HV_VS_OUT_OF_LOWERBOUND,
+    HV_VS_OUT_OF_UPPERBOUND,
     HV_VS_AT_ZERO,
     HV_VS_SWEEP
 } testcases_name;
 
 // Static function prototypes
 static void hv_vs_both_bounds();
-static void hv_vs_out_of_range();
-static void hv_vs_both_bounds();
+static void hv_vs_out_of_lowerBound();
+static void hv_vs_out_of_upperBound();
+static void hv_vs_lower_bound();
+static void hv_vs_upper_bound();
 static void hv_vs_at_zero();
 static void hv_vs_sweep();
 static int getADCdigital(int battery_voltage);

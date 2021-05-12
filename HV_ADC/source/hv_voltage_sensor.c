@@ -37,11 +37,17 @@ void hv_vs_process(uint8_t state)
 {
     switch(state)
     {
-        case HV_VS_BOTH_BOUNDS:
-            hv_vs_both_bounds();
+        case HV_VS_LOWER_BOUND:
+            hv_vs_lower_bound();
             break;
-        case HV_VS_OUT_OF_RANGE:
-            hv_vs_out_of_range();
+        case HV_VS_UPPER_BOUND:
+            hv_vs_upper_bound();
+            break;
+        case HV_VS_OUT_OF_LOWERBOUND:
+            hv_vs_out_of_lowerBound();
+            break;
+        case HV_VS_OUT_OF_UPPERBOUND:
+            hv_vs_out_of_upperBound();
             break;
         case HV_VS_AT_ZERO:
             hv_vs_at_zero();
@@ -114,27 +120,30 @@ static int getADCdigital(int battery_voltage)
    return output_voltage;
 }
 
-static void hv_vs_both_bounds()
+static void hv_vs_lower_bound()
 {
     //sending lower bound voltage of 125
     ADC_output = (uint16)getADCdigital(125);
     spiSetup(ADC_output);
+}
 
-    //Delay
+static void hv_vs_upper_bound(){
     //sending upper bound voltage of 168
     ADC_output = (uint16)getADCdigital(168);
     spiSetup(ADC_output);
 }
 
-static void hv_vs_out_of_range()
+static void hv_vs_out_of_lowerBound()
 {
     // HV_VS doesn't operate outside normal operating range between 125V and 168V
-    //sending ADC output voltage below the lower bound voltage
+    //sending ADC output voltage below the lower bound voltage of 125V
     ADC_output = (uint16)getADCdigital(120);
     spiSetup(ADC_output);
+}
 
-    //Delay
-    //sending ADC output voltage above the upper bound voltage
+static void hv_vs_out_of_upperBound()
+{
+    //sending ADC output voltage above the upper bound voltage of 168V
     ADC_output = (uint16)getADCdigital(170);
     spiSetup(ADC_output);
 }
