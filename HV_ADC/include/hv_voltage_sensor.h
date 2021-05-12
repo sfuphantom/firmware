@@ -26,7 +26,6 @@ typedef enum
 } testcases_name;
 
 // Static function prototypes
-static void normal_hv_vs_operation();
 static void hv_vs_both_bounds();
 static void hv_vs_out_of_range();
 static void hv_vs_both_bounds();

@@ -37,9 +37,6 @@ void hv_vs_process(uint8_t state)
 {
     switch(state)
     {
-        case NORMAL_HV_VS_OPERATION:
-            normal_hv_vs_operation();
-            break;
         case HV_VS_BOTH_BOUNDS:
             hv_vs_both_bounds();
             break;
@@ -58,18 +55,18 @@ void hv_vs_process(uint8_t state)
 static int twosComplement(int negative_output){
     negative_output=negative_output*(-1);
     int carry = 1;
-    int binary[] ={1,0,0,0,0,0,0,0,0,0,0,0,0};
+    int binary[] ={1,0,0,0,0,0,0,0,0,0,0,0};
     int twoscomplement=0;
     int i;
 
     // converting to a binary value in ones complement form
-    for (i=12;negative_output>0;i--){
+    for (i=11;negative_output>0;i--){
         binary[i]=negative_output%2;
         negative_output=negative_output/2;
     }
 
-    // converting to ones' complement
-    for (i=1;i<=12;i++){
+    // converting to ones'complement
+    for (i=1;i<=11;i++){
         if (binary[i]==0){
             binary[i]=1;
         }
@@ -78,8 +75,8 @@ static int twosComplement(int negative_output){
         }
     }
 
-    // converting to twos' complement
-    for (i=12;i>0;i--){
+    // converting to twos'complement
+    for (i=11;i>0;i--){
         if(binary[i] == 1 && carry == 1){
             binary[i] = 0;
         }
@@ -93,7 +90,7 @@ static int twosComplement(int negative_output){
     }
 
     // converting back to an unsigned decimal
-    for (i=12;i>=0;i--){
+    for (i=11;i>=0;i--){
         int exp =0;
         twoscomplement = twoscomplement+binary[i]*pow(2,exp);
         exp +=1;
@@ -115,17 +112,6 @@ static int getADCdigital(int battery_voltage)
        }
    }
    return output_voltage;
-}
-
-static void normal_hv_vs_operation()
-{
-    // HV_VS operate between 123V and 168V range
-       int current_voltage = 168;
-       while (current_voltage >= 123)
-            ADC_output = (uint16)getADCdigital(current_voltage);
-            spiSetup(ADC_output);
-            //Delay
-            current_voltage -= 5;
 }
 
 static void hv_vs_both_bounds()
