@@ -26,7 +26,7 @@ static float Interpolate_input (int adc_input);
 /* Defintions           */
 /*============================================================================*/
 # define MAX_DATA_BITS  (12u)
-# define SLOPE          (0.011875f)
+# define SLOPE          (0.005865f)
 # define Y_INTERCEPT    (144.285f)
 # define START_INDEX    (1u)
 
