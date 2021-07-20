@@ -33,6 +33,8 @@ uint16 RX_ADS7044_Slave[1] = {0};
 bool TX_AVAILABLE = false;  // flags to only transfer mibspi data from slave when current transfer has finished
 bool tx_master = false;     // flags to only transfer mibspi data from master when current transfer has finished
 
+#define hv_vs_timer_PERIOD 500;
+
 void hv_vs_process(uint8_t state)
 {
     switch(state)
@@ -131,6 +133,17 @@ static void hv_vs_upper_bound(){
     //sending upper bound voltage of 168
     ADC_output = (uint16)getADCdigital(168);
     spiSetup(ADC_output);
+    /*char vout[15];
+    char bit;
+    int i;
+    for (i=15;i>=0;i--){
+        vout[i]=(char) ((ADC_output >> i) & 1);
+        bit = vout[i];
+        UARTSend(PC_UART, &bit);
+    }
+    //UARTprintf("Maximum operating battery voltage level \n\r");
+    //UARTSend(PC_UART, &vout);
+    //sciSend(PC_UART, 8, &vout);*/
 }
 
 static void hv_vs_out_of_lowerBound()
@@ -156,6 +169,20 @@ static void hv_vs_at_zero()
     spiSetup(ADC_output);
 }
 
+/* Sweep test with a timer */
+
+/*void hv_vs_timer(Timer timer, int ID){
+
+    #ifdef TIMER_DEBUG
+    UARTprintf("hv_vs sweep timer expired.\n\n\r");
+    #endif
+
+    //increment cycle
+
+    setTimerID( BSE, ++ID );
+
+}*/
+
 static void hv_vs_sweep()
 {
     //Sweep test with 1V increment from 125V to 168V
@@ -163,7 +190,7 @@ static void hv_vs_sweep()
     while(input_voltage <=168){
         ADC_output = (uint16)getADCdigital(input_voltage);
         spiSetup(ADC_output);
-        //Delay
+        //startTimer(APPS, SWEEP_TIMER, hv_vs_timer_PERIOD);
         input_voltage += 1;
     }
 }

@@ -3,7 +3,7 @@
  *
  *  Created on: Nov 10, 2020 
  *      Author: Sumreen Rattan
- *  Modified by: Ryan Heo
+ *      Modified by: Ryan Heo
  */
 
 #ifndef PHANTOM_DRIVERS_INCLUDE_HV_VOLTAGE_SENSOR_H_
@@ -15,7 +15,9 @@
 #include "gio.h"
 #include "sys_vim.h"
 #include "sys_core.h"
-//#include "timer.c"
+//#include "timer.h
+#include "hwConfig.h"
+#include "Phantom_sci.h"
 
 typedef enum
 {

@@ -83,9 +83,8 @@ int main(void)
 /* USER CODE BEGIN (3) */
 
     _enable_IRQ();
-
+    //sciInit();
     mibspiInit();
-
     /* Slave Data */
 
     adcSlaveDataSetup();
@@ -93,7 +92,7 @@ int main(void)
 
     while(1)
     {
-        hv_vs_process(HV_VS_AT_ZERO);
+        hv_vs_process(HV_VS_UPPER_BOUND);
     }
 
 /* USER CODE END */

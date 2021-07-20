@@ -7,8 +7,8 @@
 uint16 ADC_output;
 
 // Static function prototypes
-static uint16 normal_hv_vs_operation(int current_voltage);
-static uint16 hv_vs_at_zero();
+//static uint16 normal_hv_vs_operation(int current_voltage);
+//static uint16 hv_vs_at_zero();
 
 static int getADCdigital(int battery_voltage)
 {
