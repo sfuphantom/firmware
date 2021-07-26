@@ -121,8 +121,8 @@ int main(void)
 {
 /* USER CODE BEGIN (3) */
     _enable_IRQ();
-
     mibspiInit();
+    sciInit();
 
     /* Slave Data */
     adcSlaveDataSetup();
@@ -134,7 +134,6 @@ int main(void)
     mibspiSetData(mibspiREG1, TransferGroup0, TX_Data_Master);
     mibspiEnableGroupNotification(mibspiREG1, TransferGroup0, 0);
     mibspiTransfer(mibspiREG1, TransferGroup0);
-
     while(1)
     {
 
@@ -157,7 +156,6 @@ int main(void)
             }
 
             adc_output =  getADCdata(RX_Yash_Master[0]);
-
 
             // what do i do with RX_Yash_Master array now?
 

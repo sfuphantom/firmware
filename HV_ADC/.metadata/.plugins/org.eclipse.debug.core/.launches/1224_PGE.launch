@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.ti.ccstudio.debug.launchType.device.debugging">
+<setAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_HIDE_CONFIG_ELEMENT_TYPES">
+<setEntry value="BOARD"/>
+<setEntry value="BYPASSED_CPU"/>
+<setEntry value="BYPASSED_ROUTER"/>
+<setEntry value="CONNECTION"/>
+<setEntry value="DEVICE"/>
+<setEntry value="NON_DEBUG_CPU"/>
+<setEntry value="NO_DRIVER"/>
+<setEntry value="ROUTER"/>
+<setEntry value="SUBPATH"/>
+<setEntry value="SYSTEM"/>
+</setAttribute>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="C:\Users\ryanh\ti\CCSTargetConfigurations\LAUNCHXL2-TMS57012.ccxml"/>
+</launchConfiguration>
