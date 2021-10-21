@@ -1,10 +1,10 @@
 # FIXED
 
 source/sys_pmm.obj: ../source/sys_pmm.c
-source/sys_pmm.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_pmm.h
-source/sys_pmm.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/reg_pmm.h
-source/sys_pmm.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_common.h
-source/sys_pmm.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/hal_stdtypes.h
+source/sys_pmm.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_pmm.h
+source/sys_pmm.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/reg_pmm.h
+source/sys_pmm.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_common.h
+source/sys_pmm.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/hal_stdtypes.h
 source/sys_pmm.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdint.h
 source/sys_pmm.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/_ti_config.h
 source/sys_pmm.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/linkage.h
@@ -18,10 +18,10 @@ source/sys_pmm.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/inclu
 source/sys_pmm.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdbool.h
 
 ../source/sys_pmm.c: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_pmm.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/reg_pmm.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_common.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/hal_stdtypes.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_pmm.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/reg_pmm.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_common.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/hal_stdtypes.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdint.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/_ti_config.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/linkage.h: 

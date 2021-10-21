@@ -1,10 +1,10 @@
 # FIXED
 
 source/pinmux.obj: ../source/pinmux.c
-source/pinmux.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/pinmux.h
-source/pinmux.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/reg_pinmux.h
-source/pinmux.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_common.h
-source/pinmux.obj: C:/Users/ryanh/Desktop/firmware/HV_ADC/include/hal_stdtypes.h
+source/pinmux.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/pinmux.h
+source/pinmux.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/reg_pinmux.h
+source/pinmux.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_common.h
+source/pinmux.obj: C:/Users/ryanh/Desktop/HV_VS_BMS/include/hal_stdtypes.h
 source/pinmux.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdint.h
 source/pinmux.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/_ti_config.h
 source/pinmux.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/linkage.h
@@ -18,10 +18,10 @@ source/pinmux.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/includ
 source/pinmux.obj: C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdbool.h
 
 ../source/pinmux.c: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/pinmux.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/reg_pinmux.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/sys_common.h: 
-C:/Users/ryanh/Desktop/firmware/HV_ADC/include/hal_stdtypes.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/pinmux.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/reg_pinmux.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/sys_common.h: 
+C:/Users/ryanh/Desktop/HV_VS_BMS/include/hal_stdtypes.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/stdint.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/_ti_config.h: 
 C:/ti/ccs1020/ccs/tools/compiler/ti-cgt-arm_20.2.2.LTS/include/linkage.h: 

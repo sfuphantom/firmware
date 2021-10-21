@@ -10,6 +10,7 @@ CMD_SRCS += \
 
 ASM_SRCS += \
 ../source/dabort.asm \
+../source/os_portasm.asm \
 ../source/sys_core.asm \
 ../source/sys_intvecs.asm \
 ../source/sys_mpu.asm \
@@ -22,6 +23,15 @@ C_SRCS += \
 ../source/hv_driver.c \
 ../source/mibspi.c \
 ../source/notification.c \
+../source/os_croutine.c \
+../source/os_event_groups.c \
+../source/os_heap.c \
+../source/os_list.c \
+../source/os_mpu_wrappers.c \
+../source/os_port.c \
+../source/os_queue.c \
+../source/os_tasks.c \
+../source/os_timer.c \
 ../source/pinmux.c \
 ../source/sci.c \
 ../source/sys_dma.c \
@@ -41,6 +51,15 @@ C_DEPS += \
 ./source/hv_driver.d \
 ./source/mibspi.d \
 ./source/notification.d \
+./source/os_croutine.d \
+./source/os_event_groups.d \
+./source/os_heap.d \
+./source/os_list.d \
+./source/os_mpu_wrappers.d \
+./source/os_port.d \
+./source/os_queue.d \
+./source/os_tasks.d \
+./source/os_timer.d \
 ./source/pinmux.d \
 ./source/sci.d \
 ./source/sys_dma.d \
@@ -61,6 +80,16 @@ OBJS += \
 ./source/hv_driver.obj \
 ./source/mibspi.obj \
 ./source/notification.obj \
+./source/os_croutine.obj \
+./source/os_event_groups.obj \
+./source/os_heap.obj \
+./source/os_list.obj \
+./source/os_mpu_wrappers.obj \
+./source/os_port.obj \
+./source/os_portasm.obj \
+./source/os_queue.obj \
+./source/os_tasks.obj \
+./source/os_timer.obj \
 ./source/pinmux.obj \
 ./source/sci.obj \
 ./source/sys_core.obj \
@@ -79,6 +108,7 @@ OBJS += \
 
 ASM_DEPS += \
 ./source/dabort.d \
+./source/os_portasm.d \
 ./source/sys_core.d \
 ./source/sys_intvecs.d \
 ./source/sys_mpu.d \
@@ -92,6 +122,16 @@ OBJS__QUOTED += \
 "source\hv_driver.obj" \
 "source\mibspi.obj" \
 "source\notification.obj" \
+"source\os_croutine.obj" \
+"source\os_event_groups.obj" \
+"source\os_heap.obj" \
+"source\os_list.obj" \
+"source\os_mpu_wrappers.obj" \
+"source\os_port.obj" \
+"source\os_portasm.obj" \
+"source\os_queue.obj" \
+"source\os_tasks.obj" \
+"source\os_timer.obj" \
 "source\pinmux.obj" \
 "source\sci.obj" \
 "source\sys_core.obj" \
@@ -115,6 +155,15 @@ C_DEPS__QUOTED += \
 "source\hv_driver.d" \
 "source\mibspi.d" \
 "source\notification.d" \
+"source\os_croutine.d" \
+"source\os_event_groups.d" \
+"source\os_heap.d" \
+"source\os_list.d" \
+"source\os_mpu_wrappers.d" \
+"source\os_port.d" \
+"source\os_queue.d" \
+"source\os_tasks.d" \
+"source\os_timer.d" \
 "source\pinmux.d" \
 "source\sci.d" \
 "source\sys_dma.d" \
@@ -129,6 +178,7 @@ C_DEPS__QUOTED += \
 
 ASM_DEPS__QUOTED += \
 "source\dabort.d" \
+"source\os_portasm.d" \
 "source\sys_core.d" \
 "source\sys_intvecs.d" \
 "source\sys_mpu.d" \
@@ -136,6 +186,7 @@ ASM_DEPS__QUOTED += \
 
 ASM_SRCS__QUOTED += \
 "../source/dabort.asm" \
+"../source/os_portasm.asm" \
 "../source/sys_core.asm" \
 "../source/sys_intvecs.asm" \
 "../source/sys_mpu.asm" \
@@ -148,6 +199,15 @@ C_SRCS__QUOTED += \
 "../source/hv_driver.c" \
 "../source/mibspi.c" \
 "../source/notification.c" \
+"../source/os_croutine.c" \
+"../source/os_event_groups.c" \
+"../source/os_heap.c" \
+"../source/os_list.c" \
+"../source/os_mpu_wrappers.c" \
+"../source/os_port.c" \
+"../source/os_queue.c" \
+"../source/os_tasks.c" \
+"../source/os_timer.c" \
 "../source/pinmux.c" \
 "../source/sci.c" \
 "../source/sys_dma.c" \
