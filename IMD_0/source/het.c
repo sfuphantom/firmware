@@ -1932,6 +1932,38 @@ void het1GetConfigValue(het_config_reg_t *config_reg, config_value_type_t type)
     }
 }
 
+/* USER CODE BEGIN (5) */
+/* USER CODE END */
+
+/** @fn void het1HighLevelInterrupt(void)
+*   @brief Level 0 Interrupt for HET1
+*/
+#pragma CODE_STATE(het1HighLevelInterrupt, 32)
+#pragma INTERRUPT(het1HighLevelInterrupt, IRQ)
+
+/* SourceId : HET_SourceId_018 */
+/* DesignId : HET_DesignId_017 */
+/* Requirements : HL_SR371, HL_SR380, HL_SR381 */
+void het1HighLevelInterrupt(void)
+{
+    uint32 vec = hetREG1->OFF1;
+
+    if (vec < 18U)
+    {
+        if ((vec & 1U) != 0U)
+        {
+            pwmNotification(hetREG1,(vec >> 1U) - 1U, pwmEND_OF_PERIOD);
+        }
+        else
+        {
+            pwmNotification(hetREG1,(vec >> 1U) - 1U, pwmEND_OF_DUTY);
+        }
+    }
+    else
+    {
+        edgeNotification(hetREG1,vec - 18U);
+    }
+}
 
 /* USER CODE BEGIN (6) */
 /* USER CODE END */
