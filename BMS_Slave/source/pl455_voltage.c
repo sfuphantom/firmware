@@ -68,12 +68,13 @@ void Slave_config()
 
     // Mask Customer Checksum Fault bit
     nSent = WriteReg(0, 107, 0x8000, 2, FRMWRT_ALL_NR); // clear all fault summary flags
-    // clear all faults
-    nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags (Section 1.2.7)
-    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR); // clear fault flags in the system status register
+
+    // clear all faults (Section 2.2.4)
+    nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags
+    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR);   //  clear fault flags in the system status register
 
     // Auto-address all boards (Section 1.2.2)
-    nSent = WriteReg(0, 14, 0x19, 1, FRMWRT_ALL_NR); // set auto-address mode on all boards
+    nSent = WriteReg(0, 14, 0x10, 1, FRMWRT_ALL_NR); // set auto-address mode on all boards
     nSent = WriteReg(0, 12, 0x08, 1, FRMWRT_ALL_NR); // enable to enter auto address mode on all boards
 
     // send out new addresses to all devices in crementing order starting at zero
@@ -111,6 +112,3 @@ void Slave_config()
     }
 
 }
-
-
-
