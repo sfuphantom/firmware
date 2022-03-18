@@ -41,5 +41,9 @@ typedef struct BMS_FLAGS{
                                                             // If this flag is over 3 and BMS state is SLAVE_CONNECTION_BAD,
                                                             // BAD_SLAVE_CONNECTION_FLAG is set
 } BMS_FLAGS;
+void BMS_init();
+void Slave_config();
+void board_enable (uint32 baudrate, uint64_t dwData);
+void board_stack_enable();
 
 #endif /* INCLUDE_PL455_VOLTAGE_H_ */
