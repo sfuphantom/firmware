@@ -42,8 +42,8 @@ typedef struct BMS_FLAGS{
                                                             // BAD_SLAVE_CONNECTION_FLAG is set
 } BMS_FLAGS;
 void BMS_init();
-void Slave_config();
-void board_enable (uint32 baudrate, uint64_t dwData);
+void Slave_autoAddressing();
+void board_com_config (uint32 baudrate, uint64_t dwData);
 void board_stack_enable();
 
 #endif /* INCLUDE_PL455_VOLTAGE_H_ */

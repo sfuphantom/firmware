@@ -39,11 +39,9 @@ void BMS_init()
     unsigned char command;
 
     //
-    UARTprintf("log: WakeBit:%d FaultBit:%d\n\r", gioGetBit(hetPORT1, 9),
-               gioGetBit(hetPORT1, 25));
+    UARTprintf("log: WakeBit:%d FaultBit:%d\n\r", gioGetBit(hetPORT1, 9), gioGetBit(hetPORT1, 25));
     WakePL455();
-    UARTprintf("log: WakeBit:%d FaultBit:%d\n\r", gioGetBit(hetPORT1, 9),
-               gioGetBit(hetPORT1, 25));
+    UARTprintf("log: WakeBit:%d FaultBit:%d\n\r", gioGetBit(hetPORT1, 9), gioGetBit(hetPORT1, 25));
 
     CommClear();
     CommReset();
@@ -54,9 +52,9 @@ void BMS_init()
 
 }
 
-void Slave_config()
+void Slave_autoAddressing()
 {
-    // Turn on the downstreat communications drivers on all devices in the chain
+    // Turn on the downstream communications drivers on all devices in the chain
     for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++)
     {
         nSent = WriteReg(nDev_ID, 12, 0x40, 1, FRMWRT_ALL_NR); //Send out broadcast pwrdown command
@@ -68,24 +66,24 @@ void Slave_config()
     delayms(100);
 
     // Mask Customer Checksum Fault bit
-    nSent = WriteReg(0, 107, 0x8000, 2, FRMWRT_ALL_NR); // clear all fault summary flags
+    nSent = WriteReg(0, 107, 0x8000, 2, FRMWRT_ALL_NR);
 
     // clear all faults (Section 2.2.4)
     nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags
-    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR);   //  clear fault flags in the system status register
+    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR);   // clear fault flags in the system status register
+
+    // Enable all communication interfaces on all boards in the stack (Section 1.2.1)
+    nSent = WriteReg(0, 16, 0x10F8, 2, FRMWRT_ALL_NR); // set communication baud rate and enable RX/TX
 
     // Auto-address all boards (Section 1.2.2)
-    nSent = WriteReg(0, 14, 0x10, 1, FRMWRT_ALL_NR); // set auto-address mode on all boards
-    nSent = WriteReg(0, 12, 0x08, 1, FRMWRT_ALL_NR); // enable to enter auto address mode on all boards
+    nSent = WriteReg(0, 14, 0x19, 1, FRMWRT_ALL_NR); // set auto-address mode on all boards (set the ADDR_SEL bit) (Refer to 7.6.3.9)
+    nSent = WriteReg(0, 12, 0x08, 1, FRMWRT_ALL_NR); // enable to enter auto address mode on all boards (set the AUTO-ADDRESS bit)
 
-    // send out new addresses to all devices incrementing order starting at zero
+    // send out new addresses to all devices incrementing order starting at zero (Section 1.2.3)
     for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++)
     {
         nSent = WriteReg(nDev_ID, 10, nDev_ID, 1, FRMWRT_ALL_NR); // send address to each board
     }
-
-    // Enable all communication interfaces on all boards in the stack (Section 1.2.1)
-    nSent = WriteReg(0, 16, 0x10F8, 2, FRMWRT_ALL_NR); // set communication baud rate and enable RX/TX
 
     // Default baud rate is set to 250000, but if another baud rate seems ideal, change the value of baud rate defined in pl455.h
     switch (BAUDRATE)
@@ -95,18 +93,17 @@ void Slave_config()
             delayms(1);
             sciSetBaudrate(BMS_UART, BAUDRATE);
             break;
-        case 250000:
-            nSent = WriteReg(0, 16, 0x20F8, 2, FRMWRT_ALL_NR);
+        case 250000: // Already set by default
             delayms(1);
             sciSetBaudrate(BMS_UART, BAUDRATE);
             break;
         case 500000:
-            nSent = WriteReg(0, 16, 0x30F8, 2, FRMWRT_ALL_NR);
+            nSent = WriteReg(0, 16, 0x20F8, 2, FRMWRT_ALL_NR);
             delayms(1);
             sciSetBaudrate(BMS_UART, BAUDRATE);
             break;
         case 1000000:
-            nSent = WriteReg(0, 16, 0x40F8, 2, FRMWRT_ALL_NR);
+            nSent = WriteReg(0, 16, 0x30F8, 2, FRMWRT_ALL_NR);
             delayms(1);
             sciSetBaudrate(BMS_UART, BAUDRATE);
             break;
@@ -114,12 +111,12 @@ void Slave_config()
 
 }
 
-void board_enable (uint32 baudrate, uint64_t dwData)
+void board_com_config (uint32 baudrate, uint64_t dwData)
 {
     switch(baudrate)
     {
     case 125000:
-        nSent = WriteReg(nDev_ID, 16, dwData, 2, FRMWRT_SGL_NR);    // enable comm-high, fault-high, comm-low and fault-low on all middle boards
+        nSent = WriteReg(nDev_ID, 16, dwData, 2, FRMWRT_SGL_NR);         // enable comm-high, fault-high, comm-low and fault-low on all middle boards
         break;
     case 250000:
         nSent = WriteReg(nDev_ID, 16, dwData+4096, 2, FRMWRT_SGL_NR);    // enable comm-high, fault-high, comm-low and fault-low on all middle boards
@@ -128,7 +125,7 @@ void board_enable (uint32 baudrate, uint64_t dwData)
         nSent = WriteReg(nDev_ID, 16, dwData+8192, 2, FRMWRT_SGL_NR);    // enable comm-high, fault-high, comm-low and fault-low on all middle boards
         break;
     case 1000000:
-        nSent = WriteReg(nDev_ID, 16, dwData+196608, 2, FRMWRT_SGL_NR);    // enable comm-high, fault-high, comm-low and fault-low on all middle boards
+        nSent = WriteReg(nDev_ID, 16, dwData+196608, 2, FRMWRT_SGL_NR);  // enable comm-high, fault-high, comm-low and fault-low on all middle boards
         break;
     }
 }
@@ -137,7 +134,6 @@ void board_stack_enable()
 {
     for (nDev_ID = TOTALBOARDS - 1; nDev_ID >= 0; --nDev_ID)
     {
-        //nRead = ReadReg(nDev_ID, 10, &wTemp, 1, 0); // 0ms timeout
         //delayms(100);
         nRead = ReadReg(nDev_ID, 10, &wTemp, 1, 0); // 0ms timeout
 
@@ -149,11 +145,11 @@ void board_stack_enable()
             { // if the last board was not present but this one is, this is the top board
                 if(nDev_ID == 0) // this is the only board
                     {
-                    board_enable (BAUDRATE, 0x0080);
+                    board_com_config (BAUDRATE, 0x0080); // enable only single-end comm port on board
                     }
                 else // this is the top board of a stack (section 1.2.5)
                     {
-                    board_enable (BAUDRATE, 0x0028);
+                    board_com_config (BAUDRATE, 0x0028); // enable only comm-low and fault-low for the top board
                     nTopFound = 1;
                         }
                     }
@@ -161,11 +157,11 @@ void board_stack_enable()
                     {
                         if(nDev_ID == 0) // this is a bottom board of a stack (section 1.2.6)
                         {
-                            board_enable (BAUDRATE, 0x00D0);
+                            board_com_config (BAUDRATE, 0x00D0); // enable comm-high, fault-high and single-end comm port on bottom board
                         }
                         else // this is a middle board
                         {
-                            board_enable (BAUDRATE, 0x0078);
+                            board_com_config (BAUDRATE, 0x0078); // enable comm-high, fault-high, comm-low, and fault-low on all middle boards
                         }
                     }
                 }
@@ -173,6 +169,6 @@ void board_stack_enable()
 
     // Clear all faults (section 1.2.7)
     nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags
-    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR); // clear fault flags in the system status register
+    nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR);   // clear fault flags in the system status register
     delayms(10);
 }
