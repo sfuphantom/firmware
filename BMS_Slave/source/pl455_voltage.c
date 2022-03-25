@@ -50,6 +50,10 @@ void BMS_init()
     sciEnableNotification(PC_UART, SCI_RX_INT);
     sciReceive(PC_UART, 1, (unsigned char*) &command);
 
+    Slave_autoAddressing();
+    Board_stack_enable();
+    AFE_config ();
+
 }
 
 void Slave_autoAddressing()
@@ -111,7 +115,7 @@ void Slave_autoAddressing()
 
 }
 
-void board_com_config (uint32 baudrate, uint64_t dwData)
+void Board_com_config (uint32 baudrate, uint64_t dwData)
 {
     switch(baudrate)
     {
@@ -130,7 +134,7 @@ void board_com_config (uint32 baudrate, uint64_t dwData)
     }
 }
 
-void board_stack_enable()
+void Board_stack_enable()
 {
     for (nDev_ID = TOTALBOARDS - 1; nDev_ID >= 0; --nDev_ID)
     {
@@ -168,7 +172,52 @@ void board_stack_enable()
             }
 
     // Clear all faults (section 1.2.7)
-    nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags
     nSent = WriteReg(0, 81, 0x38, 1, FRMWRT_ALL_NR);   // clear fault flags in the system status register
+    nSent = WriteReg(0, 82, 0xFFC0, 2, FRMWRT_ALL_NR); // clear all fault summary flags
+
     delayms(10);
+}
+
+// Section 2.1
+// The analog front end (AFE) on each stacked board should be configured properly to scan the desired channels at the desired timing
+// before reading voltages from daisy-chain networked boards.
+void AFE_config ()
+{
+    // Configure the initial sampling delay (section 2.2.1)
+    nDev_ID =0;
+    nSent = WriteReg(nDev_ID, 60, 0x00, 1, FRMWRT_SGL_NR); // set 0 mux delay
+    nSent = WriteReg(nDev_ID, 61, 0x00, 1, FRMWRT_SGL_NR); // set 0 initial delay
+
+    // Configure voltage and internal sample period (section 2.2.2)
+    nSent = WriteReg(nDev_ID, 62, 0xCC, 1, FRMWRT_SGL_NR); // set 99.92us ADC sampling period
+
+    // Configure the Over-sampling Rate (section 2.2.3)
+    nSent = WriteReg(nDev_ID, 7, 0x00, 1, FRMWRT_SGL_NR); // set no oversampling period
+
+    // Clear and check faults (section 2.2.4)
+    nSent = WriteReg(nDev_ID, 81, 0x38, 1, FRMWRT_SGL_NR);   // clear fault flags in the system status register
+    nSent = WriteReg(nDev_ID, 82, 0xFFC0, 2, FRMWRT_SGL_NR); // clear all fault summary flags
+    nRead = ReadReg(nDev_ID, 81 ,&wTemp, 1, 0); // 0ms timeout
+    nRead = ReadReg(nDev_ID, 82, &wTemp, 2, 0); // 0ms timeout
+
+    // Select number of ceels and channels to sample (section 2.2.5.1)
+    nSent = WriteReg(nDev_ID, 13, 0x0A, 1, FRMWRT_ALL_NR);       // set number of cells to 16
+    nSent = WriteReg(nDev_ID,  3, 0x03FFFFC0, 4, FRMWRT_ALL_NR); // set all AUX channels, internal digital die, and internal analog die temperatures
+
+    // Set cell overvoltager and undervoltage thresholds (section 2.2.6.1)
+    nSent = WriteReg(nDev_ID, 144, 0xD70A, 2, FRMWRT_SGL_NR); // set OV threshold = 4.2000V (4.2/5*(2^16-1) = 55050 = D70A)
+    nSent = WriteReg(nDev_ID, 142, 0xA3D6, 2, FRMWRT_SGL_NR); // set UV threshold = 3.2000V (3.2/5*(2^16-1) = 41942 = A3D6)
+
+    // Set GPIO direction for GPIO4 and GPIO[2:0] as outputs, GPIO3 and GPIO5 as inputs
+    nSent = WriteReg(nDev_ID, 120, 0x17, 1, FRMWRT_ALL_NR);
+
+    // Configure cell-balancing (datasheet section 7.6.3.13)
+    nSent = WriteReg(nDev_ID, 19, 0x20, 1, FRMWRT_ALL_NR); // Set balance time for 1 minute whenever balancing function is called
+                                                           // Disables balancing whenever Fault is detected
+    // Configure test configuration (datasheet section 7.6.3.15)
+    nSent = WriteReg(nDev_ID, 30, 0x0, 2, FRMWRT_ALL_NR); // Sets EN_SQUEEZE = 0 so BALANCE_EN controls the channels which are balancing
+
+    for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++){
+        bmsSlaveState[nDev_ID] = SLAVE_CONNECTION_GOOD;
+    }
 }
