@@ -60,8 +60,8 @@ void gioNotification(gioPORT_t *port, uint32 bit)
 }
 
 // 1. Ready to drive logic 
-// 2.Queue for communicating
-// 3. Buzzer logic (Timers)  
+// 2. Queue for communicating with tasks 
+// 3. Buzzer logic (freeRTOS Timers)  
 
 
 void InterruptTask3(){
