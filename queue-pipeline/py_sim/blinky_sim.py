@@ -27,8 +27,6 @@ class BlinkySimulation(Simulation):
 
 blinky_sim = BlinkySimulation('COM7')
 
-sim_values = [1]
-blinky_sim.run_lambda()
-# blinky_sim.run()
 
+blinky_sim.run_lambda()
 
