@@ -47,5 +47,9 @@ void Slave_autoAddressing();
 void Board_com_config (uint32 baudrate, uint64_t dwData);
 void Board_stack_enable();
 void AFE_config ();
+void BMS_Read_All(bool printToUART, bool update);
+void cellVoltageRead(bool printToUART);
+void voltageLevelCheck(bool UART, uint32 Vin, uint8 i, uint8 j, uint8 cellCount);
+
 
 #endif /* INCLUDE_PL455_VOLTAGE_H_ */

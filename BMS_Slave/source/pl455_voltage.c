@@ -32,7 +32,12 @@ BMS_SLAVE_STATE bmsSlaveState[TOTALBOARDS];
 extern bms_data *BMSDataPtr;
 int nDev_ID;
 int nRead, nSent, nTopFound = 0;
+char buf[100];
 uint32_t wTemp = 0;
+uint8 totalCellCount = TOTALCELLS*TOTALBOARDS;
+uint8 cellCount = TOTALCELLS;
+uint8 voltageLoopCounter = TOTALCELLS*2+1;
+uint8 auxLoopCounter = TOTALCELLS*2+1 + TOTALAUX*2;
 
 void BMS_init()
 {
@@ -219,5 +224,101 @@ void AFE_config ()
 
     for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++){
         bmsSlaveState[nDev_ID] = SLAVE_CONNECTION_GOOD;
+    }
+}
+
+/*
+ * Read all values in all daisy-chained slaves and store slave voltage values in BMS data structure
+ * @param       printToUART     set true to enable printing values to UART
+ * @param       update          set true to query the slaves for new values, set false to obtain previously queried-values
+ */
+void BMS_Read_All(bool printToUART, bool update)
+{
+    int nDev_ID;
+
+    if (update){
+        int nSent = WriteReg(0, 2, TOTALBOARDS-1, 1, FRMWRT_ALL_R); // send sync sample command
+        if (nSent != 1){
+            for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++){
+                BMS.CELL_RW_ERROR_FLAG[nDev_ID]++;
+            }
+        }
+        else {
+            for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++){
+                BMS.CELL_RW_ERROR_FLAG[nDev_ID] = 0;
+            }
+        }
+
+        //1 header, 32x2 cells, 2x16 Aux, 4 dig die, 4 ana die, 2 CRC
+        sciReceive(BMS_UART, BMSByteArraySize*TOTALBOARDS, MultipleSlaveReading);
+
+        delayms(5); // for the tms to record all the data first
+
+    }
+    cellVoltageRead(printToUART);
+
+}
+
+void cellVoltageRead(bool printToUART){
+
+    BMSDataPtr->Data.minimumCellVoltage = 5;
+    uint8 i;
+    uint8 j;
+
+    for (i = TOTALBOARDS-1; i == 0; i--){
+        for (j = 0; j < voltageLoopCounter; j+=2){
+            if (j==0){
+                if (printToUART){
+                    snprintf(buf, 30, "Header -> Decimal: %d, HEX: %X\n\n\r", MultipleSlaveReading[j+BMSByteArraySize*i],MultipleSlaveReading[j+BMSByteArraySize*i]);
+                    UARTSend(PC_UART, buf);
+                }
+                continue;
+            }
+
+            uint32 tempVal = MultipleSlaveReading[j+BMSByteArraySize*i]*16*16 + MultipleSlaveReading[j+BMSByteArraySize*i];
+            double div = tempVal/65535.0; //FFFF
+            double fin = div * 5.0;
+
+            voltageLevelCheck(printToUART,fin,i,j,cellCount);
+            totalCellCount--;
+            cellCount--;
+        }
+        cellCount = TOTALCELLS;
+    }
+}
+
+void voltageLevelCheck(bool UART, uint32 Vin, uint8 i, uint8 j, uint8 cellCount)
+{
+    if (i==0){
+        BMSDataPtr->SlaveVoltage.BMS_Slave_1[cellCount - 1] = Vin;
+    }
+    if (i==1){
+        BMSDataPtr->SlaveVoltage.BMS_Slave_2[cellCount - 1] = Vin;
+    }
+    if (i==2){
+        BMSDataPtr->SlaveVoltage.BMS_Slave_3[cellCount - 1] = Vin;
+    }
+    if (i==3){
+        BMSDataPtr->SlaveVoltage.BMS_Slave_4[cellCount - 1] = Vin;
+    }
+
+    if (Vin < BMSDataPtr->Data.minimumCellVoltage){
+        BMSDataPtr->Data.minimumCellVoltage = Vin;
+    }
+
+    if (UART){
+       snprint(buf , 40, "Cell %d: Hex: %X %X voltage: %fV \n\r", totalCellCount, MultipleSlaveReading[j+BMSByteArraySize*i], MultipleSlaveReading[j+1+BMSByteArraySize], Vin);
+       UARTSend(PC_UART, buf);
+       UARTSend(PC_UART, "\n\r");
+    }
+
+    if (BMS.CELL_OVERVOLTAGE_FLAG[cellCount - 1]== true || BMS.CELL_UNDERVOLTAGE_FLAG[cellCount - 1] == true){
+        BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1]++;
+    }
+    else {
+        BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] = 0;
+    }
+    if (BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] > 300) {
+        BMSDataPtr->Flags.THREE_SECOND_FLAG = true;
     }
 }

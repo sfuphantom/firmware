@@ -36,7 +36,6 @@ typedef struct bmsData
 {
 	float SOC; // State of charge estimation, expressed in % (i.e, 55.5% = 55.5)
 	float remainingRunTime; // Remaining run time estimation, expressing in minutes
-
 	double minimumCellVoltage; // Minimum voltage of all cells from most recent query
 } bmsData;
 
@@ -54,6 +53,19 @@ typedef struct bms_data
     bmsData Data;
     bmsSlaveVoltage SlaveVoltage;
 } bms_data;
+
+typedef struct cell_data
+{
+    uint8 cell_1_upper;
+    uint8 cell_1_lower;
+    uint8 cell_2_upper;
+    uint8 cell_2_lower;
+    uint8 cell_3_upper;
+    uint8 cell_3_lower;
+
+
+    uint8 header;
+};
 
 BMSState_t BMSState;
 bms_data* BMSDataPtr;
