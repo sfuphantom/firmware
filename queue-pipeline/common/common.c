@@ -6,7 +6,6 @@
  */
 
 #include "common.h"
-#
 
 static QueueHandle_t debug_q;
 
