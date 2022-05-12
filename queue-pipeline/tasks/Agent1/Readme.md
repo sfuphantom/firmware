@@ -1,9 +1,9 @@
 # Agent Task
-This task is in charge of reading a GPIO pin and outputting the data to a queue to be processed by the Actor. The beauty of this architecture is that each task is simple, and has a well-defined interface. 
+This task is in charge of reading a GPIO pin and outputting the data to a queue to be processed by the Actor. 
 
 The code below can be easily separated into its hardware and software parts. Those working on hardware can develop a single function to read the signals and then integrate their code into a task by adding the boilerplate queue code at the bottom.
 
-For those unfamiliar with freeRTOS, the ```vTaskDelay``` function will essentially yield execution of this task for 100ms to allow other tasks to run. This means that the data is more or less sampled at 10Hz.
+For those unfamiliar with freeRTOS, the ```vTaskDelay``` function will yield execution of this task for 100ms to allow other tasks to run. This means that the data is more or less sampled at 10Hz.
 ```
 void vTaskAgent1(void* pvParams){
 
@@ -18,15 +18,12 @@ void vTaskAgent1(void* pvParams){
 
         // send data to actor
         xQueueSend(
-
             &q.tx,
             ( void * ) data_ptr,
             ( TickType_t ) 10
-
         );
 
         vTaskDelay(pdMS_TO_TICKS(100));
-
     }
 }
 ```

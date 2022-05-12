@@ -6,9 +6,6 @@ An important note to discuss is the use of a struct for this module to wrap all 
 ```
 typedef struct Actor_t
 {
-    /* Queue Handles */
-    QueueArr_t queue;
-
     /* Input Data */ 
     AgentMessage_t data;
     uint8_t agent1_state;
@@ -20,25 +17,34 @@ typedef struct Actor_t
 }Actor_t;
 ```
 
-Here, there is no explicit delay or 'yielding' of execution to the scheduler. Instead, this task is part of the pipeline that begins at the Agents. The task will block for 1ms when no data is being sent to the queue. If the Agent tasks never fail, then in theory this task can be assumed to run at the same frequency as the tasks it is receiving from.
+In the following code below, there is no explicit delay or 'yielding' of execution to the scheduler. Instead, this task is part of the pipeline that begins at the Agents; once data is made available through them, the Actor will be allowed to run again. When no data is being sent to the queue, the task will block until the timeout of 1ms has been reached. If the Agent tasks never fail, this task can be assumed to run at the same frequency as the tasks it is receiving from.
 
-If receiving times out, ```xQueueReceive``` will return ``pdFALSE``. This event can be acted upon and the queue used as a type of software heartbeat to ensure its child task is operating as expected.
+If receiving times out, ```xQueueReceive``` will return ``pdFALSE``. This event can be acted upon and the queue could used as a form of software heartbeats to ensure its agents are operating as expected.
 
 The software logic for this module is sandwiched between boilerplate calls to the queue api.
 ```
-
 void vTaskActor(void* pvParams){
     
+    /* Initialize struct */
+    static Actor_t actor_data = {
+        .data = {0},
+        .tx_data = 0,
+        .agent1_state = 0,
+        .agent2_state = 0,
+    };
+    static Actor_t* self = &actor_data;
+
     /* Initialize intermediate variables */
     static BaseType_t rx_success = pdFALSE;
+    uint8_t debug_success = 1;
 
     while(true){
 
-        /* receive data from agents (suspended until available data) */
+        /* receive data from agents (suspend until data available) */
         rx_success = xQueueReceive(
-            this->queue.rx,
-            &this->data,
-            ( TickType_t ) pdMS_TO_TICKS(1)  // block for 1 tick
+            q_ptr->rx,
+            &self->data,
+            ( TickType_t ) pdMS_TO_TICKS(500)  // block for 500ms
         );
 
         /* failed to receive data; do smt!! */
@@ -47,35 +53,35 @@ void vTaskActor(void* pvParams){
         }
 
         /* act on agent data */
-        this->tx_data = actor_logic(this->data, this->agent1_state, this->agent2_state);
+        actor_logic(self);
+        debug_success = log_valuef(self->tx_data);
 
         /* transmit data */
         xQueueSend(
-            this->queue.tx,
-            &this->tx_data,
+            q_ptr->tx,
+            &self->tx_data,
             ( TickType_t ) 1
         );
 
     } // superloop
 }
 ```
-The actor_logic function processes the data and acts upon it. Here, it parses the message as either agent1 or 2 data, sends the values to the debug actor, and returns the ```and``` of both values. Because the struct is static, this function already has access to all of the data without needing them to be passed in. The parameters were still specified though, to be explicit and more unit testable. This decision may be a little overdone.
+The actor_logic function processes the data and acts upon it.
 ```
-uint8_t actor_logic(AgentMessage_t data, uint8_t agent1_state, uint8_t agent2_state){
+void actor_logic(Actor_t* inst){
 
-    switch(data.id){
+    switch(inst->data.id){
 
         case AGENT_ONE:
-            agent1_state = data.msg;
-            gioSetBit(gioPORTB, 1, agent1_state);
-            log_valuef(data.msg);
+            inst->agent1_state = inst->data.msg;
+            gioSetBit(gioPORTB, 1, inst->agent1_state);
             break;
 
         case AGENT_TWO:
-            agent2_state =  data.msg;
-            gioSetBit(gioPORTB, 2, agent2_state);
+            inst->agent2_state = inst->data.msg;
+            gioSetBit(gioPORTB, 2, inst->agent2_state);
             break;
     } // switchcase
-    return agent2_state && agent1_state;
+    inst->tx_data = inst->agent2_state && inst->agent1_state;
 }
 ```
