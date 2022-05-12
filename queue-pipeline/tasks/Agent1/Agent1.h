@@ -19,6 +19,7 @@
 #include "common.h"
 #include "gio.h"
 #include "phantom_vars.h"
+#include "het.h"
 
 void agent1Init(QueueArr_t other);
 void vTaskAgent1(void* pvParams);

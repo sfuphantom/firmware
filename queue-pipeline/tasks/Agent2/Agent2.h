@@ -10,6 +10,7 @@
 
 #include "common.h"
 #include "phantom_vars.h"
+#include "gio.h"
 
 void agent2Init(QueueArr_t);
 void vTaskAgent2(void* pvParams);

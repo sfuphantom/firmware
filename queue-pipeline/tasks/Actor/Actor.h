@@ -17,9 +17,6 @@ void vTaskActor(void* pvParams);
 void actorInit(QueueArr_t);
 typedef struct Actor_t
 {
-    /* Queue Handles */
-    QueueArr_t queue;
-
     /* Input Data */ 
     AgentMessage_t data;
     uint8_t agent1_state;
@@ -30,7 +27,7 @@ typedef struct Actor_t
 
 }Actor_t;
 
-uint8_t actor_logic(AgentMessage_t, uint8_t, uint8_t);
+void actor_logic(Actor_t*);
 
 
 

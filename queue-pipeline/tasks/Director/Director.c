@@ -1,45 +1,47 @@
 #include "Director.h"
 
 static QueueArr_t q;
+static QueueArr_t* q_ptr = &q;
 
-// void directorInit(QueueArr_t other){
+static Control_t control;
+static Control_t* ctrl = &control;
 
-//     /* Deep copy elements */
-//     q.rx = other.rx;
-//     q.tx = other.tx; 
-// }
+void directorInit(QueueArr_t other, Control_t octrl){
+
+    /* Deep copy elements */
+    q_ptr->rx = other.rx;
+
+    ctrl->agent1 = octrl.agent1;
+    ctrl->agent2 = octrl.agent2;
+    ctrl->actor = octrl.actor;
+}
 
 void vTaskDirector(void* pvParams){
 
-    static uint8_t rx_data = 0;
-    static BaseType_t rx_success = pdFALSE;
+    uint8_t rx_data = 0;
+    BaseType_t rx_success = pdFALSE;
     while(1){
 
 
-        // rx_success = xQueueReceive(
-        //     global_ptr->queue_handle_arr[FILTERED_QUEUE],
-        //     &rx_data,
-        //     ( TickType_t ) 6000 // block for 1000 ticks
-        // );
+        rx_success = xQueueReceive(
+            q_ptr->rx,
+            &rx_data,
+            ( TickType_t ) pdMS_TO_TICKS(1000) // block for x ticks
+        );
 
+        if(rx_success == pdFALSE){
+            continue;
+        }
 
-//        if(rx_data == 1){
-//
-//            vTaskSuspend(global_ptr->task_handle_arr[ACTOR]);
-//
-//        }
-//
-//        if(rx_success == pdFALSE){
-//            xQueueReset(global_ptr->queue_handle_arr[RAW_QUEUE]);
-//            vTaskResume(global_ptr->task_handle_arr[ACTOR]);
-//        }
+        // control signals        
+        if(rx_data == 1){
+//            vTaskSuspend(some-task);
+        }else{
 
+//            vTaskResume(some-task);
+        }
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
-
-    }
-
-
+    } // superloop
 
 }
 

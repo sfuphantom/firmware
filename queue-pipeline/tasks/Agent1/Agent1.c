@@ -9,12 +9,12 @@
 #include "Agent1.h"
 
 static QueueArr_t q;
+static QueueArr_t* q_ptr = &q;
 
 void agent1Init(QueueArr_t other){
 
     /* Deep copy elements */
-    q.rx = other.rx;
-    q.tx = other.tx; 
+    q_ptr->tx = other.tx;
 }
 
 void vTaskAgent1(void* pvParams){
@@ -28,21 +28,16 @@ void vTaskAgent1(void* pvParams){
 
 
         // read inputs from pin
-        data_ptr->msg = gioGetBit(gioPORTB, 1);
-
+        data_ptr->msg = gioGetBit(hetPORT1, 15);
         // send data to actor
         xQueueSend(
-
-            &q.tx,
+            q_ptr->tx,
             ( void * ) data_ptr,
             ( TickType_t ) 10
 
         );
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(10));
 
     }
-
-
-
 }
