@@ -19,7 +19,6 @@ void agent1Init(QueueArr_t other){
 
 void vTaskAgent1(void* pvParams){
 
-
     static AgentMessage_t data = {0};
     static AgentMessage_t* data_ptr = &data;
     data_ptr->id = AGENT_ONE;
@@ -34,7 +33,6 @@ void vTaskAgent1(void* pvParams){
             q_ptr->tx,
             ( void * ) data_ptr,
             ( TickType_t ) 10
-
         );
 
         vTaskDelay(pdMS_TO_TICKS(10));

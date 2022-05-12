@@ -135,6 +135,10 @@ class Simulation(ABC):
         
         
     def test_serial(self, sim_values:Iterable, expected_value:int, timeout=10, logger_fn:Callable=lambda x: None, period=0.1):
+        '''
+        Run through all 'sim_values' at 'period' and wait until
+        received value == 'expected_value', unless 'timeout'
+        '''
         # start simulation thread
         serial_thread = threading.Thread(target=self.send_serial, daemon=True)
         serial_thread.start()

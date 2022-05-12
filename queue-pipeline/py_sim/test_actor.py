@@ -31,7 +31,6 @@ def test_actor_logic():
     assert test_sim.test_serial(['1,1'], 1, logger_fn=print_test, timeout=10, period=1)
     print("\npass!")
 
-
 if __name__ == '__main__':
         
     test_actor_logic()

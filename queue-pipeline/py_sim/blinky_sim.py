@@ -1,6 +1,3 @@
-from functools import partial
-from time import time
-from tkinter import W
 from sim import Simulation
 
 class BlinkySimulation(Simulation):
@@ -17,7 +14,6 @@ class BlinkySimulation(Simulation):
     
     def construct_serial(self, args):
         led = args['led']
-        print(led)
         return '{},{}'.format(int('1' in led), int('2' in led))
 
     def print_help(self):

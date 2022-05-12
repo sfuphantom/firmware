@@ -62,5 +62,4 @@ void vTaskDebugger(void* pvParams){
             UARTprintf("\n");
         }
     } // superloop
-
 }

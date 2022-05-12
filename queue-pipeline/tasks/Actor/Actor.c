@@ -58,7 +58,6 @@ void vTaskActor(void* pvParams){
         );
 
     } // superloop
-
 }
 
 void actor_logic(Actor_t* inst){
