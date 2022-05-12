@@ -38,8 +38,6 @@ void vTaskSim(void* pvParams){
         // read inputs from PC
         sciReceive(PC_UART, 3, py_msg);
 
-
-
         // parse serial command
         split(py_msg, ",", command, 2);
 
@@ -63,7 +61,7 @@ void vTaskSim(void* pvParams){
 
         );
 
-        vTaskDelay(pdMS_TO_TICKS(1));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

@@ -17,7 +17,7 @@
 #include "sci.h"
 #include "stdio.h"
 #include "phantom_vars.h"
-
+#include "phantom_config.h"
 
 #define PC_UART scilinREG
 

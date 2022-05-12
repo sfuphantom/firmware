@@ -29,18 +29,26 @@ void debugger_init(QueueHandle_t debug_queue){
 void vTaskDebugger(void* pvParams){
 
     static DebugStruct_t data;
-    static uint8_t delay;
+
+    uint32_t prev_data;
+//    static uint8_t delay;
+    static BaseType_t rx_success = pdFALSE;
     while(1){
 
         // receieve messages from uart with an id
-        xQueueReceive(
+        rx_success = xQueueReceive(
             rx,
             &data,
-            (TickType_t) pdMS_TO_TICKS(500)
+            (TickType_t) pdMS_TO_TICKS(10000)
 
         );
 
 
+
+       /* failed to receive data; do smt!! */
+       if(rx_success == pdFALSE){
+           continue;
+       }
 
         if(data.print_val == 1){
 
@@ -49,7 +57,7 @@ void vTaskDebugger(void* pvParams){
             
             ltoa(data.data, number_str);
             UARTprintf(number_str);
-            UARTprintf("\r\n");
+            UARTprintf("\n");
         } else{
 
             if(data.data >= MSG_BUFFER_SIZE ){
@@ -57,22 +65,23 @@ void vTaskDebugger(void* pvParams){
             }
             // print whatever value to the console
             UARTprintf(MESSAGES[data.data]);
-            UARTprintf("\r\n");
+            UARTprintf("\n");
             
         }
 
 
-        uint16_t to_process = uxQueueMessagesWaiting(rx);
-
-        // speed up processing for lots of messages
-        if(to_process > 10){
-            delay = 1;
-        }else{
-            delay = 100;
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(delay));
-
+        prev_data = data.data;
+//        uint16_t to_process = uxQueueMessagesWaiting(rx);
+//
+//        // speed up processing for lots of messages
+//        if(to_process > 10){
+//            delay = 1;
+//        }else{
+//            delay = 100;
+//        }
+//
+//        vTaskDelay(pdMS_TO_TICKS(delay));
+//
 
     }
 

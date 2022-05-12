@@ -10,7 +10,16 @@
 static QueueHandle_t debug_q;
 
 void split(char* str, const char* delimeter, char* buffer, int buffer_size){
+    /*
+    Args: 
+        str: original string to split 
+        delimeter: delimeter
+        buffer: string to copy contents to 
+        buffer_size: size of buffer 
+    Return:
+        No explicit returns. Output of function is copied to buffer
 
+    */
 
     // Returns first token
     char *token = strtok(str, delimeter);
@@ -56,6 +65,7 @@ void debug_init(QueueHandle_t q){
 
 uint8_t log_messagef(uint32_t index){
 
+    #if SIM_MODE == 1
     DebugStruct_t data = {
         .print_val = 0,
         .data = index
@@ -69,11 +79,14 @@ uint8_t log_messagef(uint32_t index){
     );
 
     return tx_success == pdTRUE;
+    #else
+    return 0;
+    #endif
 }
 
 uint8_t log_valuef(uint32_t value){
 
-
+    #if SIM_MODE == 1
     DebugStruct_t data = {
         .print_val = 1,
         .data = value
@@ -87,4 +100,8 @@ uint8_t log_valuef(uint32_t value){
     );
 
     return tx_success == pdTRUE;
+    
+    #else
+    return 0;
+    #endif
 }
