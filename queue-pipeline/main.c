@@ -55,23 +55,26 @@
 
 /* Include Files */
 
-#include "sys_common.h"
 
 /* USER CODE BEGIN (1) */
 
+/* Standard libraries */
 #include "string.h"
-#include "sci.h"
 #include "stdio.h"
 
-#include "common.h"
+/* Halcogen libraries */
+#include "sci.h"
+#include "sys_common.h"
+#include "het.h"
 
+/* User libraries */
 #include "Actor.h"
 #include "Agent1.h"
 #include "Agent2.h"
 #include "TaskSim.h"
 #include "Director.h"
 #include "taskUART.h"
-#include "het.h"
+#include "common.h"
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -83,10 +86,7 @@
 */
 
 /* USER CODE BEGIN (2) */
-
 void freeRTOSinit();
-
-
 /* USER CODE END */
 
 int main(void)
@@ -95,9 +95,9 @@ int main(void)
 
     /* Initialize UART communication */
     UARTInit(PC_UART, 9600);
-
     UARTprintf("Starting program...\r\n");
 
+    /* Initialization */
     gioInit();
     hetInit();
     freeRTOSinit();
@@ -135,12 +135,9 @@ void freeRTOSinit()
     }
 
     QueueHandle_t debug_queue =  xQueueCreate( 5, sizeof( DebugStruct_t ) );
-
     debugger_init(debug_queue);
     debug_init(debug_queue);
     #endif
-
-
 
     /* Queue Creation */
     QueueHandle_t raw_digital_queue = xQueueCreate( 10, sizeof( AgentMessage_t ) );
@@ -164,16 +161,14 @@ void freeRTOSinit()
     /* Task Creation */
     Control_t ctrl_tasks;
 
-    actorInit(actor_queues);
-
     if(filtered_digital_queue == NULL|| raw_digital_queue == NULL ){
         UARTprintf("Failed to create queues\r\n");
     }else{
         UARTprintf("Created queues successfully!\r\n");
     }
 
-    TaskHandle_t task_handles[5];
     /* Task Creation*/    
+    actorInit(actor_queues);
     xReturned = xTaskCreate(
                     vTaskActor,       /* Function that implements the task. */
                     "Actor",          /* Text name for the task. */
@@ -228,13 +223,14 @@ void freeRTOSinit()
     #else
 
     simInit(agent1_queues, agent2_queues);
+    TaskHandle_t sim_task;
     xReturned = xTaskCreate(
                 vTaskSim,       /* Function that implements the task. */
                 "Sim",          /* Text name for the task. */
                 64,      /* Stack size in words, not bytes. */
                 ( void * ) 0,    /* Parameter passed into the task. */
                 0,/* Priority at which the task is created. */
-                &task_handles[SIM]
+                &sim_task
 
     );
 
@@ -243,19 +239,17 @@ void freeRTOSinit()
     }else{
         UARTprintf("Succcessfully created sim agent!!\r\n");
     }
-
-
     #endif
-    
 
     directorInit(director_queues, ctrl_tasks);
+    TaskHandle_t director_task;
     xReturned = xTaskCreate(
                    vTaskDirector,   /* Function that implements the task. */
                    "Director",      /* Text name for the task. */
                    64,              /* Stack size in words, not bytes. */
                    ( void * ) 3,    /* Parameter passed into the task. */
                    3,               /* Priority at which the task is created. */
-                   &task_handles[DIRECTOR] /* Used to pass out the created task's handle. */
+                   &director_task /* Used to pass out the created task's handle. */
 
    );
 

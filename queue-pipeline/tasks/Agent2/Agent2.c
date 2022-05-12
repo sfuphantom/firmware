@@ -5,7 +5,6 @@
  *      Author: Rafael
  */
 
-
 #include "Agent2.h"
 static QueueArr_t q;
 static QueueArr_t* q_ptr = &q;
@@ -24,10 +23,9 @@ void vTaskAgent2(void* pvParams){
 
     while(true){
 
-
         // read inputs from pin
-        data_ptr->msg = gioGetBit(gioPORTB, 2);
-        gioSetBit(gioPORTB, 2, data_ptr->msg);
+        // data_ptr->msg = gioGetBit(gioPORTB, 2);
+        data_ptr->msg = 0;
 
         // send data to actor
         xQueueSend(

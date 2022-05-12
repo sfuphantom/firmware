@@ -26,9 +26,9 @@ void vTaskAgent1(void* pvParams){
 
     while(true){
 
-
         // read inputs from pin
         data_ptr->msg = gioGetBit(hetPORT1, 15);
+
         // send data to actor
         xQueueSend(
             q_ptr->tx,
@@ -38,6 +38,5 @@ void vTaskAgent1(void* pvParams){
         );
 
         vTaskDelay(pdMS_TO_TICKS(10));
-
-    }
+    } // superloop
 }

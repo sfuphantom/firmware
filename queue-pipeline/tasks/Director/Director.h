@@ -15,6 +15,7 @@ typedef struct Control_t{
     TaskHandle_t agent2;
     TaskHandle_t actor;
 }Control_t;
+
 void directorInit(QueueArr_t, Control_t);
 void vTaskDirector(void* pvParams);
 

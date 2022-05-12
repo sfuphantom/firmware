@@ -8,9 +8,7 @@
 #ifndef COMMON_PHANTOM_CONFIG_H_
 #define COMMON_PHANTOM_CONFIG_H_
 
-#define SIM_MODE 1
-
-#define DEBUG_MODE 1
-
+#define SIM_MODE 0
+#define DEBUG_MODE 0
 
 #endif /* COMMON_PHANTOM_CONFIG_H_ */

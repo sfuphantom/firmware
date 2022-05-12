@@ -12,13 +12,7 @@
 #include "phantom_vars.h"
 #include "phantom_config.h"
 
-
-
 void debugger_init(QueueHandle_t);
 void vTaskDebugger(void* pvParams);
-
-
-
-
 
 #endif /* TASKS_TASKUART_TASKUART_H_ */

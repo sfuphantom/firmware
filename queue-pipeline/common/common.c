@@ -65,6 +65,10 @@ void debug_init(QueueHandle_t q){
 
 uint8_t log_messagef(uint32_t index){
 
+    /*
+    Send message lying at index to UART 
+    */
+
     #if SIM_MODE == 1
     DebugStruct_t data = {
         .print_val = 0,
@@ -85,6 +89,10 @@ uint8_t log_messagef(uint32_t index){
 }
 
 uint8_t log_valuef(uint32_t value){
+
+    /*
+    Send value to UART 
+    */
 
     #if SIM_MODE == 1
     DebugStruct_t data = {

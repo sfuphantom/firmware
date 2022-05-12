@@ -24,8 +24,4 @@
 void agent1Init(QueueArr_t other);
 void vTaskAgent1(void* pvParams);
 
-
-
-
-
 #endif /* TASKS_AGENT1_AGENT1_H_ */

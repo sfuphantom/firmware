@@ -21,15 +21,14 @@
 
 #define PC_UART scilinREG
 
-
-
-void split(char* str, const char* delimeter, char* buffer, int buffer_size);
+/* UART helpers */
 void delayms(uint16_t ms);
 void UARTSend(sciBASE_t *sci, char data[]);
 void UARTInit(sciBASE_t *sci, uint32 baud);
 void UARTprintf(char msg[]);
 
-
+/* Functions for Sim and Debug */
+void split(char* str, const char* delimeter, char* buffer, int buffer_size);
 void debug_init(QueueHandle_t);
 uint8_t log_messagef(uint32_t index);
 uint8_t log_valuef(uint32_t value);

@@ -35,13 +35,13 @@ void vTaskSim(void* pvParams){
 
     while(true){
 
-        // read inputs from PC
+        /* read inputs from PC */
         sciReceive(PC_UART, 3, py_msg);
 
-        // parse serial command
+        /* parse serial command */
         split(py_msg, ",", command, 2);
 
-        // distribute values to appropriate pointers
+        /* distribute values to appropriate pointers */
         cmp_str[0] = command[0];
         this->agent1.msg = (int)strtol(cmp_str, (char **)NULL, 10);
         cmp_str[0] = command[1];

@@ -25,16 +25,26 @@ class Simulation(ABC):
         
     @abstractmethod
     def construct_serial(self, args):
+        '''
+        Provide a recipe for constructing the serial message
+        from a dictionary of the user's inputs
+        '''
         pass
     
     @property
     @abstractmethod
     def parser_config(self):
+        '''
+        Provide a 2D array representing the list of commands to argparse
+        '''
         pass
 
     @property
     @abstractmethod
     def init_cmd(self):
+        '''
+        Return the initial value sent to the MCU on startup
+        '''
         pass
     
     def send_serial(self):
@@ -42,7 +52,7 @@ class Simulation(ABC):
         while True:
 
             try:
-                serial_msg = self.q_serial_send.get(block=False, timeout=1)
+                serial_msg = self.q_serial_send.get(block=False, timeout=0.1)
             except queue.Empty:
                 pass
             
@@ -50,9 +60,9 @@ class Simulation(ABC):
             if serial_msg == -1:
                 break
             self.ser.write(bytes(serial_msg, encoding='utf8'))
-            time.sleep(0.3)
+            time.sleep(0.1)
 
-    def receive_serial(self, expected_value:int=None, logger_fn:Callable=lambda x,y: None):
+    def receive_serial(self, expected_value:int=None, logger_fn:Callable=lambda x: None):
         curr_val = None
         while True:
             q_msg = ''
@@ -124,7 +134,7 @@ class Simulation(ABC):
         serial_thread.join()
         
         
-    def test_serial(self, sim_values:Iterable, expected_value:int, timeout=10, logger_fn:Callable=lambda x,y: None, period=0.1):
+    def test_serial(self, sim_values:Iterable, expected_value:int, timeout=10, logger_fn:Callable=lambda x: None, period=0.1):
         # start simulation thread
         serial_thread = threading.Thread(target=self.send_serial, daemon=True)
         serial_thread.start()
@@ -137,7 +147,7 @@ class Simulation(ABC):
         validate_period = 0.1
         # wait for success
         iterations = int(timeout / validate_period)        
-        for i in range(iterations):
+        for _ in range(iterations):
             msg = self.ser.readline().decode()
             logger_fn(msg)
             if msg != '' and int(msg) == expected_value:

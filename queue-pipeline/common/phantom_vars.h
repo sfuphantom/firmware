@@ -15,40 +15,34 @@
 #include "os_task.h"
 #include "os_queue.h"
 
-
-// task ids
-
-enum{
-    DIRECTOR=0,
-    ACTOR,
-    AGENT_ONE,
-    AGENT_TWO,
-    SIM
-};
+/* Index of Debugging Messages  */
 typedef enum message_t{
     MSG_ONE=0,
     MSG_TWO,
 }message_t;
 
+typedef enum agentid_t{
+    AGENT_ONE,
+    AGENT_TWO,
+}agentid_t;
+
+/* Data received by Debug Actor  */
 typedef struct DebugStruct_t
 {
     uint32_t data;
     uint8_t print_val;
-
 }DebugStruct_t;
 
+/* Agent Message Structure */
+typedef struct AgentMessage{
+    uint8_t id;  // agent identifier
+    uint8_t msg; // data from agent
+}AgentMessage_t;
 
 typedef struct QueueArr_t
 {
     QueueHandle_t tx;
     QueueHandle_t rx;
 }QueueArr_t;
-
-
-// struct for messages from agents
-typedef struct AgentMessage{
-    uint8_t id; // agent identifier
-    uint8_t msg; // data from agent
-}AgentMessage_t;
 
 #endif /* COMMON_PHANTOM_VARS_H_ */

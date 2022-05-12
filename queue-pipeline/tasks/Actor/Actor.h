@@ -12,9 +12,7 @@
 #include "phantom_vars.h"
 #include "gio.h"
 #include "common.h"
-void vTaskActor(void* pvParams);
 
-void actorInit(QueueArr_t);
 typedef struct Actor_t
 {
     /* Input Data */ 
@@ -27,6 +25,8 @@ typedef struct Actor_t
 
 }Actor_t;
 
+void vTaskActor(void* pvParams);
+void actorInit(QueueArr_t);
 void actor_logic(Actor_t*);
 
 

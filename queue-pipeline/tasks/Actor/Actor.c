@@ -7,7 +7,6 @@
 
 #include "Actor.h"
 
-
 QueueArr_t queue;
 static QueueArr_t* q_ptr = &queue;
 
@@ -27,18 +26,19 @@ void vTaskActor(void* pvParams){
         .agent1_state = 0,
         .agent2_state = 0,
     };
-
     static Actor_t* self = &actor_data;
+
     /* Initialize intermediate variables */
     static BaseType_t rx_success = pdFALSE;
     uint8_t debug_success = 1;
+
     while(true){
 
-        /* receive data from agents (suspended until available data) */
+        /* receive data from agents (suspend until data available) */
         rx_success = xQueueReceive(
             q_ptr->rx,
             &self->data,
-            ( TickType_t ) pdMS_TO_TICKS(500)  // block for 1 tick
+            ( TickType_t ) pdMS_TO_TICKS(500)  // block for 500ms
         );
 
         /* failed to receive data; do smt!! */
@@ -48,10 +48,7 @@ void vTaskActor(void* pvParams){
 
         /* act on agent data */
         actor_logic(self);
-
-
         debug_success = log_valuef(self->tx_data);
-
 
         /* transmit data */
         xQueueSend(

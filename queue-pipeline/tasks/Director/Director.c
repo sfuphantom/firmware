@@ -22,7 +22,6 @@ void vTaskDirector(void* pvParams){
     BaseType_t rx_success = pdFALSE;
     while(1){
 
-
         rx_success = xQueueReceive(
             q_ptr->rx,
             &rx_data,
