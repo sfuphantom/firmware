@@ -38,14 +38,6 @@ typedef struct DebugStruct_t
 }DebugStruct_t;
 
 
-
-// typedef struct GlobalData{
-
-//     TaskHandle_t task_handle_arr[4];
-//     QueueHandle_t queue_handle_arr[2];
-
-// }GlobalData_t;
-
 typedef struct QueueArr_t
 {
     QueueHandle_t tx;
