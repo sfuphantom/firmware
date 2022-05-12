@@ -71,7 +71,7 @@
 #include "TaskSim.h"
 #include "Director.h"
 #include "taskUART.h"
-
+#include "het.h"
 /* USER CODE END */
 
 /** @fn void main(void)
@@ -99,6 +99,7 @@ int main(void)
     UARTprintf("Starting program...\r\n");
 
     gioInit();
+    hetInit();
     freeRTOSinit();
 
     vTaskStartScheduler();
@@ -123,7 +124,7 @@ void freeRTOSinit()
                     "Debugger",      /* Text name for the task. */
                     64,              /* Stack size in words, not bytes. */
                     ( void * ) 1,    /* Parameter passed into the task. */
-                    3,               /* Priority at which the task is created. */
+                    1,               /* Priority at which the task is created. */
                     &debug_task /* Used to pass out the created task's handle. */
     );
 
@@ -133,7 +134,7 @@ void freeRTOSinit()
         UARTprintf("Succcessfully created Debugger!\r\n");
     }
 
-    QueueHandle_t debug_queue =  xQueueCreate( 20, sizeof( DebugStruct_t ) );
+    QueueHandle_t debug_queue =  xQueueCreate( 5, sizeof( DebugStruct_t ) );
 
     debugger_init(debug_queue);
     debug_init(debug_queue);
@@ -160,6 +161,8 @@ void freeRTOSinit()
         .tx = raw_digital_queue
     };
 
+    /* Task Creation */
+    Control_t ctrl_tasks;
 
     actorInit(actor_queues);
 
@@ -177,7 +180,7 @@ void freeRTOSinit()
                     64,      /* Stack size in words, not bytes. */
                     ( void * ) 2,    /* Parameter passed into the task. */
                     2,/* Priority at which the task is created. */
-                    &task_handles[ACTOR]
+                    &ctrl_tasks.actor
 
     );
 
@@ -196,7 +199,7 @@ void freeRTOSinit()
                     64,      /* Stack size in words, not bytes. */
                     ( void * ) 1,    /* Parameter passed into the task. */
                     1,/* Priority at which the task is created. */
-                    &task_handles[AGENT_ONE]
+                    &ctrl_tasks.agent1
 
     );
 
@@ -212,7 +215,7 @@ void freeRTOSinit()
                 64,      /* Stack size in words, not bytes. */
                 ( void * ) 1,    /* Parameter passed into the task. */
                 1,/* Priority at which the task is created. */
-                &task_handles[AGENT_TWO]
+                &ctrl_tasks.agent2
 
     );
     
@@ -223,7 +226,6 @@ void freeRTOSinit()
     }
 
     #else
-    
 
     simInit(agent1_queues, agent2_queues);
     xReturned = xTaskCreate(
@@ -231,7 +233,7 @@ void freeRTOSinit()
                 "Sim",          /* Text name for the task. */
                 64,      /* Stack size in words, not bytes. */
                 ( void * ) 0,    /* Parameter passed into the task. */
-                1,/* Priority at which the task is created. */
+                0,/* Priority at which the task is created. */
                 &task_handles[SIM]
 
     );
@@ -244,17 +246,18 @@ void freeRTOSinit()
 
 
     #endif
+    
 
-
+    directorInit(director_queues, ctrl_tasks);
     xReturned = xTaskCreate(
-                    vTaskDirector,   /* Function that implements the task. */
-                    "Director",      /* Text name for the task. */
-                    64,              /* Stack size in words, not bytes. */
-                    ( void * ) 1,    /* Parameter passed into the task. */
-                    3,               /* Priority at which the task is created. */
-                    &task_handles[DIRECTOR] /* Used to pass out the created task's handle. */
+                   vTaskDirector,   /* Function that implements the task. */
+                   "Director",      /* Text name for the task. */
+                   64,              /* Stack size in words, not bytes. */
+                   ( void * ) 3,    /* Parameter passed into the task. */
+                   3,               /* Priority at which the task is created. */
+                   &task_handles[DIRECTOR] /* Used to pass out the created task's handle. */
 
-    );
+   );
 
     if(xReturned == pdFALSE){
         UARTprintf("Failed to create Director\r\n");
