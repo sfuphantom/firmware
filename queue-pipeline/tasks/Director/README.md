@@ -1,8 +1,8 @@
 # Director Task
 
-This task's internal logic would most likely implement a state machine. Here, it simply acts upon a single arbitrary condition. Because only one task module exists and that task module determines the suspension of a task, it would not make sense for it to suspend itself. 
+This task's internal logic would be most likely to implement the system's state machine. Here, it simply acts upon a single arbitrary condition. Because only one task module exists and that task module determines the suspension of the task, it would not make sense for it to suspend itself since it cannot get itself out of suspension. 
 
-In a bigger project with more tasks, you can imagine one module reporting an error in one of the sensors and having the Director suspend the throttleActor, preventing the driver from moving during a fault situation. Once the fault is cleared, the Director can resume the task.    
+In a bigger project with more than one task, for example an electric race vehicle, you can imagine one module reporting an error in one of the sensors and having the Director suspend the throttleActor, preventing the driver from moving during a fault scenario. Once the fault is cleared, the Director can resume the task.    
 ```
 void vTaskDirector(void* pvParams){
 
@@ -30,3 +30,5 @@ void vTaskDirector(void* pvParams){
 
 } // superloop
 ```
+
+### [back to root](/README.md) 

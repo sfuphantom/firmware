@@ -1,14 +1,15 @@
 ## phantom_vars.h
 This file holds common user-defined types in this project so that all software modules can access their definition. This mostly consists of structs and enums used to identify message types and tasks when transmitting and receiving messages to and from the queue.
 
-A common ```Queue``` pattern highlighted in the Mastering freeRTOS book is defining a struct as follows:
+A common ```Queue``` pattern highlighted in the Mastering the FreeRTOS™
+Real Time Kernel book is defining a struct as follows:
 ```
 typedef struct AgentMessage{
     uint8_t id; // agent identifier
     uint8_t msg; // data from agent
 }AgentMessage_t;
 ```
-When multiple senders have access a single queue, the receiver can identify where the data came from by receiving a type ```AgentMessage_t``` that holds the actual data, as well as an id that the transmitter can use to identify the information source (normally an enum).
+When multiple senders have access to a common queue, the receiver can identify where the data came from by receiving a type ```AgentMessage_t``` that holds the actual data, as well as an id that the transmitter can use to identify the information source (normally an enum).
 
 Another notable design choice is the user-defined type QueueArr_t:
 ```
@@ -25,4 +26,7 @@ This file holds configurations/pre-processor flags for enabling simulation and d
 
 ## common.h/c
 
-This file holds a collection of common underlying functions used by a majority of the tasks. 
+This file holds a collection of common underlying functions used by a majority of the tasks.
+
+### [back to root](/README.md) 
+

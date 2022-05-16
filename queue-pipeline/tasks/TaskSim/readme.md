@@ -1,6 +1,6 @@
 # Simulation Task
 
-Any simulation will have some quirks that push it farther away from reality. Some quirks include...
+Any simulation will have some quirks that push it farther away from reality. Quirks in this simulation include...
 * The more Agents a system has, the farther this simulation will be from reality as this task mimics all of them at once
 *  This task sends all data serially one after another. The data is not being sent asynchronously
 
@@ -47,3 +47,5 @@ void vTaskSim(void* pvParams){
     }
 }
 ```
+
+### [back to root](/README.md) 
