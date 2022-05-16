@@ -1,3 +1,4 @@
+# Created by Rafael Guevara
 from sim import Simulation
 
 class BlinkySimulation(Simulation):

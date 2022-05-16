@@ -1,3 +1,4 @@
+# Created by Rafael Guevara
 from blinky_sim import BlinkySimulation
 test_sim = BlinkySimulation('COM7')
 def print_test(curr_val:str, reset=False):
