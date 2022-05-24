@@ -54,18 +54,11 @@ typedef struct bms_data
     bmsSlaveVoltage SlaveVoltage;
 } bms_data;
 
-typedef struct cell_data
+/*typedef struct cell_data
 {
-    uint8 cell_1_upper;
-    uint8 cell_1_lower;
-    uint8 cell_2_upper;
-    uint8 cell_2_lower;
-    uint8 cell_3_upper;
-    uint8 cell_3_lower;
-
-
     uint8 header;
-};
+    uint16 voltage;
+};*/
 
 BMSState_t BMSState;
 bms_data* BMSDataPtr;

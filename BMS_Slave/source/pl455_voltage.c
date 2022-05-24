@@ -249,16 +249,19 @@ void BMS_Read_All(bool printToUART, bool update)
             }
         }
 
-        //1 header, 32x2 cells, 2x16 Aux, 4 dig die, 4 ana die, 2 CRC
-        sciReceive(BMS_UART, BMSByteArraySize*TOTALBOARDS, MultipleSlaveReading);
+        //1 header, 10x2 cells, 2x8 Aux, 1 dig die (2 bytes), 1 ana die(2 bytes), 1 CRC (2 bytes)
+        sciReceive(BMS_UART, BMSByteArraySize*TOTALBOARDS, MultipleSlaveReading); //Receive voltage/temperature data
 
-        delayms(5); // for the tms to record all the data first
+        delayms(5); // for the TMS to record all the data first
 
     }
-    cellVoltageRead(printToUART);
-
+    cellVoltageRead(printToUART); // Check individual cell voltage reading and update error flags.
 }
 
+/*
+ * Check individual cell voltage level from each board and update error flags
+ * @param       printToUART     set true to enable printing values to UART
+ */
 void cellVoltageRead(bool printToUART){
 
     BMSDataPtr->Data.minimumCellVoltage = 5;
@@ -269,24 +272,31 @@ void cellVoltageRead(bool printToUART){
         for (j = 0; j < voltageLoopCounter; j+=2){
             if (j==0){
                 if (printToUART){
-                    snprintf(buf, 30, "Header -> Decimal: %d, HEX: %X\n\n\r", MultipleSlaveReading[j+BMSByteArraySize*i],MultipleSlaveReading[j+BMSByteArraySize*i]);
+                    snprintf(buf, 30, "Header -> Decimal: %d, HEX: %X\n\n\r", MultipleSlaveReading[j+BMSByteArraySize*i],MultipleSlaveReading[j+1+BMSByteArraySize*i]);
                     UARTSend(PC_UART, buf);
                 }
                 continue;
             }
 
-            uint32 tempVal = MultipleSlaveReading[j+BMSByteArraySize*i]*16*16 + MultipleSlaveReading[j+BMSByteArraySize*i];
-            double div = tempVal/65535.0; //FFFF
-            double fin = div * 5.0;
+            // Read a cell voltage in two bytes and convert them into a decimal value (ADC Conversion, 16 bits)
+            uint32 tempVal = MultipleSlaveReading[j+BMSByteArraySize*i]*16*16 + MultipleSlaveReading[j+1+BMSByteArraySize*i];
+            double div = tempVal/65535.0; //divide by FFFF
+            double fin = div * 5.0; //multiply by full (max) voltage of 5V
 
-            voltageLevelCheck(printToUART,fin,i,j,cellCount);
+            voltageLevelCheck(printToUART,fin,i,j,cellCount); //Check with thresholds and update flags
             totalCellCount--;
             cellCount--;
         }
         cellCount = TOTALCELLS;
     }
 }
-
+/*
+ * Store cell voltages in corresponding slaves and update error flags
+ * @param       UART     set true to enable printing values to UART
+ * @param        i       current outer-loop board counter
+ * @param        j       current inner-loop voltage cell counter
+ * @param     cellCount  current cell number to check
+ */
 void voltageLevelCheck(bool UART, uint32 Vin, uint8 i, uint8 j, uint8 cellCount)
 {
     if (i==0){
@@ -321,4 +331,39 @@ void voltageLevelCheck(bool UART, uint32 Vin, uint8 i, uint8 j, uint8 cellCount)
     if (BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] > 300) {
         BMSDataPtr->Flags.THREE_SECOND_FLAG = true;
     }
+    // Increment the over voltage flag if the cell voltage being read is greater than 4.2V
+    if (Vin > 4.2){
+        BMS.CELL_OVERVOLTAGE_FLAG[cellCount - 1] = true;
+        BMS.TOTAL_CELL_ERROR_COUNTER++;
+
+        if(UART){
+            snprint(buf, 20, "Cell %d Overvoltage\n\r", totalCellCount);
+            UARTSend(PC_UART, buf);
+            UARTSend(PC_UART, "\n\r");
+        }
+    }
+    // Increment the under voltage flag if the cell voltage being read is less than 3.2V
+    else if (Vin < 3.2){
+        BMS.CELL_UNDERVOLTAGE_FLAG[cellCount - 1] = true;
+        BMS.TOTAL_CELL_ERROR_COUNTER++;
+
+        if(UART){
+            snprint(buf, 21, "Cell %d Undervoltage\n\r", totalCellCount);
+            UARTSend(PC_UART, buf);
+            UARTSend(PC_UART, "\n\r");
+        }
+    }
+    // Increment the cell voltage error counter if either over or under voltage flag is detected
+    if (BMS.CELL_OVERVOLTAGE_FLAG[cellCount - 1] == true || BMS.CELL_UNDERVOLTAGE_FLAG[cellCount - 1] == true){
+        BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1]++;
+    }
+    else{
+        BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] = 0;
+    }
+    // Increment three second flag is the voltage error counter lasts longer than 3 seconds
+    if (BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] > 300){
+        BMSDataPtr->Flags.THREE_SECOND_FLAG =true;
+    }
 }
+
+
