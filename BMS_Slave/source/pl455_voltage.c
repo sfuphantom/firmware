@@ -219,7 +219,7 @@ void AFE_config ()
     // Configure cell-balancing (datasheet section 7.6.3.13)
     nSent = WriteReg(nDev_ID, 19, 0x20, 1, FRMWRT_ALL_NR); // Set balance time for 1 minute whenever balancing function is called
                                                            // Disables balancing whenever Fault is detected
-    // Configure test configuration (datasheet section 7.6.3.15)
+    // Configure test configuration (datasheet section 7.6.3.14)
     nSent = WriteReg(nDev_ID, 30, 0x0, 2, FRMWRT_ALL_NR); // Sets EN_SQUEEZE = 0 so BALANCE_EN controls the channels which are balancing
 
     for (nDev_ID = 0; nDev_ID < TOTALBOARDS; nDev_ID++){
@@ -362,8 +362,77 @@ void voltageLevelCheck(bool UART, uint32 Vin, uint8 i, uint8 j, uint8 cellCount)
     }
     // Increment three second flag is the voltage error counter lasts longer than 3 seconds
     if (BMS.CELL_VOLTAGE_ERROR_COUNTER[cellCount - 1] > 300){
-        BMSDataPtr->Flags.THREE_SECOND_FLAG =true;
+        BMSDataPtr->Flags.THREE_SECOND_FLAG = true;
     }
 }
 
+void Cell_Balance()
+{
+    int nSent = 0;
+    char buf[50];
+    double voltageDiff;
+    uint8_t i;
+
+    uint16 CellBalanceMask1 = 0x0000;
+    uint16 CellBalanceMask2 = 0x0000;
+    uint16 CellBalanceMask3 = 0x0000;
+    uint16 CellBalanceMask4 = 0x0000;
+
+    for (i = 0; i < 10; i++)
+    {
+        voltageDiff = BMSDataPtr->SlaveVoltage.BMS_Slave_1[i] - BMSDataPtr -> Data.minimumCellVoltage;
+        if(voltageDiff >= 0.1)
+        {
+            CellBalanceMasek1 = CellBalanceMask1 | (uint32)((uint32)1U << i);
+        }
+        voltageDiff = BMSDataPtr->SlaveVoltage.BMS_Slave_2[i] - BMSDataPtr -> Data.minimumCellVoltage;
+        if(voltageDiff >= 0.1)
+        {
+            CellBalanceMasek1 = CellBalanceMask2 | (uint32)((uint32)1U << i);
+        }
+        voltageDiff = BMSDataPtr->SlaveVoltage.BMS_Slave_3[i] - BMSDataPtr -> Data.minimumCellVoltage;
+        if(voltageDiff >= 0.1)
+        {
+            CellBalanceMasek1 = CellBalanceMask3 | (uint32)((uint32)1U << i);
+        }
+        voltageDiff = BMSDataPtr->SlaveVoltage.BMS_Slave_4[i] - BMSDataPtr -> Data.minimumCellVoltage;
+        if(voltageDiff >= 0.1)
+        {
+            CellBalanceMasek1 = CellBalanceMask4 | (uint32)((uint32)1U << i);
+        }
+    }
+
+    nSent = WriteReg(0, 20, CellBalanceMask2, 2, FRMWRT_SGL_NR);
+    if (nSent != 2){
+        BMS.CELL_RW_ERROR_FLAG[0]++;
+    }
+    else{
+        BMS.CELL_RW_ERROR_FLAG[0] = 0;
+    }
+
+    nSent = WriteReg(1, 20, CellBalanceMask1, 2, FRMWRT_SGL_NR);
+    if (nSent != 2){
+        BMS.CELL_RW_ERROR_FLAG[1]++;
+    }
+    else{
+        BMS.CELL_RW_ERROR_FLAG[1] = 0;
+    }
+    nSent = WriteReg(2, 20, CellBalanceMask1, 2, FRMWRT_SGL_NR);
+        if (nSent != 2){
+            BMS.CELL_RW_ERROR_FLAG[2]++;
+        }
+        else{
+            BMS.CELL_RW_ERROR_FLAG[2] = 0;
+        }
+    nSent = WriteReg(3, 20, CellBalanceMask1, 2, FRMWRT_SGL_NR);
+    if (nSent != 2){
+        BMS.CELL_RW_ERROR_FLAG[3]++;
+    }
+    else{
+        BMS.CELL_RW_ERROR_FLAG[3] = 0;
+    }
+
+    snprintf(buf, 50, "Cell bitmask: %d\n\r", CellBalanceMask1);
+    UARTSend(PC_UART, buf);
+}
 
