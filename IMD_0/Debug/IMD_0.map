@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker PC v18.12.4                    
 ******************************************************************************
->> Linked Tue Jul 19 20:52:17 2022
+>> Linked Tue Sep 13 19:10:26 2022
 
 OUTPUT FILE NAME:   <IMD_0.out>
 ENTRY POINT SYMBOL: "_c_int00"  address: 00008064
@@ -12,7 +12,7 @@ MEMORY CONFIGURATION
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
   VECTORS               00000000   00000020  00000020  00000000     X
-  FLASH0                00000020   0013ffe0  000093ec  00136bf4  R  X
+  FLASH0                00000020   0013ffe0  000093f4  00136bec  R  X
   STACKS                08000000   00001500  00000000  00001500  RW  
   RAM                   08001500   0002eb00  00000068  0002ea98  RW  
 
@@ -21,11 +21,11 @@ SEGMENT ALLOCATION MAP
 
 run origin  load origin   length   init length attrs members
 ----------  ----------- ---------- ----------- ----- -------
-00000000    00000000    00009410   00009410    r-x
+00000000    00000000    00009418   00009418    r-x
   00000000    00000000    00000020   00000020    r-x .intvecs
-  00000020    00000020    00008df4   00008df4    r-x .text
-  00008e14    00008e14    000005c8   000005c8    r-- .const
-  000093e0    000093e0    00000030   00000030    r-- .cinit
+  00000020    00000020    00008dfc   00008dfc    r-x .text
+  00008e1c    00008e1c    000005c8   000005c8    r-- .const
+  000093e8    000093e8    00000030   00000030    r-- .cinit
 08001500    08001500    00000068   00000000    rw-
   08001500    08001500    00000066   00000000    rw- .bss
   08001566    08001566    00000002   00000000    rw- .data
@@ -39,7 +39,7 @@ section   page    origin      length       input sections
 .intvecs   0    00000000    00000020     
                   00000000    00000020     sys_intvecs.obj (.intvecs)
 
-.text      0    00000020    00008df4     
+.text      0    00000020    00008dfc     
                   00000020    00002cdc     sys_selftest.obj (.text)
                   00002cfc    00000b64     system.obj (.text)
                   00003860    00000a58     sys_vim.obj (.text)
@@ -69,26 +69,26 @@ section   page    origin      length       input sections
                   00008d3c    0000004c     rti.obj (.text:retain)
                   00008d88    00000044     rtsv7R4_T_be_v3D16_eabi.lib : autoinit.c.obj (.text:__TI_auto_init_nobinit_nopinit:__TI_auto_init_nobinit_nopinit)
                   00008dcc    0000001c                                 : copy_zero_init.c.obj (.text:decompress:ZI:__TI_zero_init_nomemset:__TI_zero_init_nomemset)
-                  00008de8    00000010     sys_main.obj (.text)
-                  00008df8    0000000e     rtsv7R4_T_be_v3D16_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
-                  00008e06    00000004                                 : exit.c.obj (.text:abort:abort)
-                  00008e0a    00000002                                 : div0.asm.obj (.text)
-                  00008e0c    00000004     sys_phantom.obj (.text:retain)
-                  00008e10    00000004     sys_startup.obj (.text)
+                  00008de8    00000018     sys_main.obj (.text)
+                  00008e00    0000000e     rtsv7R4_T_be_v3D16_eabi.lib : copy_decompress_none.c.obj (.text:decompress:none:__TI_decompress_none)
+                  00008e0e    00000004                                 : exit.c.obj (.text:abort:abort)
+                  00008e12    00000002                                 : div0.asm.obj (.text)
+                  00008e14    00000004     sys_phantom.obj (.text:retain)
+                  00008e18    00000004     sys_startup.obj (.text)
 
-.const     0    00008e14    000005c8     
-                  00008e14    000003a0     het.obj (.const:het1PROGRAM)
-                  000091b4    00000200     sys_vim.obj (.const:s_vim_init)
-                  000093b4    00000020     het.obj (.const:s_het1pwmPolarity)
-                  000093d4    00000008     IMD.obj (.const)
+.const     0    00008e1c    000005c8     
+                  00008e1c    000003a0     het.obj (.const:het1PROGRAM)
+                  000091bc    00000200     sys_vim.obj (.const:s_vim_init)
+                  000093bc    00000020     het.obj (.const:s_het1pwmPolarity)
+                  000093dc    00000008     IMD.obj (.const)
 
-.cinit     0    000093e0    00000030     
-                  000093e0    0000000c     (__TI_handler_table)
-                  000093ec    00000004     --HOLE-- [fill = 0]
-                  000093f0    00000008     (.cinit..bss.load) [load image, compression = zero_init]
-                  000093f8    00000006     (.cinit..data.load) [load image, compression = lzss]
-                  000093fe    00000002     --HOLE-- [fill = 0]
-                  00009400    00000010     (__TI_cinit_table)
+.cinit     0    000093e8    00000030     
+                  000093e8    0000000c     (__TI_handler_table)
+                  000093f4    00000004     --HOLE-- [fill = 0]
+                  000093f8    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  00009400    00000006     (.cinit..data.load) [load image, compression = lzss]
+                  00009406    00000002     --HOLE-- [fill = 0]
+                  00009408    00000010     (__TI_cinit_table)
 
 .bss       0    08001500    00000066     UNINITIALIZED
                   08001500    00000028     sci.obj (.bss:g_sciTransfer_t)
@@ -131,10 +131,10 @@ MODULE SUMMARY
        notification.obj             228     0         0      
        sys_pmu.obj                  224     0         0      
        sys_intvecs.obj              32      0         0      
-       sys_main.obj                 16      0         0      
+       sys_main.obj                 24      0         0      
        sys_phantom.obj              4       0         0      
     +--+----------------------------+-------+---------+---------+
-       Total:                       35604   1480      104    
+       Total:                       35612   1480      104    
                                                              
     C:/ti/ccs930/ccs/tools/compiler/ti-cgt-arm_18.12.4.LTS/lib/rtsv7R4_T_be_v3D16_eabi.lib
        s_floor.c.obj                224     0         0      
@@ -152,19 +152,19 @@ MODULE SUMMARY
                                                              
        Linker Generated:            0       42        0      
     +--+----------------------------+-------+---------+---------+
-       Grand Total:                 36372   1522      104    
+       Grand Total:                 36380   1522      104    
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 00009400 records: 2, size/record: 8, table size: 16
-	.bss: load addr=000093f0, load size=00000008 bytes, run addr=08001500, run size=00000066 bytes, compression=zero_init
-	.data: load addr=000093f8, load size=00000006 bytes, run addr=08001566, run size=00000002 bytes, compression=lzss
+__TI_cinit_table @ 00009408 records: 2, size/record: 8, table size: 16
+	.bss: load addr=000093f8, load size=00000008 bytes, run addr=08001500, run size=00000066 bytes, compression=zero_init
+	.data: load addr=00009400, load size=00000006 bytes, run addr=08001566, run size=00000002 bytes, compression=lzss
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 000093e0 records: 3, size/record: 4, table size: 12
+__TI_handler_table @ 000093e8 records: 3, size/record: 4, table size: 12
 	index: 0, handler: __TI_zero_init
 	index: 1, handler: __TI_decompress_lzss
 	index: 2, handler: __TI_decompress_none
@@ -174,29 +174,29 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 
 address   name                                
 -------   ----                                
-00008e07  C$$EXIT                             
+00008e0f  C$$EXIT                             
 08001566  IMDData                             
 00006d40  IsdwdKeySequenceCorrect             
 08001544  NumberofCharsDuty                   
 08001548  NumberofCharsFreq                   
 UNDEFED   SHT$$INIT_ARRAY$$Base               
 UNDEFED   SHT$$INIT_ARRAY$$Limit              
-00009400  __TI_CINIT_Base                     
-00009410  __TI_CINIT_Limit                    
-000093e0  __TI_Handler_Table_Base             
-000093ec  __TI_Handler_Table_Limit            
+00009408  __TI_CINIT_Base                     
+00009418  __TI_CINIT_Limit                    
+000093e8  __TI_Handler_Table_Base             
+000093f4  __TI_Handler_Table_Limit            
 00007d90  __TI_PINIT_Base                     
 00007d94  __TI_PINIT_Limit                    
 00008d89  __TI_auto_init_nobinit_nopinit      
 00008c2d  __TI_decompress_lzss                
-00008df9  __TI_decompress_none                
+00008e01  __TI_decompress_none                
 ffffffff  __TI_pprof_out_hndl                 
 ffffffff  __TI_prof_data_size                 
 ffffffff  __TI_prof_data_start                
 00000000  __TI_static_base__                  
 00008dcd  __TI_zero_init_nomemset             
-00008e0b  __aeabi_idiv0                       
-00008e0b  __aeabi_ldiv0                       
+00008e13  __aeabi_idiv0                       
+00008e13  __aeabi_ldiv0                       
 00008af9  __aeabi_memcpy                      
 00008af9  __aeabi_memcpy4                     
 00008af9  __aeabi_memcpy8                     
@@ -253,7 +253,7 @@ ffffffff  __c_args__
 00008ab4  _pmuStartCounters_                  
 00008abc  _pmuStopCounters_                   
 UNDEFED   _system_post_cinit                  
-00008e07  abort                               
+00008e0f  abort                               
 0000126c  adc1ParityCheck                     
 00001358  adc2ParityCheck                     
 ffffffff  binit                               
@@ -326,7 +326,7 @@ ffffffff  binit
 000072c0  esmSetCounterPreloadValue           
 000071f0  esmSetInterruptLevel                
 00007180  esmTriggerErrorPinReset             
-000093d8  f_HCLK                              
+000093e0  f_HCLK                              
 00008939  floor                               
 00008939  floorl                              
 000022c4  fmcBus1ParityCheck                  
@@ -349,7 +349,7 @@ ffffffff  binit
 00007698  gioSetDirection                     
 00007708  gioSetPort                          
 00007768  gioToggleBit                        
-00008e10  handlePLLLockFail                   
+00008e18  handlePLLLockFail                   
 000049d0  het1GetConfigValue                  
 000084fc  het1HighLevelInterrupt              
 000085a4  het1LowLevelInterrupt               
@@ -385,7 +385,7 @@ ffffffff  binit
 00000578  pbistStop                           
 0800155c  period                              
 00002e10  periphInit                          
-00008e0c  phantomInterrupt                    
+00008e14  phantomInterrupt                    
 00005048  pinmuxGetConfigValue                
 000047c0  pwmDisableNotification              
 00004778  pwmEnableNotification               
@@ -700,18 +700,18 @@ address   name
 00008d89  __TI_auto_init_nobinit_nopinit      
 00008dcd  __TI_zero_init_nomemset             
 00008de8  main                                
-00008df9  __TI_decompress_none                
-00008e07  C$$EXIT                             
-00008e07  abort                               
-00008e0b  __aeabi_idiv0                       
-00008e0b  __aeabi_ldiv0                       
-00008e0c  phantomInterrupt                    
-00008e10  handlePLLLockFail                   
-000093d8  f_HCLK                              
-000093e0  __TI_Handler_Table_Base             
-000093ec  __TI_Handler_Table_Limit            
-00009400  __TI_CINIT_Base                     
-00009410  __TI_CINIT_Limit                    
+00008e01  __TI_decompress_none                
+00008e0f  C$$EXIT                             
+00008e0f  abort                               
+00008e13  __aeabi_idiv0                       
+00008e13  __aeabi_ldiv0                       
+00008e14  phantomInterrupt                    
+00008e18  handlePLLLockFail                   
+000093e0  f_HCLK                              
+000093e8  __TI_Handler_Table_Base             
+000093f4  __TI_Handler_Table_Limit            
+00009408  __TI_CINIT_Base                     
+00009418  __TI_CINIT_Limit                    
 08001534  duty_data                           
 0800153c  freq_data                           
 08001544  NumberofCharsDuty                   

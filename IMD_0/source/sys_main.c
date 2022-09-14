@@ -82,7 +82,8 @@ int main(void)
     while(1)
     {
         updateIMDData();
-        //serialSendData();
+        serialSendData();
+        getIMDData();
     }
 /* USER CODE END */
 
